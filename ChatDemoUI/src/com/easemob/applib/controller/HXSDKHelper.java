@@ -1,10 +1,26 @@
-package com.easemob.chatuidemo;
+/**
+ * Copyright (C) 2013-2014 EaseMob Technologies. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.easemob.applib.controller;
 
 import java.util.Iterator;
 import java.util.List;
 
+import com.easemob.EMCallBack;
 import com.easemob.EMConnectionListener;
 import com.easemob.EMError;
+import com.easemob.applib.model.DefaultHXSDKModel;
+import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
@@ -17,14 +33,14 @@ import android.content.pm.PackageManager;
 import android.util.Log;
 
 /**
- * The developer can directly use this HuanXin SDK helper or derive from this class to talk with HuanXin SDK
+ * The developer should derive from this class to talk with HuanXin SDK
  * All the Huan Xin related initialization and global listener are implemented in this class which will 
  * help developer to speed up the SDK integration
  * 
- * @author easemob
+ * @author youni
  *
  */
-public class HXSDKHelper {
+public abstract class HXSDKHelper {
     /**
      * application context
      */
@@ -33,7 +49,7 @@ public class HXSDKHelper {
     /**
      * HuanXin mode helper, which will manage the user data and user preferences
      */
-    protected HXSDKMode hxModel = null;
+    protected HXSDKModel hxModel = null;
     
     /**
      * MyConnectionListener
@@ -41,10 +57,26 @@ public class HXSDKHelper {
     protected EMConnectionListener connectionListener = null;
     
     /**
+     * user name in cache
+     */
+    protected String username = null;
+    
+    /**
+     * password in cache
+     */
+    protected String password = null;
+    
+    /**
      * init flag: if the sdk has been inited before, we don't need to init again
      */
     private boolean sdkInited = false;
 
+    private static HXSDKHelper me = null;
+    
+    public HXSDKHelper(){
+        me = this;
+    }
+    
     /**
      * this function will initialize the HuanXin SDK
      * 
@@ -59,13 +91,12 @@ public class HXSDKHelper {
      *     // do HuanXin related work
      * }
      */
-    public synchronized boolean onInit(Context context, HXSDKMode model){
+    public synchronized boolean onInit(Context context){
         if(sdkInited){
             return false;
         }
 
         appContext = context;
-        hxModel = model;
         int pid = android.os.Process.myPid();
         String processAppName = getAppName(pid);
         
@@ -80,8 +111,18 @@ public class HXSDKHelper {
             return false;
         }
         
+        // create HX SDK model
+        hxModel = createModel();
+        
+        // create a defalut HX SDK model in case subclass did not provide the model
+        if(hxModel == null){
+            hxModel = new DefaultHXSDKModel(appContext,this);
+        }
+        
         // 初始化环信SDK,一定要先调用init()
         EMChat.getInstance().init(context);
+        
+        // set debug mode in development process
         EMChat.getInstance().setDebugMode(true);
         Log.d("EMChat Demo", "initialize EMChat SDK");
         
@@ -90,6 +131,52 @@ public class HXSDKHelper {
         sdkInited = true;
         return true;
     }
+    
+    /**
+     * get global instance
+     * @return
+     */
+    public static HXSDKHelper getInstance(){
+        return me;
+    }
+    
+    public HXSDKModel getModel(){
+        return hxModel;
+    }
+    
+    public String getUsername(){
+        if(username == null){
+            username = hxModel.getUserName();
+        }
+        return username;
+    }
+    
+    public String getPassword(){
+        if(password == null){
+            password = hxModel.getPwd();
+        }
+        return password;    
+    }
+    
+    public void setUsername(String username){
+        if (username != null) {
+            if(hxModel.saveUserName(username)){
+                this.username = username;
+            }
+        }
+    }
+    
+    public void setPassword(String password){
+        if(hxModel.savePassword(password)){
+            this.password = password;
+        }
+    }
+    
+    /**
+     * the subclass must override this class to provide its own model or directly use {@link DefaultHXSDKModel}
+     * @return
+     */
+    abstract protected HXSDKModel createModel();
     
     /**
      * please make sure you have to get EMChatOptions by following method and set related options
@@ -101,7 +188,7 @@ public class HXSDKHelper {
         // 默认添加好友时，是不需要验证的，改成需要验证
         options.setAcceptInvitationAlways(false);
         // 默认环信是不维护好友关系列表的，如果app依赖环信的好友关系，把这个属性设置为true
-        options.setUseRoster(false);
+        options.setUseRoster(hxModel.getUseHXRoster());
         // 设置收到消息是否有新消息通知(声音和震动提示)，默认为true
         options.setNotifyBySoundAndVibrate(hxModel.getSettingMsgNotification());
         // 设置收到消息是否有声音提示，默认为true
@@ -116,6 +203,39 @@ public class HXSDKHelper {
         options.setNotifyText(getMessageNotifyListener());
     }
     
+    /**
+     * logout HuanXin SDK
+     */
+    public void logout(final EMCallBack callback){
+        EMChatManager.getInstance().logout(new EMCallBack(){
+
+            @Override
+            public void onSuccess() {
+                // TODO Auto-generated method stub
+                setPassword(null);
+                hxModel.closeDB();
+                if(callback != null){
+                    callback.onSuccess();
+                }
+            }
+
+            @Override
+            public void onError(int code, String message) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void onProgress(int progress, String status) {
+                // TODO Auto-generated method stub
+                if(callback != null){
+                    callback.onProgress(progress, status);
+                }
+            }
+            
+        });
+    }
+
     /**
      * get the message notify listener
      * @return
@@ -156,24 +276,24 @@ public class HXSDKHelper {
     /**
      * the developer can override this function to handle connection conflict error
      */
-    protected void onConnectionConflict(){
-    }
+    protected void onConnectionConflict(){}
 
     /**
      * handle the connection connected
      */
-    protected void onConnectionConnected(){
-        
-    }
+    protected void onConnectionConnected(){}
     
     /**
      * handle the connection disconnect
      * @param error see {@link EMError}
      */
-    protected void onConnectionDisconnected(int error){
-        
-    }
+    protected void onConnectionDisconnected(int error){}
 
+    /**
+     * check the application process name if process name is not qualified, then we think it is a service process and we will not init SDK
+     * @param pID
+     * @return
+     */
     private String getAppName(int pID) {
         String processName = null;
         ActivityManager am = (ActivityManager) appContext.getSystemService(Context.ACTIVITY_SERVICE);

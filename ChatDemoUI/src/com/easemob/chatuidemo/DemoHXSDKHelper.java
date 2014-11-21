@@ -1,8 +1,26 @@
+/**
+ * Copyright (C) 2013-2014 EaseMob Technologies. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.easemob.chatuidemo;
+
+import java.util.Map;
 
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import com.easemob.EMCallBack;
+import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
 import com.easemob.chat.EMMessage;
@@ -12,11 +30,22 @@ import com.easemob.chat.OnMessageNotifyListener;
 import com.easemob.chat.OnNotificationClickListener;
 import com.easemob.chatuidemo.activity.ChatActivity;
 import com.easemob.chatuidemo.activity.MainActivity;
+import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.receiver.VoiceCallReceiver;
 import com.easemob.chatuidemo.utils.CommonUtils;
 
+/**
+ * Demo UI HX SDK helper class which subclass HXSDKHelper
+ * @author youni
+ *
+ */
 public class DemoHXSDKHelper extends HXSDKHelper{
 
+    /**
+     * contact list in cache
+     */
+    private Map<String, User> contactList;
+    
     @Override
     protected void initHXOptions(){
         super.initHXOptions();
@@ -51,13 +80,11 @@ public class DemoHXSDKHelper extends HXSDKHelper{
               return null;
           }
 
-            @Override
-            public int onSetSmallIcon(EMMessage message) {
-                //设置小图标
-                return 0;
-            }
-
-
+          @Override
+          public int onSetSmallIcon(EMMessage message) {
+              //设置小图标
+              return 0;
+          }
       };
     }
     
@@ -90,9 +117,67 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         appContext.startActivity(intent);
     }
     
+    @Override
     protected void initListener(){
         super.initListener();
         IntentFilter callFilter = new IntentFilter(EMChatManager.getInstance().getIncomingVoiceCallBroadcastAction());
         appContext.registerReceiver(new VoiceCallReceiver(), callFilter);    
+    }
+
+    @Override
+    protected HXSDKModel createModel() {
+        return new DemoHXSDKModel(appContext,this);
+    }
+    
+    /**
+     * 获取内存中好友user list
+     *
+     * @return
+     */
+    public Map<String, User> getContactList() {
+        if (getUsername() != null && contactList == null) {
+            contactList = getModel().getContactList();
+        }
+        
+        return contactList;
+    }
+
+    /**
+     * 设置好友user list到内存中
+     *
+     * @param contactList
+     */
+    public void setContactList(Map<String, User> contactList) {
+        this.contactList = contactList;
+    }
+    
+    @Override
+    public void logout(final EMCallBack callback){
+        super.logout(new EMCallBack(){
+
+            @Override
+            public void onSuccess() {
+                // TODO Auto-generated method stub
+                setContactList(null);
+                if(callback != null){
+                    callback.onSuccess();
+                }
+            }
+
+            @Override
+            public void onError(int code, String message) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void onProgress(int progress, String status) {
+                // TODO Auto-generated method stub
+                if(callback != null){
+                    callback.onProgress(progress, status);
+                }
+            }
+            
+        });
     }
 }
