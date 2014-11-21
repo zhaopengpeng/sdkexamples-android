@@ -22,7 +22,6 @@ import com.easemob.EMCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.EMChatManager;
-import com.easemob.chat.EMChatOptions;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
@@ -49,9 +48,8 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     @Override
     protected void initHXOptions(){
         super.initHXOptions();
-        EMChatOptions options = EMChatManager.getInstance().getChatOptions();
-        // since demo itself rely on the users in HuanXin IM, so set this to be true
-        options.setUseRoster(false);
+        // you can also get EMChatOptions to set related SDK options
+        // EMChatOptions options = EMChatManager.getInstance().getChatOptions();
     }
 
     @Override
@@ -130,13 +128,20 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     }
     
     /**
+     * get demo HX SDK Model
+     */
+    public DemoHXSDKModel getModel(){
+        return (DemoHXSDKModel) hxModel;
+    }
+    
+    /**
      * 获取内存中好友user list
      *
      * @return
      */
     public Map<String, User> getContactList() {
         if (getUsername() != null && contactList == null) {
-            contactList = getModel().getContactList();
+            contactList = ((DemoHXSDKModel) getModel()).getContactList();
         }
         
         return contactList;
@@ -159,6 +164,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             public void onSuccess() {
                 // TODO Auto-generated method stub
                 setContactList(null);
+                getModel().closeDB();
                 if(callback != null){
                     callback.onSuccess();
                 }
