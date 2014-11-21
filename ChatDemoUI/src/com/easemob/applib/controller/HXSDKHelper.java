@@ -37,7 +37,7 @@ import android.util.Log;
  * All the Huan Xin related initialization and global listener are implemented in this class which will 
  * help developer to speed up the SDK integration
  * 
- * @author youni
+ * @author easemob
  *
  */
 public abstract class HXSDKHelper {

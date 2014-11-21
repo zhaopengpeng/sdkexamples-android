@@ -21,7 +21,7 @@ import com.easemob.chatuidemo.domain.User;
 
 /**
  * HX SDK app model which will manage the user data and preferences
- * @author youni
+ * @author easemob
  *
  */
 public abstract class HXSDKModel {

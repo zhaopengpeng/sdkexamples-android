@@ -36,7 +36,7 @@ import com.easemob.chatuidemo.utils.CommonUtils;
 
 /**
  * Demo UI HX SDK helper class which subclass HXSDKHelper
- * @author youni
+ * @author easemob
  *
  */
 public class DemoHXSDKHelper extends HXSDKHelper{

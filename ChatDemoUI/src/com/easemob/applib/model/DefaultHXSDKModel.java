@@ -31,7 +31,7 @@ import android.preference.PreferenceManager;
 
 /**
  * HuanXin default SDK Model implementation
- * @author youni
+ * @author easemob
  *
  */
 public class DefaultHXSDKModel extends HXSDKModel{
