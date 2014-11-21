@@ -62,105 +62,15 @@ public class DemoApplication extends Application {
 	 * 当前用户nickname,为了苹果推送不是userid而是昵称
 	 */
 	public static String currentUserNick = "";
+	public static DemoHXSDKHelper hxSDKHelper = new DemoHXSDKHelper();
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-
-        int pid = android.os.Process.myPid();
-        String processAppName = getAppName(pid);
-        // 如果使用到百度地图或者类似启动remote service的第三方库，这个if判断不能少
-        if (processAppName == null || processAppName.equals("")) {
-            // workaround for baidu location sdk
-            // 百度定位sdk，定位服务运行在一个单独的进程，每次定位服务启动的时候，都会调用application::onCreate
-            // 创建新的进程。
-            // 但环信的sdk只需要在主进程中初始化一次。 这个特殊处理是，如果从pid 找不到对应的processInfo
-            // processName，
-            // 则此application::onCreate 是被service 调用的，直接返回
-            return;
-        }
-        
         applicationContext = this;
         instance = this;
-        // 初始化环信SDK,一定要先调用init()
-        EMChat.getInstance().init(applicationContext);
-        EMChat.getInstance().setDebugMode(true);
-        Log.d("EMChat Demo", "initialize EMChat SDK");
-        // debugmode设为true后，就能看到sdk打印的log了
-
-        // 获取到EMChatOptions对象
-        EMChatOptions options = EMChatManager.getInstance().getChatOptions();
-        // 默认添加好友时，是不需要验证的，改成需要验证
-        options.setAcceptInvitationAlways(false);
-        // 默认环信是不维护好友关系列表的，如果app依赖环信的好友关系，把这个属性设置为true
-        options.setUseRoster(true);
-        // 设置收到消息是否有新消息通知(声音和震动提示)，默认为true
-        options.setNotifyBySoundAndVibrate(PreferenceUtils.getInstance(applicationContext).getSettingMsgNotification());
-        // 设置收到消息是否有声音提示，默认为true
-        options.setNoticeBySound(PreferenceUtils.getInstance(applicationContext).getSettingMsgSound());
-        // 设置收到消息是否震动 默认为true
-        options.setNoticedByVibrate(PreferenceUtils.getInstance(applicationContext).getSettingMsgVibrate());
-        // 设置语音消息播放是否设置为扬声器播放 默认为true
-        options.setUseSpeaker(PreferenceUtils.getInstance(applicationContext).getSettingMsgSpeaker());
-        // 设置notification消息点击时，跳转的intent为自定义的intent
-        options.setOnNotificationClickListener(new OnNotificationClickListener() {
-
-            @Override
-            public Intent onNotificationClick(EMMessage message) {
-                Intent intent = new Intent(applicationContext, ChatActivity.class);
-                ChatType chatType = message.getChatType();
-                if (chatType == ChatType.Chat) { // 单聊信息
-                    intent.putExtra("userId", message.getFrom());
-                    intent.putExtra("chatType", ChatActivity.CHATTYPE_SINGLE);
-                } else { // 群聊信息
-                            // message.getTo()为群聊id
-                    intent.putExtra("groupId", message.getTo());
-                    intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
-                }
-                return intent;
-            }
-        });
-        // 设置一个connectionlistener监听账户重复登陆
-        EMChatManager.getInstance().addConnectionListener(new MyConnectionListener());
-
-		// 取消注释，app在后台，有新消息来时，状态栏的消息提示换成自己写的
-//		options.setNotifyText(new OnMessageNotifyListener() {
-//
-//			@Override
-//			public String onNewMessageNotify(EMMessage message) {
-//				// 设置状态栏的消息提示，可以根据message的类型做相应提示
-//			    String ticker = CommonUtils.getMessageDigest(message, applicationContext);
-//			    if(message.getType() == Type.TXT)
-//		            ticker = ticker.replaceAll("\\[.{2,3}\\]", "[表情]");
-//				return message.getFrom() + ": " + ticker;
-//			}
-//
-//			@Override
-//			public String onLatestMessageNotify(EMMessage message, int fromUsersNum, int messageNum) {
-//			    return null;
-////				return fromUsersNum + "个基友，发来了" + messageNum + "条消息";
-//			}
-//
-//			@Override
-//			public String onSetNotificationTitle(EMMessage message) {
-//				//修改标题,这里使用默认
-//				return null;
-//			}
-//
-//            @Override
-//            public int onSetSmallIcon(EMMessage message) {
-//                //设置小图标
-//                return 0;
-////                return R.drawable.default_face;
-//            }
-//
-//
-//		});
-
-		//注册一个语言电话的广播接收者
-		IntentFilter callFilter = new IntentFilter(EMChatManager.getInstance().getIncomingVoiceCallBroadcastAction());
-		registerReceiver(new VoiceCallReceiver(), callFilter);	
-		
+        
+        hxSDKHelper.onInit(applicationContext,new DemoHXSDKMode(applicationContext));
 	}
 
 	public static DemoApplication getInstance() {
