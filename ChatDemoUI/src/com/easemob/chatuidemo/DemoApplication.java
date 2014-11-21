@@ -40,6 +40,20 @@ public class DemoApplication extends Application {
         applicationContext = this;
         instance = this;
 
+        /**
+         * this function will initialize the HuanXin SDK
+         * 
+         * @return boolean true if caller can continue to call HuanXin related APIs after calling onInit, otherwise false.
+         * 
+         * for example:
+         * 
+         * public class DemoHXSDKHelper extends HXSDKHelper
+         * 
+         * hxSDKHelper = new DemoHXSDKHelper();
+         * if(hxSDKHelper.onInit(context)){
+         *     // do HuanXin related work
+         * }
+         */
         hxSDKHelper.onInit(applicationContext);
 	}
 

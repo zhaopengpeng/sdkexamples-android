@@ -128,7 +128,6 @@ public class DefaultHXSDKModel extends HXSDKModel{
         return preferences.getString(PREF_PWD, null);
     }
 
-    @Override
     public boolean saveContactList(List<User> contactList) {
         // TODO Auto-generated method stub
         dao = new UserDao(context);
@@ -136,17 +135,14 @@ public class DefaultHXSDKModel extends HXSDKModel{
         return true;
     }
 
-    @Override
     public Map<String, User> getContactList() {
         // TODO Auto-generated method stub
         dao = new UserDao(context);
         return dao.getContactList();
     }
 
-    @Override
     public void closeDB() {
         // TODO Auto-generated method stub
         DbOpenHelper.getInstance(context).closeDB();
     }
-
 }

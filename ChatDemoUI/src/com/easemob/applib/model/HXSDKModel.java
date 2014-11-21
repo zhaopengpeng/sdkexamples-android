@@ -13,12 +13,6 @@
  */
 package com.easemob.applib.model;
 
-import java.util.List;
-import java.util.Map;
-
-import com.easemob.applib.controller.HXSDKHelper;
-import com.easemob.chatuidemo.domain.User;
-
 /**
  * HX SDK app model which will manage the user data and preferences
  * @author easemob
@@ -50,9 +44,4 @@ public abstract class HXSDKModel {
     
     public abstract boolean savePassword(String pwd);
     public abstract String getPwd();
-    
-    public abstract boolean saveContactList(List<User> contactList);
-    public abstract Map<String, User> getContactList();
-    
-    public abstract void closeDB();
 }

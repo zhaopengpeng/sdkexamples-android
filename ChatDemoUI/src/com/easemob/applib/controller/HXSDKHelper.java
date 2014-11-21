@@ -213,7 +213,6 @@ public abstract class HXSDKHelper {
             public void onSuccess() {
                 // TODO Auto-generated method stub
                 setPassword(null);
-                hxModel.closeDB();
                 if(callback != null){
                     callback.onSuccess();
                 }
