@@ -38,6 +38,7 @@ import android.widget.Toast;
 
 import com.easemob.EMConnectionListener;
 import com.easemob.EMError;
+import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactListener;
@@ -122,6 +123,13 @@ public class MainActivity extends BaseActivity {
 		IntentFilter ackMessageIntentFilter = new IntentFilter(EMChatManager.getInstance().getAckMessageBroadcastAction());
 		ackMessageIntentFilter.setPriority(3);
 		registerReceiver(ackMessageReceiver, ackMessageIntentFilter);
+		
+		//注册一个透传消息的BroadcastReceiver
+		IntentFilter cmdMessageIntentFilter = new IntentFilter(EMChatManager.getInstance().getCmdMessageBroadcastAction());
+		cmdMessageIntentFilter.setPriority(3);
+		registerReceiver(cmdMessageReceiver, cmdMessageIntentFilter);
+		
+		
 
 		// 注册一个离线消息的BroadcastReceiver
 		// IntentFilter offlineMessageIntentFilter = new
@@ -337,6 +345,31 @@ public class MainActivity extends BaseActivity {
 				}
 			}
 			
+		}
+	};
+	
+	
+	
+	/**
+	 * 透传消息BroadcastReceiver
+	 */
+	private BroadcastReceiver cmdMessageReceiver = new BroadcastReceiver() {
+		
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			abortBroadcast();
+			EMLog.d(TAG, "收到透传消息");
+			//获取cmd message对象
+			String msgId = intent.getStringExtra("msgid");
+			EMMessage message = intent.getParcelableExtra("message");
+			//获取消息body
+			CmdMessageBody cmdMsgBody = (CmdMessageBody) message.getBody();
+			String action = cmdMsgBody.action;//获取自定义action
+			
+			//获取扩展属性 此处省略
+//			message.getStringAttribute("");
+			EMLog.d(TAG, String.format("透传消息：action:%s,message:%s", action,message.toString()));
+			Toast.makeText(MainActivity.this, "收到透传：action："+action, Toast.LENGTH_SHORT).show();
 		}
 	};
 
