@@ -14,14 +14,12 @@
 package com.easemob.chatuidemo;
 
 import android.content.Context;
-
-import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.applib.model.DefaultHXSDKModel;
 
 public class DemoHXSDKModel extends DefaultHXSDKModel{
 
-    public DemoHXSDKModel(Context ctx,HXSDKHelper helper) {
-        super(ctx,helper);
+    public DemoHXSDKModel(Context ctx) {
+        super(ctx);
         // TODO Auto-generated constructor stub
     }
 

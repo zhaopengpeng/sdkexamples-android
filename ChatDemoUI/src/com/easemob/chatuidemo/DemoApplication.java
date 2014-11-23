@@ -45,12 +45,16 @@ public class DemoApplication extends Application {
          * 
          * @return boolean true if caller can continue to call HuanXin related APIs after calling onInit, otherwise false.
          * 
+         * 环信初始化SDK帮助函数
+         * 返回true如果正确初始化，否则false，如果返回为false，请在后续的调用中不要调用任何和环信相关的代码
+         * 
          * for example:
+         * 例子：
          * 
          * public class DemoHXSDKHelper extends HXSDKHelper
          * 
-         * hxSDKHelper = new DemoHXSDKHelper();
-         * if(hxSDKHelper.onInit(context)){
+         * HXHelper = new DemoHXSDKHelper();
+         * if(HXHelper.onInit(context)){
          *     // do HuanXin related work
          * }
          */

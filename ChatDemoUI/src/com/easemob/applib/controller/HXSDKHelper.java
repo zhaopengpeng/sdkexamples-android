@@ -35,7 +35,12 @@ import android.util.Log;
 /**
  * The developer should derive from this class to talk with HuanXin SDK
  * All the Huan Xin related initialization and global listener are implemented in this class which will 
- * help developer to speed up the SDK integration
+ * help developer to speed up the SDK integration。
+ * this is a global instance class which can be obtained in any codes through getInstance()
+ * 
+ * 开发人员可以选择继承这个环信SDK帮助类区加快初始化继承速度。此类会初始化环信SDK，并设置初始化参数和初始化相应的监听器
+ * 不过继承类需要根据需求提供相应的函数尤其是提供一个{@link HXSDKModel}. 所以请实现abstract protected HXSDKModel createModel();
+ * 全局紧有一个此类的实例存在，所以可以在任意地方通过getInstance()函数获取此全局实例
  * 
  * @author easemob
  *
@@ -71,6 +76,9 @@ public abstract class HXSDKHelper {
      */
     private boolean sdkInited = false;
 
+    /**
+     * the global HXSDKHelper instance
+     */
     private static HXSDKHelper me = null;
     
     public HXSDKHelper(){
@@ -82,7 +90,11 @@ public abstract class HXSDKHelper {
      * 
      * @return boolean true if caller can continue to call HuanXin related APIs after calling onInit, otherwise false.
      * 
+     * 环信初始化SDK帮助函数
+     * 返回true如果正确初始化，否则false，如果返回为false，请在后续的调用中不要调用任何和环信相关的代码
+     * 
      * for example:
+     * 例子：
      * 
      * public class DemoHXSDKHelper extends HXSDKHelper
      * 
@@ -93,7 +105,7 @@ public abstract class HXSDKHelper {
      */
     public synchronized boolean onInit(Context context){
         if(sdkInited){
-            return false;
+            return true;
         }
 
         appContext = context;
@@ -116,7 +128,7 @@ public abstract class HXSDKHelper {
         
         // create a defalut HX SDK model in case subclass did not provide the model
         if(hxModel == null){
-            hxModel = new DefaultHXSDKModel(appContext,this);
+            hxModel = new DefaultHXSDKModel(appContext);
         }
         
         // 初始化环信SDK,一定要先调用init()
@@ -186,7 +198,7 @@ public abstract class HXSDKHelper {
         // 获取到EMChatOptions对象
         EMChatOptions options = EMChatManager.getInstance().getChatOptions();
         // 默认添加好友时，是不需要验证的，改成需要验证
-        options.setAcceptInvitationAlways(false);
+        options.setAcceptInvitationAlways(hxModel.getAcceptInvitationAlways());
         // 默认环信是不维护好友关系列表的，如果app依赖环信的好友关系，把这个属性设置为true
         options.setUseRoster(hxModel.getUseHXRoster());
         // 设置收到消息是否有新消息通知(声音和震动提示)，默认为true
@@ -197,8 +209,11 @@ public abstract class HXSDKHelper {
         options.setNoticedByVibrate(hxModel.getSettingMsgVibrate());
         // 设置语音消息播放是否设置为扬声器播放 默认为true
         options.setUseSpeaker(hxModel.getSettingMsgSpeaker());
+        // 设置是否需要已读回执
+        options.setRequireAck(hxModel.getRequireReadAck());
+        // 设置是否需要已送达回执
+        options.setRequireDeliveryAck(hxModel.getRequireDeliveryAck());
         // 设置notification消息点击时，跳转的intent为自定义的intent
-        
         options.setOnNotificationClickListener(getNotificationClickListener());
         options.setNotifyText(getMessageNotifyListener());
     }
@@ -234,7 +249,19 @@ public abstract class HXSDKHelper {
             
         });
     }
-
+    
+    /**
+     * 检查是否已经登录过
+     * @return
+     */
+    public boolean isLogined(){
+        if(hxModel.getUserName() != null && hxModel.getPwd() != null){
+            return true;
+        }
+        
+        return false;
+    }
+    
     /**
      * get the message notify listener
      * @return

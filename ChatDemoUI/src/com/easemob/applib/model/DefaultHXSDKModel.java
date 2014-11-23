@@ -19,11 +19,10 @@ package com.easemob.applib.model;
 import java.util.List;
 import java.util.Map;
 
-import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chatuidemo.db.DbOpenHelper;
 import com.easemob.chatuidemo.db.UserDao;
 import com.easemob.chatuidemo.domain.User;
-import com.easemob.chatuidemo.utils.PreferenceUtils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -39,59 +38,58 @@ public class DefaultHXSDKModel extends HXSDKModel{
     private static final String PREF_PWD = "pwd";
     UserDao dao = null;
     protected Context context = null;
-    protected HXSDKHelper hxHelper = null;
     
-    public DefaultHXSDKModel(Context ctx, HXSDKHelper helper){
+    public DefaultHXSDKModel(Context ctx){
         context = ctx;
-        hxHelper = helper;
+        HXPreferenceUtils.init(context);
     }
     
     @Override
     public void setSettingMsgNotification(boolean paramBoolean) {
         // TODO Auto-generated method stub
-        PreferenceUtils.getInstance(context).setSettingMsgNotification(paramBoolean);
+        HXPreferenceUtils.getInstance().setSettingMsgNotification(paramBoolean);
     }
 
     @Override
     public boolean getSettingMsgNotification() {
         // TODO Auto-generated method stub
-        return PreferenceUtils.getInstance(context).getSettingMsgNotification();
+        return HXPreferenceUtils.getInstance().getSettingMsgNotification();
     }
 
     @Override
     public void setSettingMsgSound(boolean paramBoolean) {
         // TODO Auto-generated method stub
-        PreferenceUtils.getInstance(context).setSettingMsgSound(paramBoolean);
+        HXPreferenceUtils.getInstance().setSettingMsgSound(paramBoolean);
     }
 
     @Override
     public boolean getSettingMsgSound() {
         // TODO Auto-generated method stub
-        return PreferenceUtils.getInstance(context).getSettingMsgSound();
+        return HXPreferenceUtils.getInstance().getSettingMsgSound();
     }
 
     @Override
     public void setSettingMsgVibrate(boolean paramBoolean) {
         // TODO Auto-generated method stub
-        PreferenceUtils.getInstance(context).setSettingMsgVibrate(paramBoolean);
+        HXPreferenceUtils.getInstance().setSettingMsgVibrate(paramBoolean);
     }
 
     @Override
     public boolean getSettingMsgVibrate() {
         // TODO Auto-generated method stub
-        return PreferenceUtils.getInstance(context).getSettingMsgVibrate();
+        return HXPreferenceUtils.getInstance().getSettingMsgVibrate();
     }
 
     @Override
     public void setSettingMsgSpeaker(boolean paramBoolean) {
         // TODO Auto-generated method stub
-        PreferenceUtils.getInstance(context).setSettingMsgSpeaker(paramBoolean);
+        HXPreferenceUtils.getInstance().setSettingMsgSpeaker(paramBoolean);
     }
 
     @Override
     public boolean getSettingMsgSpeaker() {
         // TODO Auto-generated method stub
-        return PreferenceUtils.getInstance(context).getSettingMsgSpeaker();
+        return HXPreferenceUtils.getInstance().getSettingMsgSpeaker();
     }
 
     @Override
