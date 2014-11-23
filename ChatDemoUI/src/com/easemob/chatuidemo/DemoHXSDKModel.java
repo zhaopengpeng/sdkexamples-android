@@ -13,8 +13,14 @@
  */
 package com.easemob.chatuidemo;
 
+import java.util.List;
+import java.util.Map;
+
 import android.content.Context;
 import com.easemob.applib.model.DefaultHXSDKModel;
+import com.easemob.chatuidemo.db.DbOpenHelper;
+import com.easemob.chatuidemo.db.UserDao;
+import com.easemob.chatuidemo.domain.User;
 
 public class DemoHXSDKModel extends DefaultHXSDKModel{
 
@@ -27,5 +33,23 @@ public class DemoHXSDKModel extends DefaultHXSDKModel{
     public boolean getUseHXRoster() {
         // TODO Auto-generated method stub
         return true;
+    }
+    
+    public boolean saveContactList(List<User> contactList) {
+        // TODO Auto-generated method stub
+        UserDao dao = new UserDao(context);
+        dao.saveContactList(contactList);
+        return true;
+    }
+
+    public Map<String, User> getContactList() {
+        // TODO Auto-generated method stub
+        UserDao dao = new UserDao(context);
+        return dao.getContactList();
+    }
+
+    public void closeDB() {
+        // TODO Auto-generated method stub
+        DbOpenHelper.getInstance(context).closeDB();
     }
 }
