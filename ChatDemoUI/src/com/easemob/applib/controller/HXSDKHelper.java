@@ -38,9 +38,9 @@ import android.util.Log;
  * help developer to speed up the SDK integration。
  * this is a global instance class which can be obtained in any codes through getInstance()
  * 
- * 开发人员可以选择继承这个环信SDK帮助类区加快初始化继承速度。此类会初始化环信SDK，并设置初始化参数和初始化相应的监听器
- * 不过继承类需要根据需求提供相应的函数尤其是提供一个{@link HXSDKModel}. 所以请实现abstract protected HXSDKModel createModel();
- * 全局紧有一个此类的实例存在，所以可以在任意地方通过getInstance()函数获取此全局实例
+ * 开发人员可以选择继承这个环信SDK帮助类去加快初始化集成速度。此类会初始化环信SDK，并设置初始化参数和初始化相应的监听器
+ * 不过继承类需要根据要求求提供相应的函数，尤其是提供一个{@link HXSDKModel}. 所以请实现abstract protected HXSDKModel createModel();
+ * 全局仅有一个此类的实例存在，所以可以在任意地方通过getInstance()函数获取此全局实例
  * 
  * @author easemob
  *
