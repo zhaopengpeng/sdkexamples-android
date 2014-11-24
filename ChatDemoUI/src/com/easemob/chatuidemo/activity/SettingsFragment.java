@@ -29,11 +29,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.easemob.EMCallBack;
+import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
-import com.easemob.chatuidemo.utils.PreferenceUtils;
 
 /**
  * 设置界面
@@ -197,7 +197,7 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 				chatOptions.setNotificationEnable(false);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
 
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgNotification(false);
+				HXSDKHelper.getInstance().getModel().setSettingMsgNotification(false);
 			} else {
 				iv_switch_open_notification.setVisibility(View.VISIBLE);
 				iv_switch_close_notification.setVisibility(View.INVISIBLE);
@@ -207,7 +207,7 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 				textview2.setVisibility(View.VISIBLE);
 				chatOptions.setNotificationEnable(true);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgNotification(true);
+				HXSDKHelper.getInstance().getModel().setSettingMsgNotification(true);
 			}
 			break;
 		case R.id.rl_switch_sound:
@@ -216,13 +216,13 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 				iv_switch_close_sound.setVisibility(View.VISIBLE);
 				chatOptions.setNoticeBySound(false);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgSound(false);
+				HXSDKHelper.getInstance().getModel().setSettingMsgSound(false);
 			} else {
 				iv_switch_open_sound.setVisibility(View.VISIBLE);
 				iv_switch_close_sound.setVisibility(View.INVISIBLE);
 				chatOptions.setNoticeBySound(true);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgSound(true);
+				HXSDKHelper.getInstance().getModel().setSettingMsgSound(true);
 			}
 			break;
 		case R.id.rl_switch_vibrate:
@@ -231,13 +231,13 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 				iv_switch_close_vibrate.setVisibility(View.VISIBLE);
 				chatOptions.setNoticedByVibrate(false);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgVibrate(false);
+				HXSDKHelper.getInstance().getModel().setSettingMsgVibrate(false);
 			} else {
 				iv_switch_open_vibrate.setVisibility(View.VISIBLE);
 				iv_switch_close_vibrate.setVisibility(View.INVISIBLE);
 				chatOptions.setNoticedByVibrate(true);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgVibrate(true);
+				HXSDKHelper.getInstance().getModel().setSettingMsgVibrate(true);
 			}
 			break;
 		case R.id.rl_switch_speaker:
@@ -246,13 +246,13 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 				iv_switch_close_speaker.setVisibility(View.VISIBLE);
 				chatOptions.setUseSpeaker(false);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgSpeaker(false);
+				HXSDKHelper.getInstance().getModel().setSettingMsgSpeaker(false);
 			} else {
 				iv_switch_open_speaker.setVisibility(View.VISIBLE);
 				iv_switch_close_speaker.setVisibility(View.INVISIBLE);
 				chatOptions.setUseSpeaker(true);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgVibrate(true);
+				HXSDKHelper.getInstance().getModel().setSettingMsgVibrate(true);
 			}
 			break;
 		case R.id.btn_logout: //退出登陆

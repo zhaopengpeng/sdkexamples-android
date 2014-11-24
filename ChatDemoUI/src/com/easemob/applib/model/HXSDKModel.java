@@ -20,28 +20,52 @@ package com.easemob.applib.model;
  */
 public abstract class HXSDKModel {
     public abstract void setSettingMsgNotification(boolean paramBoolean);
-
     public abstract boolean getSettingMsgNotification();
 
     public abstract void setSettingMsgSound(boolean paramBoolean);
-
     public abstract boolean getSettingMsgSound();
 
     public abstract void setSettingMsgVibrate(boolean paramBoolean);
-
     public abstract boolean getSettingMsgVibrate();
 
     public abstract void setSettingMsgSpeaker(boolean paramBoolean);
-
     public abstract boolean getSettingMsgSpeaker();
-    
-    public boolean getUseHXRoster(){
-        return false;
-    }
-    
+   
     public abstract boolean saveUserName(String username);
     public abstract String getUserName();
     
     public abstract boolean savePassword(String pwd);
     public abstract String getPwd();
+    
+    /**
+     * 是否总是接收好友邀请
+     * @return
+     */
+    public boolean getAcceptInvitationAlways(){
+        return false;
+    }
+    
+    /**
+     * 是否需要环信好友关系，默认是false
+     * @return
+     */
+    public boolean getUseHXRoster(){
+        return false;
+    }
+    
+    /**
+     * 是否需要已读回执
+     * @return
+     */
+    public boolean getRequireReadAck(){
+        return true;
+    }
+    
+    /**
+     * 是否需要已送达回执
+     * @return
+     */
+    public boolean getRequireDeliveryAck(){
+        return false;
+    }
 }

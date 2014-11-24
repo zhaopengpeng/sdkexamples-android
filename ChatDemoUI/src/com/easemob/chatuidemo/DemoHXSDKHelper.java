@@ -124,7 +124,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
 
     @Override
     protected HXSDKModel createModel() {
-        return new DemoHXSDKModel(appContext,this);
+        return new DemoHXSDKModel(appContext);
     }
     
     /**
