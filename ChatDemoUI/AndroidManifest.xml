@@ -241,11 +241,14 @@
             android:value="easemob-demo#chatdemoui" />
         <!-- 声明sdk所需的service -->
         <service android:name="com.easemob.chat.EMChatService" />
+        
+        <!-- 百度地图所需的service -->
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
             android:process=":remote" />
         
+        <!-- umeng appkey，可忽略 -->
          <meta-data
             android:name="UMENG_APPKEY"
             android:value="53912a3156240b01a7075ed1" >
