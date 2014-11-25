@@ -70,6 +70,8 @@ public class ChatAllHistoryFragment extends Fragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		if(savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false))
+            return;
 		inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		errorItem = (RelativeLayout) getView().findViewById(R.id.rl_error_item);
 		errorText = (TextView) errorItem.findViewById(R.id.tv_connect_errormsg);
@@ -257,11 +259,17 @@ public class ChatAllHistoryFragment extends Fragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (!hidden) {
+		if (!hidden && ! ((MainActivity)getActivity()).isConflict) {
 			refresh();
 		}
 	}
 
-
+	@Override
+    public void onSaveInstanceState(Bundle outState) {
+        if(((MainActivity)getActivity()).isConflict)
+            outState.putBoolean("isConflict", true);
+        super.onSaveInstanceState(outState);
+        
+    }
 
 }

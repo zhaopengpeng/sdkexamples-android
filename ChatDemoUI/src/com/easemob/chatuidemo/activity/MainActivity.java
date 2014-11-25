@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.Log;
@@ -86,11 +85,18 @@ public class MainActivity extends BaseActivity {
 	private int currentTabIndex;
 	private NewMessageBroadcastReceiver msgReceiver;
 	// 账号在别处登录
-	private boolean isConflict = false;
+	public boolean isConflict = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false)) {
+            // 防止被T后，没点确定按钮然后按了home键，长期在后台又进app导致的crash
+            // 三个fragment里加的判断同理
+            finish();
+            startActivity(new Intent(this, LoginActivity.class));
+            return;
+        }
 		setContentView(R.layout.activity_main);
 		initView();
 		
@@ -752,6 +758,12 @@ public class MainActivity extends BaseActivity {
 		}
 
 	}
+	
+	@Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("isConflict", isConflict);
+        super.onSaveInstanceState(outState);
+    }
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -806,4 +818,5 @@ public class MainActivity extends BaseActivity {
 		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow)
 			showConflictDialog();
 	}
+	
 }

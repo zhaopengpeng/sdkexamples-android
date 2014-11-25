@@ -119,6 +119,8 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		if(savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false))
+            return;
 		rl_switch_notification = (RelativeLayout) getView().findViewById(R.id.rl_switch_notification);
 		rl_switch_sound = (RelativeLayout) getView().findViewById(R.id.rl_switch_sound);
 		rl_switch_vibrate = (RelativeLayout) getView().findViewById(R.id.rl_switch_vibrate);
@@ -302,4 +304,12 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 		});
 	}
 
+	
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if(((MainActivity)getActivity()).isConflict)
+            outState.putBoolean("isConflict", true);
+        super.onSaveInstanceState(outState);
+        
+    }
 }

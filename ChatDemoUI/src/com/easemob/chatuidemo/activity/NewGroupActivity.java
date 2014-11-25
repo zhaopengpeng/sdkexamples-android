@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.R;
+import com.easemob.exceptions.EaseMobException;
 
 public class NewGroupActivity extends BaseActivity {
 	private EditText groupNameEditText;
@@ -108,7 +109,7 @@ public class NewGroupActivity extends BaseActivity {
 								finish();
 							}
 						});
-					} catch (final Exception e) {
+					} catch (final EaseMobException e) {
 						runOnUiThread(new Runnable() {
 							public void run() {
 								progressDialog.dismiss();
