@@ -297,6 +297,7 @@ public abstract class HXSDKHelper {
                 onConnectionConnected();
             }
         };
+        EMChatManager.getInstance().addConnectionListener(connectionListener);
     }
     
     /**
