@@ -16,13 +16,9 @@ package com.easemob.applib.model;
 /**
  * UI Demo HX Model implementation
  */
-import java.util.List;
-import java.util.Map;
 
 import com.easemob.applib.utils.HXPreferenceUtils;
-import com.easemob.chatuidemo.db.DbOpenHelper;
 import com.easemob.chatuidemo.db.UserDao;
-import com.easemob.chatuidemo.domain.User;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -99,14 +95,14 @@ public class DefaultHXSDKModel extends HXSDKModel{
     }
 
     @Override
-    public boolean saveUserName(String username) {
+    public boolean saveHXId(String hxId) {
         // TODO Auto-generated method stub
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return preferences.edit().putString(PREF_USERNAME, username).commit();
+        return preferences.edit().putString(PREF_USERNAME, hxId).commit();
     }
 
     @Override
-    public String getUserName() {
+    public String getHXId() {
         // TODO Auto-generated method stub
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         return preferences.getString(PREF_USERNAME, null);
