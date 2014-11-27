@@ -31,8 +31,8 @@ public abstract class HXSDKModel {
     public abstract void setSettingMsgSpeaker(boolean paramBoolean);
     public abstract boolean getSettingMsgSpeaker();
    
-    public abstract boolean saveUserName(String username);
-    public abstract String getUserName();
+    public abstract boolean saveHXId(String hxId);
+    public abstract String getHXId();
     
     public abstract boolean savePassword(String pwd);
     public abstract String getPwd();
@@ -66,6 +66,23 @@ public abstract class HXSDKModel {
      * @return
      */
     public boolean getRequireDeliveryAck(){
+        return false;
+    }
+    
+    /**
+     * 是否运行在sandbox测试环境. 默认是关掉的
+     * 设置sandbox 测试环境
+     * 建议开发者开发时设置此模式
+     */
+    public boolean isSandboxMode(){
+        return false;
+    }
+    
+    /**
+     * 是否设置debug模式
+     * @return
+     */
+    public boolean isDebugMode(){
         return false;
     }
 }

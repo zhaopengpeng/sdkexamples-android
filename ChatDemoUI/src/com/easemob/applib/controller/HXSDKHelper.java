@@ -22,6 +22,7 @@ import com.easemob.EMError;
 import com.easemob.applib.model.DefaultHXSDKModel;
 import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.EMChat;
+import com.easemob.chat.EMChatConfig.EMEnvMode;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
 import com.easemob.chat.OnMessageNotifyListener;
@@ -33,7 +34,7 @@ import android.content.pm.PackageManager;
 import android.util.Log;
 
 /**
- * The developer should derive from this class to talk with HuanXin SDK
+ * The developer can derive from this class to talk with HuanXin SDK
  * All the Huan Xin related initialization and global listener are implemented in this class which will 
  * help developer to speed up the SDK integration。
  * this is a global instance class which can be obtained in any codes through getInstance()
@@ -46,6 +47,7 @@ import android.util.Log;
  *
  */
 public abstract class HXSDKHelper {
+    private static final String TAG = "HXSDKHelper";
     /**
      * application context
      */
@@ -62,9 +64,9 @@ public abstract class HXSDKHelper {
     protected EMConnectionListener connectionListener = null;
     
     /**
-     * user name in cache
+     * HuanXin ID in cache
      */
-    protected String username = null;
+    protected String hxId = null;
     
     /**
      * password in cache
@@ -72,7 +74,7 @@ public abstract class HXSDKHelper {
     protected String password = null;
     
     /**
-     * init flag: if the sdk has been inited before, we don't need to init again
+     * init flag: test if the sdk has been inited before, we don't need to init again
      */
     private boolean sdkInited = false;
 
@@ -114,6 +116,7 @@ public abstract class HXSDKHelper {
         
         // 如果使用到百度地图或者类似启动remote service的第三方库，这个if判断不能少
         if (processAppName == null || processAppName.equals("")) {
+            Log.e(TAG, "enter the service process!");
             // workaround for baidu location sdk
             // 百度定位sdk，定位服务运行在一个单独的进程，每次定位服务启动的时候，都会调用application::onCreate
             // 创建新的进程。
@@ -130,13 +133,22 @@ public abstract class HXSDKHelper {
         if(hxModel == null){
             hxModel = new DefaultHXSDKModel(appContext);
         }
-        
+
         // 初始化环信SDK,一定要先调用init()
         EMChat.getInstance().init(context);
         
-        // set debug mode in development process
-        EMChat.getInstance().setDebugMode(true);
-        Log.d("EMChat Demo", "initialize EMChat SDK");
+        // 设置sandbox测试环境
+        // 建议开发者开发时设置此模式
+        if(hxModel.isSandboxMode()){
+            EMChat.getInstance().setEnv(EMEnvMode.EMSandboxMode);
+        }
+        
+        if(hxModel.isDebugMode()){
+            // set debug mode in development process
+            EMChat.getInstance().setDebugMode(true);    
+        }
+
+        Log.d(TAG, "initialize EMChat SDK");
         
         initHXOptions();
         initListener();
@@ -156,11 +168,11 @@ public abstract class HXSDKHelper {
         return hxModel;
     }
     
-    public String getUsername(){
-        if(username == null){
-            username = hxModel.getUserName();
+    public String getHXId(){
+        if(hxId == null){
+            hxId = hxModel.getHXId();
         }
-        return username;
+        return hxId;
     }
     
     public String getPassword(){
@@ -170,10 +182,10 @@ public abstract class HXSDKHelper {
         return password;    
     }
     
-    public void setUsername(String username){
-        if (username != null) {
-            if(hxModel.saveUserName(username)){
-                this.username = username;
+    public void setHXId(String hxId){
+        if (hxId != null) {
+            if(hxModel.saveHXId(hxId)){
+                this.hxId = hxId;
             }
         }
     }
@@ -195,6 +207,8 @@ public abstract class HXSDKHelper {
      *      EMChatOptions options = EMChatManager.getInstance().getChatOptions();
      */
     protected void initHXOptions(){
+        Log.d(TAG, "init HuanXin Options");
+        
         // 获取到EMChatOptions对象
         EMChatOptions options = EMChatManager.getInstance().getChatOptions();
         // 默认添加好友时，是不需要验证的，改成需要验证
@@ -255,7 +269,7 @@ public abstract class HXSDKHelper {
      * @return
      */
     public boolean isLogined(){
-        if(hxModel.getUserName() != null && hxModel.getPwd() != null){
+        if(hxModel.getHXId() != null && hxModel.getPwd() != null){
             return true;
         }
         
@@ -281,6 +295,8 @@ public abstract class HXSDKHelper {
      * init HuanXin listeners
      */
     protected void initListener(){
+        Log.d(TAG, "init listener");
+        
         // create the global connection listener
         connectionListener = new EMConnectionListener() {
             @Override

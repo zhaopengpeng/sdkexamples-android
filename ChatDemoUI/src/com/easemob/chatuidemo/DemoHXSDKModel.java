@@ -35,6 +35,11 @@ public class DemoHXSDKModel extends DefaultHXSDKModel{
         return true;
     }
     
+    // demo will switch on debug mode
+    public boolean isDebugMode(){
+        return true;
+    }
+    
     public boolean saveContactList(List<User> contactList) {
         // TODO Auto-generated method stub
         UserDao dao = new UserDao(context);

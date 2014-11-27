@@ -21,6 +21,7 @@ import android.content.IntentFilter;
 import com.easemob.EMCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.applib.model.HXSDKModel;
+
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
@@ -140,7 +141,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
      * @return
      */
     public Map<String, User> getContactList() {
-        if (getUsername() != null && contactList == null) {
+        if (getHXId() != null && contactList == null) {
             contactList = ((DemoHXSDKModel) getModel()).getContactList();
         }
         
