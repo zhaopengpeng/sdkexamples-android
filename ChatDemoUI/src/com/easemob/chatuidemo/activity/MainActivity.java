@@ -100,7 +100,7 @@ public class MainActivity extends BaseActivity {
 		setContentView(R.layout.activity_main);
 		initView();
 		
-		MobclickAgent.setDebugMode( true );
+//		MobclickAgent.setDebugMode( true );
 		MobclickAgent.updateOnlineConfig(this);
 		
 		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow)
