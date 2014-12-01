@@ -117,6 +117,15 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     }
     
     @Override
+    protected void onUserRemoved(){
+    	Intent intent = new Intent(appContext, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra("user_removed", true);
+        appContext.startActivity(intent);
+    }
+    
+    
+    @Override
     protected void initListener(){
         super.initListener();
         IntentFilter callFilter = new IntentFilter(EMChatManager.getInstance().getIncomingVoiceCallBroadcastAction());

@@ -86,6 +86,9 @@ public class MainActivity extends BaseActivity {
 	private NewMessageBroadcastReceiver msgReceiver;
 	// 账号在别处登录
 	public boolean isConflict = false;
+	//账号被移除
+	public boolean isUserRemove = false;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +99,13 @@ public class MainActivity extends BaseActivity {
             finish();
             startActivity(new Intent(this, LoginActivity.class));
             return;
+        }else if(savedInstanceState != null && savedInstanceState.getBoolean("user_removed", false)){
+        	// 防止被移除后，没点确定按钮然后按了home键，长期在后台又进app导致的crash
+            // 三个fragment里加的判断同理
+        	DemoApplication.getInstance().logout(null);
+        	finish();
+            startActivity(new Intent(this, LoginActivity.class));
+            return;
         }
 		setContentView(R.layout.activity_main);
 		initView();
@@ -103,8 +113,11 @@ public class MainActivity extends BaseActivity {
 //		MobclickAgent.setDebugMode( true );
 		MobclickAgent.updateOnlineConfig(this);
 		
-		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow)
-			showConflictDialog();
+		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow){
+			showConflictDialog(false);
+		}else if(getIntent().getBooleanExtra("user_removed", false) && !isConflictDialogShow){
+			showConflictDialog(true);
+		}
 		
 		inviteMessgeDao = new InviteMessgeDao(this);
 		userDao = new UserDao(this);
@@ -591,9 +604,13 @@ public class MainActivity extends BaseActivity {
 
 				@Override
 				public void run() {
-					if (error == EMError.CONNECTION_CONFLICT) {
+					
+					if(error == EMError.USER_REMOVED){
+						// 显示帐号已经被移除
+						showConflictDialog(true);
+					}else if (error == EMError.CONNECTION_CONFLICT) {
 						// 显示帐号在其他设备登陆dialog
-						showConflictDialog();
+						showConflictDialog(false);
 					} else {
 						chatHistoryFragment.errorItem.setVisibility(View.VISIBLE);
 						if (NetUtils.hasNetwork(MainActivity.this))
@@ -751,7 +768,7 @@ public class MainActivity extends BaseActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (!isConflict) {
+		if (!isConflict||!isUserRemove) {
 			updateUnreadLabel();
 			updateUnreadAddressLable();
 			EMChatManager.getInstance().activityResumed();
@@ -762,6 +779,7 @@ public class MainActivity extends BaseActivity {
 	@Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBoolean("isConflict", isConflict);
+        outState.putBoolean("user_removed", isUserRemove);
         super.onSaveInstanceState(outState);
     }
 
@@ -780,7 +798,7 @@ public class MainActivity extends BaseActivity {
 	/**
 	 * 显示帐号在别处登录dialog
 	 */
-	private void showConflictDialog() {
+	private void showConflictDialog(boolean isDelete) {
 		isConflictDialogShow = true;
 		DemoApplication.getInstance().logout(null);
 
@@ -791,6 +809,11 @@ public class MainActivity extends BaseActivity {
 					conflictBuilder = new android.app.AlertDialog.Builder(MainActivity.this);
 				conflictBuilder.setTitle("下线通知");
 				conflictBuilder.setMessage(R.string.connect_conflict);
+				if(isDelete){
+					conflictBuilder.setTitle("移除通知");
+					conflictBuilder.setMessage(R.string.em_user_remove);
+				}
+				
 				conflictBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 
 					@Override
@@ -803,7 +826,11 @@ public class MainActivity extends BaseActivity {
 				});
 				conflictBuilder.setCancelable(false);
 				conflictBuilder.create().show();
-				isConflict = true;
+				if(isDelete){
+					isUserRemove = true;
+				}else{
+					isConflict = true;
+				}
 			} catch (Exception e) {
 				EMLog.e(TAG, "---------color conflictBuilder error" + e.getMessage());
 			}
@@ -815,8 +842,11 @@ public class MainActivity extends BaseActivity {
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow)
-			showConflictDialog();
+		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow){
+			showConflictDialog(false);
+		}else if(getIntent().getBooleanExtra("user_removed", false) && !isConflictDialogShow){
+			showConflictDialog(true);
+		}
 	}
 	
 }
