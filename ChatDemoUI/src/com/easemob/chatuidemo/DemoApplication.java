@@ -20,6 +20,7 @@ import android.content.Context;
 
 import com.baidu.mapapi.BMapManager;
 import com.easemob.EMCallBack;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.domain.User;
 
 public class DemoApplication extends Application {
