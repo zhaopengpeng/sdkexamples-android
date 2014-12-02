@@ -196,6 +196,15 @@ public class LoginActivity extends BaseActivity {
 								EMGroupManager.getInstance().getGroupsFromServer();
 							} catch (Exception e) {
 								e.printStackTrace();
+								//取好友或者群聊失败，不让进入主页面，也可以不管这个exception继续进到主页面
+								runOnUiThread(new Runnable() {
+	                                public void run() {
+	                                    pd.dismiss();
+	                                    DemoApplication.getInstance().logout(null);
+	                                    Toast.makeText(getApplicationContext(), "登录失败: 获取好友或群聊失败", 1).show();
+	                                }
+	                            });
+								return;
 							}
 							//更新当前用户的nickname 此方法的作用是在ios离线推送时能够显示用户nick
 							boolean updatenick = EMChatManager.getInstance().updateCurrentUserNick(DemoApplication.currentUserNick);
