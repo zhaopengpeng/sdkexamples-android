@@ -41,6 +41,7 @@ import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chatuidemo.DemoApplication;
+import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ChatAllHistoryAdapter;
 import com.easemob.chatuidemo.db.InviteMessgeDao;
@@ -268,8 +269,8 @@ public class ChatAllHistoryFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         if(((MainActivity)getActivity()).isConflict)
             outState.putBoolean("isConflict", true);
-        if(((MainActivity)getActivity()).isUserRemove)
-            outState.putBoolean("user_removed", true);
+        if(((MainActivity)getActivity()).getCurrentAccountRemoved())
+            outState.putBoolean(DemoHXSDKHelper.ACCOUNT_REMOVED, true);
         super.onSaveInstanceState(outState);
         
     }

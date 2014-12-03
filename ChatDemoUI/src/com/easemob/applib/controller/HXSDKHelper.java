@@ -302,7 +302,7 @@ public abstract class HXSDKHelper {
             @Override
             public void onDisconnected(int error) {
             	if (error == EMError.USER_REMOVED) {
-            		onUserRemoved();
+            		onCurrentAccountRemoved();
             	}else if (error == EMError.CONNECTION_CONFLICT) {
                     onConnectionConflict();
                 }else{
@@ -327,7 +327,7 @@ public abstract class HXSDKHelper {
     /**
      * the developer can override this function to handle user is removed error
      */
-    protected void onUserRemoved(){}
+    protected void onCurrentAccountRemoved(){}
     
     
     /**

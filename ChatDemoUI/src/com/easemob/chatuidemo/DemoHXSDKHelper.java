@@ -45,6 +45,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
      * contact list in cache
      */
     private Map<String, User> contactList;
+    public static final String ACCOUNT_REMOVED = "account_removed";
     
     @Override
     protected void initHXOptions(){
@@ -117,10 +118,10 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     }
     
     @Override
-    protected void onUserRemoved(){
+    protected void onCurrentAccountRemoved(){
     	Intent intent = new Intent(appContext, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra("user_removed", true);
+        intent.putExtra(ACCOUNT_REMOVED, true);
         appContext.startActivity(intent);
     }
     
