@@ -32,6 +32,7 @@ import com.easemob.EMCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
+import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
@@ -308,11 +309,11 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 	
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        if(((MainActivity)getActivity()).isConflict)
-            outState.putBoolean("isConflict", true);
-        if(((MainActivity)getActivity()).getCurrentAccountRemoved())
-            outState.putBoolean(DemoHXSDKHelper.ACCOUNT_REMOVED, true);
-        super.onSaveInstanceState(outState);
-        
+    	super.onSaveInstanceState(outState);
+        if(((MainActivity)getActivity()).isConflict){
+        	outState.putBoolean("isConflict", true);
+        }else if(((MainActivity)getActivity()).getCurrentAccountRemoved()){
+        	outState.putBoolean(Constant.ACCOUNT_REMOVED, true);
+        }
     }
 }

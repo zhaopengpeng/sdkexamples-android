@@ -100,15 +100,14 @@ public class MainActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if(savedInstanceState != null && savedInstanceState.getBoolean(DemoHXSDKHelper.ACCOUNT_REMOVED, false)){
+		if(savedInstanceState != null && savedInstanceState.getBoolean(Constant.ACCOUNT_REMOVED, false)){
         	// 防止被移除后，没点确定按钮然后按了home键，长期在后台又进app导致的crash
             // 三个fragment里加的判断同理
         	DemoApplication.getInstance().logout(null);
         	finish();
             startActivity(new Intent(this, LoginActivity.class));
             return;
-        }
-		if (savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false)) {
+        }else if (savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false)) {
             // 防止被T后，没点确定按钮然后按了home键，长期在后台又进app导致的crash
             // 三个fragment里加的判断同理
             finish();
@@ -123,7 +122,7 @@ public class MainActivity extends BaseActivity {
 		
 		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow){
 			showConflictDialog();
-		}else if(getIntent().getBooleanExtra(DemoHXSDKHelper.ACCOUNT_REMOVED, false) && !isAccountRemovedDialogShow){
+		}else if(getIntent().getBooleanExtra(Constant.ACCOUNT_REMOVED, false) && !isAccountRemovedDialogShow){
 			showAccountRemovedDialog();
 		}
 		
@@ -792,7 +791,7 @@ public class MainActivity extends BaseActivity {
 	@Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBoolean("isConflict", isConflict);
-        outState.putBoolean(DemoHXSDKHelper.ACCOUNT_REMOVED, isCurrentAccountRemoved);
+        outState.putBoolean(Constant.ACCOUNT_REMOVED, isCurrentAccountRemoved);
         super.onSaveInstanceState(outState);
     }
 
@@ -888,8 +887,7 @@ public class MainActivity extends BaseActivity {
 		super.onNewIntent(intent);
 		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow){
 			showConflictDialog();
-		}
-		if(getIntent().getBooleanExtra(DemoHXSDKHelper.ACCOUNT_REMOVED, false) && !isAccountRemovedDialogShow){
+		}else if(getIntent().getBooleanExtra(Constant.ACCOUNT_REMOVED, false) && !isAccountRemovedDialogShow){
 			showAccountRemovedDialog();
 		}
 	}

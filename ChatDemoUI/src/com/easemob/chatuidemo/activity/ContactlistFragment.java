@@ -47,7 +47,6 @@ import android.widget.Toast;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
-import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ContactAdapter;
 import com.easemob.chatuidemo.db.InviteMessgeDao;
@@ -304,11 +303,12 @@ public class ContactlistFragment extends Fragment {
 	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-	    if(((MainActivity)getActivity()).isConflict)
-	        outState.putBoolean("isConflict", true);
-	    if(((MainActivity)getActivity()).getCurrentAccountRemoved())
-            outState.putBoolean(DemoHXSDKHelper.ACCOUNT_REMOVED, true);
-	    super.onSaveInstanceState(outState);
+		super.onSaveInstanceState(outState);
+	    if(((MainActivity)getActivity()).isConflict){
+	    	outState.putBoolean("isConflict", true);
+	    }else if(((MainActivity)getActivity()).getCurrentAccountRemoved()){
+	    	outState.putBoolean(Constant.ACCOUNT_REMOVED, true);
+	    }
 	    
 	}
 }
