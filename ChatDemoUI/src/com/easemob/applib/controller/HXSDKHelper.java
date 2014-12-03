@@ -301,7 +301,9 @@ public abstract class HXSDKHelper {
         connectionListener = new EMConnectionListener() {
             @Override
             public void onDisconnected(int error) {
-                if (error == EMError.CONNECTION_CONFLICT) {
+            	if (error == EMError.USER_REMOVED) {
+            		onCurrentAccountRemoved();
+            	}else if (error == EMError.CONNECTION_CONFLICT) {
                     onConnectionConflict();
                 }else{
                     onConnectionDisconnected(error);
@@ -321,6 +323,13 @@ public abstract class HXSDKHelper {
      */
     protected void onConnectionConflict(){}
 
+    
+    /**
+     * the developer can override this function to handle user is removed error
+     */
+    protected void onCurrentAccountRemoved(){}
+    
+    
     /**
      * handle the connection connected
      */
