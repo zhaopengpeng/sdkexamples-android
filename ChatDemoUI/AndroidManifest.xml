@@ -25,11 +25,14 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     
-
-    <permission android:name="android.permission.BAIDU_LOCATION_SERVICE" />
-
-    <uses-permission android:name="android.permission.BAIDU_LOCATION_SERVICE" />
- 
+	 <uses-permission android:name="android.permission.GET_ACCOUNTS" />  
+	<uses-permission android:name="android.permission.USE_CREDENTIALS" />  
+	<uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />  
+	<uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />  
+	<uses-permission android:name="com.android.launcher.permission.READ_SETTINGS" />  
+	<uses-permission android:name="android.permission.BROADCAST_STICKY" />  
+	<uses-permission android:name="android.permission.WRITE_SETTINGS" />  
+  
     <application
         android:name="DemoApplication"
         android:allowBackup="true"
@@ -246,14 +249,16 @@
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
-            android:process=":remote" />
-        
+            android:process=":remote"
+             />
         <!-- umeng appkey，可忽略 -->
          <meta-data
             android:name="UMENG_APPKEY"
             android:value="53912a3156240b01a7075ed1" >
         </meta-data>
-        
+        <meta-data
+            android:name="com.baidu.lbsapi.API_KEY"
+            android:value="3ecea51f560650b1ed8a4b99808f52e8" />
         
     </application>
 
