@@ -14,8 +14,6 @@
 
 package com.easemob.chatuidemo.activity;
 
-import org.bitlet.weupnp.Main;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
