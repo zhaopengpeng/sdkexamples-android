@@ -15,7 +15,6 @@ package com.easemob.chatuidemo.activity;
 
 import java.io.File;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -38,7 +37,6 @@ public class AlertDialog extends BaseActivity {
 	private ImageView imageView;
 	private EditText editText;
 	private boolean isEditextShow;
-	private String voicePath;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +50,6 @@ public class AlertDialog extends BaseActivity {
 		String msg = getIntent().getStringExtra("msg");
 		//提示标题
 		String title = getIntent().getStringExtra("title");
-//		voicePath = getIntent().getStringExtra("voicePath");
 		position = getIntent().getIntExtra("position", -1);
 		//是否显示取消标题
 		boolean isCanceTitle=getIntent().getBooleanExtra("titleIsCancel", false);
@@ -62,6 +59,9 @@ public class AlertDialog extends BaseActivity {
 		isEditextShow = getIntent().getBooleanExtra("editTextShow",false);
 		//转发复制的图片的path
 		String path = getIntent().getStringExtra("forwardImage");
+		//
+		String edit_text = getIntent().getStringExtra("edit_text");
+		
 		if(msg != null)
 		    ((TextView)findViewById(R.id.alert_message)).setText(msg);
 		if(title != null)
@@ -88,7 +88,7 @@ public class AlertDialog extends BaseActivity {
 		}
 		if(isEditextShow){
 			editText.setVisibility(View.VISIBLE);
-			
+			editText.setText(edit_text);
 		}
 	}
 	

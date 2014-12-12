@@ -10,7 +10,6 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.easemob.chat.EMChatConfig;
-import com.easemob.chat.EMChatManager;
 import com.easemob.chat.FileMessageBody;
 import com.easemob.chatuidemo.R;
 import com.easemob.cloud.CloudOperationCallback;
@@ -31,18 +30,14 @@ public class ShowNormalFileActivity extends BaseActivity {
 		file = new File(messageBody.getLocalUrl());
 		//set head map
 		final Map<String, String> maps = new HashMap<String, String>();
-		String accessToken=EMChatManager.getInstance().getAccessToken();
-		maps.put("Authorization", "Bearer " + accessToken);
 		if (!TextUtils.isEmpty(messageBody.getSecret())) {
 			maps.put("share-secret", messageBody.getSecret());
 		}
-		maps.put("Accept", "application/octet-stream");
-		
 		//下载文件
 		new Thread(new Runnable() {
 			public void run() {
 				HttpFileManager fileManager = new HttpFileManager(ShowNormalFileActivity.this, EMChatConfig.getInstance().getStorageUrl());
-				fileManager.downloadFile(messageBody.getRemoteUrl(), messageBody.getLocalUrl(), EMChatConfig.getInstance().APPKEY,maps,
+				fileManager.downloadFile(messageBody.getRemoteUrl(), messageBody.getLocalUrl(), maps,
 						new CloudOperationCallback() {
 							
 							@Override
@@ -68,9 +63,9 @@ public class ShowNormalFileActivity extends BaseActivity {
 							public void onError(final String msg) {
 								runOnUiThread(new Runnable() {
 									public void run() {
-										if(file != null && file.exists())
+										if(file != null && file.exists()&&file.isFile())
 											file.delete();
-										Toast.makeText(ShowNormalFileActivity.this, "下载文件失败: "+msg, 0).show();
+										Toast.makeText(ShowNormalFileActivity.this, "下载文件失败: "+msg, Toast.LENGTH_SHORT).show();
 										finish();
 									}
 								});
