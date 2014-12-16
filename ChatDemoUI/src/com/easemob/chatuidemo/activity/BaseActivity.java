@@ -81,7 +81,8 @@ public class BaseActivity extends FragmentActivity {
         
         //必须设置pendingintent，否则在2.3的机器上会有bug
         Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, notifiId, intent, Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, notifiId, intent, PendingIntent.FLAG_ONE_SHOT);
         mBuilder.setContentIntent(pendingIntent);
 
         Notification notification = mBuilder.build();
