@@ -16,8 +16,6 @@ package com.easemob.chatuidemo.activity;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 
 import android.content.BroadcastReceiver;
@@ -52,8 +50,6 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -80,15 +76,14 @@ import com.easemob.chat.VideoMessageBody;
 import com.easemob.chat.VoiceMessageBody;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
-import com.easemob.chatuidemo.adapter.ExpressionAdapter;
-import com.easemob.chatuidemo.adapter.ExpressionPagerAdapter;
+import com.easemob.chatuidemo.activity.EmojiconFragment.OnEmojiconClickedListener;
 import com.easemob.chatuidemo.adapter.MessageAdapter;
 import com.easemob.chatuidemo.adapter.VoicePlayClickListener;
 import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.chatuidemo.utils.ImageUtils;
-import com.easemob.chatuidemo.utils.SmileUtils;
-import com.easemob.chatuidemo.widget.ExpandGridView;
 import com.easemob.chatuidemo.widget.PasteEditText;
+import com.easemob.chatuidemo.widget.emojicon.Emojicon;
+import com.easemob.chatuidemo.widget.emojicon.EmojiconEditText;
 import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.EMLog;
 import com.easemob.util.PathUtil;
@@ -98,7 +93,7 @@ import com.easemob.util.VoiceRecorder;
  * 聊天页面
  * 
  */
-public class ChatActivity extends BaseActivity implements OnClickListener {
+public class ChatActivity extends BaseActivity implements OnClickListener, OnEmojiconClickedListener {
 
 	private static final int REQUEST_CODE_EMPTY_HISTORY = 2;
 	public static final int REQUEST_CODE_CONTEXT_MENU = 3;
@@ -140,7 +135,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	private ImageView micImage;
 	private TextView recordingHint;
 	private ListView listView;
-	private PasteEditText mEditTextContent;
+	private EmojiconEditText mEditTextContent;
 	private View buttonSetModeKeyboard;
 	private View buttonSetModeVoice;
 	private View buttonSend;
@@ -154,7 +149,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	private ClipboardManager clipboard;
 	private ViewPager expressionViewpager;
 	private InputMethodManager manager;
-	private List<String> reslist;
 	private Drawable[] micImages;
 	private int chatType;
 	private EMConversation conversation;
@@ -187,6 +181,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 		}
 	};
 	private EMGroup group;
+    private EmojiconFragment emojiconFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -204,7 +199,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 		micImage = (ImageView) findViewById(R.id.mic_image);
 		recordingHint = (TextView) findViewById(R.id.recording_hint);
 		listView = (ListView) findViewById(R.id.list);
-		mEditTextContent = (PasteEditText) findViewById(R.id.et_sendmessage);
+		mEditTextContent = (EmojiconEditText) findViewById(R.id.et_sendmessage);
 		buttonSetModeKeyboard = findViewById(R.id.btn_set_mode_keyboard);
 		edittext_layout = (RelativeLayout) findViewById(R.id.edittext_layout);
 		buttonSetModeVoice = findViewById(R.id.btn_set_mode_voice);
@@ -233,15 +228,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 				getResources().getDrawable(R.drawable.record_animate_12), getResources().getDrawable(R.drawable.record_animate_13),
 				getResources().getDrawable(R.drawable.record_animate_14), };
 
-		// 表情list
-		reslist = getExpressionRes(35);
-		// 初始化表情viewpager
-		List<View> views = new ArrayList<View>();
-		View gv1 = getGridChildView(1);
-		View gv2 = getGridChildView(2);
-		views.add(gv1);
-		views.add(gv2);
-		expressionViewpager.setAdapter(new ExpressionPagerAdapter(views));
+		// 加入表情页
+        emojiconFragment = new EmojiconFragment();
+        getSupportFragmentManager().beginTransaction().add(R.id.ll_face_container, emojiconFragment).commit();
+		
 		edittext_layout.requestFocus();
 		voiceRecorder = new VoiceRecorder(micImageHandler);
 		buttonPressToSpeak.setOnTouchListener(new PressToSpeakListen());
@@ -1130,81 +1120,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 		}
 	}
 	
-	/**
-	 * 获取表情的gridview的子view
-	 * 
-	 * @param i
-	 * @return
-	 */
-	private View getGridChildView(int i) {
-		View view = View.inflate(this, R.layout.expression_gridview, null);
-		ExpandGridView gv = (ExpandGridView) view.findViewById(R.id.gridview);
-		List<String> list = new ArrayList<String>();
-		if (i == 1) {
-			List<String> list1 = reslist.subList(0, 20);
-			list.addAll(list1);
-		} else if (i == 2) {
-			list.addAll(reslist.subList(20, reslist.size()));
-		}
-		list.add("delete_expression");
-		final ExpressionAdapter expressionAdapter = new ExpressionAdapter(this, 1, list);
-		gv.setAdapter(expressionAdapter);
-		gv.setOnItemClickListener(new OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				String filename = expressionAdapter.getItem(position);
-				try {
-					// 文字输入框可见时，才可输入表情
-					// 按住说话可见，不让输入表情
-					if (buttonSetModeKeyboard.getVisibility() != View.VISIBLE) {
-
-						if (filename != "delete_expression") { // 不是删除键，显示表情
-							// 这里用的反射，所以混淆的时候不要混淆SmileUtils这个类
-							Class clz = Class.forName("com.easemob.chatuidemo.utils.SmileUtils");
-							Field field = clz.getField(filename);
-							mEditTextContent.append(SmileUtils.getSmiledText(ChatActivity.this, (String) field.get(null)));
-						} else { // 删除文字或者表情
-							if (!TextUtils.isEmpty(mEditTextContent.getText())) {
-
-								int selectionStart = mEditTextContent.getSelectionStart();// 获取光标的位置
-								if (selectionStart > 0) {
-									String body = mEditTextContent.getText().toString();
-									String tempStr = body.substring(0, selectionStart);
-									int i = tempStr.lastIndexOf("[");// 获取最后一个表情的位置
-									if (i != -1) {
-										CharSequence cs = tempStr.substring(i, selectionStart);
-										if (SmileUtils.containsKey(cs.toString()))
-											mEditTextContent.getEditableText().delete(i, selectionStart);
-										else
-											mEditTextContent.getEditableText().delete(selectionStart - 1, selectionStart);
-									} else {
-										mEditTextContent.getEditableText().delete(selectionStart - 1, selectionStart);
-									}
-								}
-							}
-
-						}
-					}
-				} catch (Exception e) {
-				}
-
-			}
-		});
-		return view;
-	}
-
-	public List<String> getExpressionRes(int getSum) {
-		List<String> reslist = new ArrayList<String>();
-		for (int x = 1; x <= getSum; x++) {
-			String filename = "ee_" + x;
-
-			reslist.add(filename);
-
-		}
-		return reslist;
-
-	}
 
 
 	@Override
@@ -1440,5 +1355,16 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	public String getToChatUsername() {
 		return toChatUsername;
 	}
+
+	@Override
+    public void onEmojiconClicked(Emojicon emojicon) {
+        // 输入表情
+        emojiconFragment.inputEmojicon(mEditTextContent, emojicon);
+    }
+
+    @Override
+    public void onEmojiconDeleteClicked() {
+        emojiconFragment.deleteEmojicon(mEditTextContent);
+    }
 
 }
