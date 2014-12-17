@@ -74,7 +74,7 @@ public class BaseActivity extends FragmentActivity {
                 .setWhen(System.currentTimeMillis()).setAutoCancel(true);
         
         String ticker = CommonUtils.getMessageDigest(message, this);
-        if(message.getType() == Type.TXT)
+        if(message.getType() == Type.TXT) //适用于旧版的表情
             ticker = ticker.replaceAll("\\[.{2,3}\\]", "[表情]");
         //设置状态栏提示
         mBuilder.setTicker(message.getFrom()+": " + ticker);

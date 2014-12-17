@@ -44,7 +44,7 @@ public class EmojiconFragment extends Fragment {
 	private PagerAdapter emojisAdapter;
 	private ViewPager emojisViewpager;
 	// 排除删除键
-	private final int iconSize = 24 - 1;
+	private final int iconSize = 21 - 1;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
