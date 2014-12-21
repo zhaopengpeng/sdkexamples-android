@@ -5,9 +5,11 @@ import java.util.List;
 import org.jivesoftware.smack.XMPPException;
 
 import com.easemob.EMCallBack;
+import com.easemob.chat.EMCallManager;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMConferenceRoomInfo;
 import com.easemob.chatuidemo.R;
+import com.easemob.exceptions.EaseMobException;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -44,7 +46,7 @@ public class MediaConferenceListActivity extends BaseActivity{
 			@Override
 			public void run(){
 				try {
-					confList = EMChatManager.getInstance().getMediaConferenceRooms();
+					confList = EMCallManager.getInstance().getMediaConferenceRooms();
 					
 					MediaConferenceListActivity.this.runOnUiThread(new Runnable(){
 						@Override
@@ -65,7 +67,7 @@ public class MediaConferenceListActivity extends BaseActivity{
 									pd.setCancelable(false);
 									pd.setCanceledOnTouchOutside(false);
 									pd.show();
-									EMChatManager.getInstance().joinMediaConferenceRoom(confId,new EMCallBack(){
+									EMCallManager.getInstance().asyncJoinMediaConferenceRoom(confId,new EMCallBack(){
 
 										@Override
 										public void onSuccess() {
@@ -113,7 +115,7 @@ public class MediaConferenceListActivity extends BaseActivity{
 					        pd.dismiss();
 						}
 					});
-				} catch (XMPPException e) {
+				} catch (EaseMobException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					final String msg = e.getMessage();

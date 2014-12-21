@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.easemob.EMCallBack;
+import com.easemob.chat.EMCallManager;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.widget.HorizontalListView;
@@ -88,7 +89,7 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 	 */
 	private void requireTalkToken(){
 		micInfoText.setText("准备中...");
-		EMChatManager.getInstance().requireTalkToken(confId, new EMCallBack(){
+		EMCallManager.getInstance().asyncRequireTalkToken(confId, new EMCallBack(){
 
 			@Override
 			public void onSuccess() {
@@ -134,7 +135,7 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 	 * 释放话语token
 	 */
 	private void releaseTalkToken(){
-		EMChatManager.getInstance().releaseTalkToken(confId,new EMCallBack(){
+		EMCallManager.getInstance().asyncReleaseTalkToken(confId,new EMCallBack(){
 
 			@Override
 			public void onSuccess() {
@@ -190,7 +191,27 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 	 * 退出房间
 	 */
 	private void exitRoom(){
-	    EMChatManager.getInstance().exitMediaConferenceRoom(confId);
+	    EMCallManager.getInstance().asyncExitMediaConferenceRoom(confId,new EMCallBack(){
+
+            @Override
+            public void onSuccess() {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void onError(int code, String message) {
+                // TODO Auto-generated method stub
+                
+            }
+
+            @Override
+            public void onProgress(int progress, String status) {
+                // TODO Auto-generated method stub
+                
+            }
+	        
+	    });
 	}
 	
 	private class UserAdapter extends ArrayAdapter<String>{
