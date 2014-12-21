@@ -32,6 +32,7 @@ import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.VoiceMessageBody;
 import com.easemob.chatuidemo.R;
+import com.easemob.chatuidemo.activity.ChatActivity;
 
 public class VoicePlayClickListener implements View.OnClickListener {
 
@@ -43,14 +44,11 @@ public class VoicePlayClickListener implements View.OnClickListener {
 	MediaPlayer mediaPlayer = null;
 	ImageView iv_read_status;
 	Activity activity;
-	private String username;
 	private ChatType chatType;
 	private BaseAdapter adapter;
 
 	public static boolean isPlaying = false;
 	public static VoicePlayClickListener currentPlayListener = null;
-	static EMMessage currentMessage = null;
-
 
 	/**
 	 * 
@@ -67,10 +65,9 @@ public class VoicePlayClickListener implements View.OnClickListener {
 		this.message = message;
 		voiceBody = (VoiceMessageBody) message.getBody();
 		this.iv_read_status = iv_read_status;
-		this.adapter=adapter;
+		this.adapter = adapter;
 		voiceIconView = v;
 		this.activity = activity;
-		this.username = username;
 		this.chatType = message.getChatType();
 	}
 
@@ -87,24 +84,26 @@ public class VoicePlayClickListener implements View.OnClickListener {
 			mediaPlayer.release();
 		}
 		isPlaying = false;
+		((ChatActivity) activity).playMsgId = null;
+		adapter.notifyDataSetChanged();
 	}
 
 	public void playVoice(String filePath) {
 		if (!(new File(filePath).exists())) {
 			return;
 		}
-		AudioManager audioManager = (AudioManager)activity.getSystemService(Context.AUDIO_SERVICE);
+		((ChatActivity) activity).playMsgId = message.getMsgId();
+		AudioManager audioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
 
 		mediaPlayer = new MediaPlayer();
-		if (EMChatManager.getInstance().getChatOptions().getUseSpeaker()){
+		if (EMChatManager.getInstance().getChatOptions().getUseSpeaker()) {
 			audioManager.setMode(AudioManager.MODE_NORMAL);
 			audioManager.setSpeakerphoneOn(true);
 			mediaPlayer.setAudioStreamType(AudioManager.STREAM_RING);
-		}
-		else{
-			audioManager.setSpeakerphoneOn(false);//关闭扬声器
-			//把声音设定成Earpiece（听筒）出来，设定为正在通话中
-			 audioManager.setMode(AudioManager.MODE_IN_CALL);
+		} else {
+			audioManager.setSpeakerphoneOn(false);// 关闭扬声器
+			// 把声音设定成Earpiece（听筒）出来，设定为正在通话中
+			audioManager.setMode(AudioManager.MODE_IN_CALL);
 			mediaPlayer.setAudioStreamType(AudioManager.STREAM_VOICE_CALL);
 		}
 		try {
@@ -123,25 +122,29 @@ public class VoicePlayClickListener implements View.OnClickListener {
 			});
 			isPlaying = true;
 			currentPlayListener = this;
-			currentMessage = message;
 			mediaPlayer.start();
 			showAnimation();
-			try {
-				//如果是接收的消息
-				if (!message.isAcked && message.direct == EMMessage.Direct.RECEIVE) {
-					message.isAcked = true;
-					if (iv_read_status != null && iv_read_status.getVisibility() == View.VISIBLE) {
-						//隐藏自己未播放这条语音消息的标志
-						iv_read_status.setVisibility(View.INVISIBLE);
-						EMChatDB.getInstance().updateMessageAck(message.getMsgId(), true);
+
+			// 如果是接收的消息
+			if (message.direct == EMMessage.Direct.RECEIVE) {
+				try {
+					if (!message.isAcked) {
+						message.isAcked = true;
+						// 告知对方已读这条消息
+						if (chatType != ChatType.GroupChat)
+							EMChatManager.getInstance().ackMessageRead(message.getFrom(), message.getMsgId());
 					}
-					//告知对方已读这条消息
-					if(chatType != ChatType.GroupChat)
-						EMChatManager.getInstance().ackMessageRead(message.getFrom(), message.getMsgId());
+				} catch (Exception e) {
+					message.isAcked = false;
 				}
-			} catch (Exception e) {
-				message.isAcked = false;
+				if (!message.isListened() && iv_read_status != null && iv_read_status.getVisibility() == View.VISIBLE) {
+					// 隐藏自己未播放这条语音消息的标志
+					iv_read_status.setVisibility(View.INVISIBLE);
+					EMChatManager.getInstance().setMessageListened(message);
+				}
+
 			}
+
 		} catch (Exception e) {
 		}
 	}
@@ -150,9 +153,9 @@ public class VoicePlayClickListener implements View.OnClickListener {
 	private void showAnimation() {
 		// play voice, and start animation
 		if (message.direct == EMMessage.Direct.RECEIVE) {
-				voiceIconView.setImageResource(R.anim.voice_from_icon);
+			voiceIconView.setImageResource(R.anim.voice_from_icon);
 		} else {
-				voiceIconView.setImageResource(R.anim.voice_to_icon);
+			voiceIconView.setImageResource(R.anim.voice_to_icon);
 		}
 		voiceAnimation = (AnimationDrawable) voiceIconView.getDrawable();
 		voiceAnimation.start();
@@ -160,35 +163,28 @@ public class VoicePlayClickListener implements View.OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-
 		if (isPlaying) {
-			currentPlayListener.stopPlayVoice();
-			if (currentMessage != null && currentMessage.hashCode() == message.hashCode()) {
-				currentMessage = null;
+			if (((ChatActivity) activity).playMsgId != null && ((ChatActivity) activity).playMsgId.equals(message.getMsgId())) {
+				currentPlayListener.stopPlayVoice();
 				return;
 			}
+			currentPlayListener.stopPlayVoice();
 		}
 
 		if (message.direct == EMMessage.Direct.SEND) {
 			// for sent msg, we will try to play the voice file directly
 			playVoice(voiceBody.getLocalUrl());
 		} else {
-			
-			if(message.status==EMMessage.Status.SUCCESS)
-			{
+			if (message.status == EMMessage.Status.SUCCESS) {
 				File file = new File(voiceBody.getLocalUrl());
 				if (file.exists() && file.isFile())
 					playVoice(voiceBody.getLocalUrl());
 				else
 					System.err.println("file not exist");
-				
-			}else if(message.status==EMMessage.Status.INPROGRESS)
-			{
+
+			} else if (message.status == EMMessage.Status.INPROGRESS) {
 				Toast.makeText(activity, "正在下载语音，稍后点击", Toast.LENGTH_SHORT).show();
-				 
-				
-			}else if(message.status==EMMessage.Status.FAIL)
-			{
+			} else if (message.status == EMMessage.Status.FAIL) {
 				Toast.makeText(activity, "正在下载语音，稍后点击", Toast.LENGTH_SHORT).show();
 				new AsyncTask<Void, Void, Void>() {
 
@@ -197,25 +193,17 @@ public class VoicePlayClickListener implements View.OnClickListener {
 						EMChatManager.getInstance().asyncFetchMessage(message);
 						return null;
 					}
-					
+
 					@Override
 					protected void onPostExecute(Void result) {
 						super.onPostExecute(result);
 						adapter.notifyDataSetChanged();
 					}
-					
+
 				}.execute();
-				
-			
+
 			}
- 
+
 		}
 	}
-
-	interface OnVoiceStopListener {
-		void onStop();
-
-		void onStart();
-	}
-
 }

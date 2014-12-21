@@ -17,7 +17,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.easemob.chatuidemo.DemoApplication;
+import com.easemob.applib.controller.HXSDKHelper;
 
 public class DbOpenHelper extends SQLiteOpenHelper{
 
@@ -54,7 +54,7 @@ public class DbOpenHelper extends SQLiteOpenHelper{
 	}
 	
 	private static String getUserDatabaseName() {
-        return  DemoApplication.getInstance().getUserName() + "_demo.db";
+        return  HXSDKHelper.getInstance().getHXId() + "_demo.db";
     }
 	
 	@Override

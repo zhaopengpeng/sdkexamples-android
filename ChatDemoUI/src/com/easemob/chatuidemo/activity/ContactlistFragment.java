@@ -32,11 +32,11 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
@@ -66,6 +66,7 @@ public class ContactlistFragment extends Fragment {
 	private boolean hidden;
 	private Sidebar sidebar;
 	private InputMethodManager inputMethodManager;
+	private List<String> blackList;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,10 +76,15 @@ public class ContactlistFragment extends Fragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		//防止被T后，没点确定按钮然后按了home键，长期在后台又进app导致的crash
+		if(savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false))
+		    return;
 		inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		listView = (ListView) getView().findViewById(R.id.list);
 		sidebar = (Sidebar) getView().findViewById(R.id.sidebar);
 		sidebar.setListView(listView);
+		//黑名单列表
+		blackList = EMContactManager.getInstance().getBlackListUsernames();
 		contactList = new ArrayList<User>();
 		// 获取设置contactlist
 		getContactList();
@@ -231,11 +237,12 @@ public class ContactlistFragment extends Fragment {
 			public void run() {
 				try {
 					//加入到黑名单
-					EMContactManager.getInstance().addUserToBlackList(username,true);
+					EMContactManager.getInstance().addUserToBlackList(username,false);
 					getActivity().runOnUiThread(new Runnable() {
 						public void run() {
 							pd.dismiss();
 							Toast.makeText(getActivity(), "移入黑名单成功", 0).show();
+							refresh();
 						}
 					});
 				} catch (EaseMobException e) {
@@ -268,8 +275,12 @@ public class ContactlistFragment extends Fragment {
 		}
 	}
 
+	/**
+	 * 获取联系人列表，并过滤掉黑名单和排序
+	 */
 	private void getContactList() {
 		contactList.clear();
+		//获取本地好友列表
 		Map<String, User> users = DemoApplication.getInstance().getContactList();
 		Iterator<Entry<String, User>> iterator = users.entrySet().iterator();
 		while (iterator.hasNext()) {
@@ -291,5 +302,16 @@ public class ContactlistFragment extends Fragment {
 		contactList.add(0, users.get(Constant.GROUP_USERNAME));
 		// 把"申请与通知"添加到首位
 		contactList.add(0, users.get(Constant.NEW_FRIENDS_USERNAME));
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+	    if(((MainActivity)getActivity()).isConflict){
+	    	outState.putBoolean("isConflict", true);
+	    }else if(((MainActivity)getActivity()).getCurrentAccountRemoved()){
+	    	outState.putBoolean(Constant.ACCOUNT_REMOVED, true);
+	    }
+	    
 	}
 }

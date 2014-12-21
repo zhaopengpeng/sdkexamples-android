@@ -13,8 +13,7 @@
  */
 package com.easemob.chatuidemo.activity;
 
-import org.jivesoftware.smack.XMPPException;
-
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -29,11 +28,14 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.easemob.EMCallBack;
+import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
+import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
+import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
-import com.easemob.chatuidemo.utils.PreferenceUtils;
 
 /**
  * 设置界面
@@ -119,6 +121,8 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		if(savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false))
+            return;
 		rl_switch_notification = (RelativeLayout) getView().findViewById(R.id.rl_switch_notification);
 		rl_switch_sound = (RelativeLayout) getView().findViewById(R.id.rl_switch_sound);
 		rl_switch_vibrate = (RelativeLayout) getView().findViewById(R.id.rl_switch_vibrate);
@@ -183,16 +187,6 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 	}
 
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -207,7 +201,7 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 				chatOptions.setNotificationEnable(false);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
 
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgNotification(false);
+				HXSDKHelper.getInstance().getModel().setSettingMsgNotification(false);
 			} else {
 				iv_switch_open_notification.setVisibility(View.VISIBLE);
 				iv_switch_close_notification.setVisibility(View.INVISIBLE);
@@ -217,7 +211,7 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 				textview2.setVisibility(View.VISIBLE);
 				chatOptions.setNotificationEnable(true);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgNotification(true);
+				HXSDKHelper.getInstance().getModel().setSettingMsgNotification(true);
 			}
 			break;
 		case R.id.rl_switch_sound:
@@ -226,13 +220,13 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 				iv_switch_close_sound.setVisibility(View.VISIBLE);
 				chatOptions.setNoticeBySound(false);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgSound(false);
+				HXSDKHelper.getInstance().getModel().setSettingMsgSound(false);
 			} else {
 				iv_switch_open_sound.setVisibility(View.VISIBLE);
 				iv_switch_close_sound.setVisibility(View.INVISIBLE);
 				chatOptions.setNoticeBySound(true);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgSound(true);
+				HXSDKHelper.getInstance().getModel().setSettingMsgSound(true);
 			}
 			break;
 		case R.id.rl_switch_vibrate:
@@ -241,13 +235,13 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 				iv_switch_close_vibrate.setVisibility(View.VISIBLE);
 				chatOptions.setNoticedByVibrate(false);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgVibrate(false);
+				HXSDKHelper.getInstance().getModel().setSettingMsgVibrate(false);
 			} else {
 				iv_switch_open_vibrate.setVisibility(View.VISIBLE);
 				iv_switch_close_vibrate.setVisibility(View.INVISIBLE);
 				chatOptions.setNoticedByVibrate(true);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgVibrate(true);
+				HXSDKHelper.getInstance().getModel().setSettingMsgVibrate(true);
 			}
 			break;
 		case R.id.rl_switch_speaker:
@@ -256,20 +250,17 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 				iv_switch_close_speaker.setVisibility(View.VISIBLE);
 				chatOptions.setUseSpeaker(false);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgSpeaker(false);
+				HXSDKHelper.getInstance().getModel().setSettingMsgSpeaker(false);
 			} else {
 				iv_switch_open_speaker.setVisibility(View.VISIBLE);
 				iv_switch_close_speaker.setVisibility(View.INVISIBLE);
 				chatOptions.setUseSpeaker(true);
 				EMChatManager.getInstance().setChatOptions(chatOptions);
-				PreferenceUtils.getInstance(getActivity()).setSettingMsgVibrate(true);
+				HXSDKHelper.getInstance().getModel().setSettingMsgVibrate(true);
 			}
 			break;
-		case R.id.btn_logout:
-			DemoApplication.getInstance().logout();
-			// 重新显示登陆页面
-			((MainActivity) getActivity()).finish();
-			startActivity(new Intent(getActivity(), LoginActivity.class));
+		case R.id.btn_logout: //退出登陆
+			logout();
 			break;
 		case R.id.ll_black_list:
 			startActivity(new Intent(getActivity(), BlacklistActivity.class));
@@ -283,4 +274,46 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 
 	}
 
+	void logout() {
+		final ProgressDialog pd = new ProgressDialog(getActivity());
+		pd.setMessage("正在退出登陆..");
+		pd.setCanceledOnTouchOutside(false);
+		pd.show();
+		DemoApplication.getInstance().logout(new EMCallBack() {
+			
+			@Override
+			public void onSuccess() {
+				getActivity().runOnUiThread(new Runnable() {
+					public void run() {
+						pd.dismiss();
+						// 重新显示登陆页面
+						((MainActivity) getActivity()).finish();
+						startActivity(new Intent(getActivity(), LoginActivity.class));
+						
+					}
+				});
+			}
+			
+			@Override
+			public void onProgress(int progress, String status) {
+				
+			}
+			
+			@Override
+			public void onError(int code, String message) {
+				
+			}
+		});
+	}
+
+	
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+    	super.onSaveInstanceState(outState);
+        if(((MainActivity)getActivity()).isConflict){
+        	outState.putBoolean("isConflict", true);
+        }else if(((MainActivity)getActivity()).getCurrentAccountRemoved()){
+        	outState.putBoolean(Constant.ACCOUNT_REMOVED, true);
+        }
+    }
 }

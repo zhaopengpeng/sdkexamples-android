@@ -15,16 +15,19 @@ package com.easemob.chatuidemo.activity;
 
 import java.util.List;
 
-import android.app.Activity;
+import u.aly.bu;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -38,10 +41,9 @@ import android.widget.Toast;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMGroupManager;
-import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
-import com.easemob.chatuidemo.utils.PreferenceUtils;
 import com.easemob.chatuidemo.widget.ExpandGridView;
+import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.EMLog;
 import com.easemob.util.NetUtils;
 
@@ -50,8 +52,12 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	private static final int REQUEST_CODE_ADD_USER = 0;
 	private static final int REQUEST_CODE_EXIT = 1;
 	private static final int REQUEST_CODE_EXIT_DELETE = 2;
-	private static final int REQUEST_CODE_CLEAR_ALL_HISTORY=3;
-	
+	private static final int REQUEST_CODE_CLEAR_ALL_HISTORY = 3;
+	private static final int REQUEST_CODE_ADD_TO_BALCKLIST = 4;
+	private static final int REQUEST_CODE_EDIT_GROUPNAME = 5;
+
+	String longClickUsername = null;
+
 	private ExpandGridView userGridview;
 	private String groupId;
 	private ProgressBar loadingPB;
@@ -62,7 +68,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	private int referenceWidth;
 	private int referenceHeight;
 	private ProgressDialog progressDialog;
-	
+
 	private RelativeLayout rl_switch_block_groupmsg;
 	/**
 	 * 屏蔽群消息imageView
@@ -72,29 +78,32 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	 * 关闭屏蔽群消息imageview
 	 */
 	private ImageView iv_switch_unblock_groupmsg;
-	
+
 	public static GroupDetailsActivity instance;
-	
-	//清空所有聊天记录
+
+	// 清空所有聊天记录
 	private RelativeLayout clearAllHistory;
-	
+	private RelativeLayout blacklistLayout;
+	private RelativeLayout changeGroupNameLayout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_group_details);
 		instance = this;
-		clearAllHistory=(RelativeLayout) findViewById(R.id.clear_all_history);
+		clearAllHistory = (RelativeLayout) findViewById(R.id.clear_all_history);
 		userGridview = (ExpandGridView) findViewById(R.id.gridview);
 		loadingPB = (ProgressBar) findViewById(R.id.progressBar);
 		exitBtn = (Button) findViewById(R.id.btn_exit_grp);
 		deleteBtn = (Button) findViewById(R.id.btn_exitdel_grp);
-		
-		rl_switch_block_groupmsg = (RelativeLayout)findViewById(R.id.rl_switch_block_groupmsg);
-		
+		blacklistLayout = (RelativeLayout) findViewById(R.id.rl_blacklist);
+		changeGroupNameLayout = (RelativeLayout) findViewById(R.id.rl_change_group_name);
+
+		rl_switch_block_groupmsg = (RelativeLayout) findViewById(R.id.rl_switch_block_groupmsg);
+
 		iv_switch_block_groupmsg = (ImageView) findViewById(R.id.iv_switch_block_groupmsg);
 		iv_switch_unblock_groupmsg = (ImageView) findViewById(R.id.iv_switch_unblock_groupmsg);
-		
+
 		rl_switch_block_groupmsg.setOnClickListener(this);
 
 		Drawable referenceDrawable = getResources().getDrawable(R.drawable.smiley_add_btn);
@@ -105,16 +114,19 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		groupId = getIntent().getStringExtra("groupId");
 		group = EMGroupManager.getInstance().getGroup(groupId);
 
-		// 如果自己是群主，显示解散按钮
-		if(group.getOwner() == null || "".equals(group.getOwner())){
+		if (group.getOwner() == null || "".equals(group.getOwner())
+				|| !group.getOwner().equals(EMChatManager.getInstance().getCurrentUser())) {
 			exitBtn.setVisibility(View.GONE);
 			deleteBtn.setVisibility(View.GONE);
+			blacklistLayout.setVisibility(View.GONE);
+			changeGroupNameLayout.setVisibility(View.GONE);
 		}
+		// 如果自己是群主，显示解散按钮
 		if (EMChatManager.getInstance().getCurrentUser().equals(group.getOwner())) {
 			exitBtn.setVisibility(View.GONE);
 			deleteBtn.setVisibility(View.VISIBLE);
 		}
-		((TextView) findViewById(R.id.group_name)).setText(group.getGroupName()+"("+group.getAffiliationsCount()+"人)");
+		((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getAffiliationsCount() + "人)");
 		adapter = new GridAdapter(this, R.layout.grid, group.getMembers());
 		userGridview.setAdapter(adapter);
 
@@ -140,23 +152,12 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 				return false;
 			}
 		});
-		
-		clearAllHistory.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				Intent intent=new Intent(GroupDetailsActivity.this, AlertDialog.class);
-				intent.putExtra("cancel",true);
-				intent.putExtra("titleIsCancel", true);
-				intent.putExtra("msg","确定清空此群的聊天记录吗？");
-				startActivityForResult(intent, REQUEST_CODE_CLEAR_ALL_HISTORY);
-			}
-		});
-		
-		
-	}
 
-	
+		clearAllHistory.setOnClickListener(this);
+		blacklistLayout.setOnClickListener(this);
+		changeGroupNameLayout.setOnClickListener(this);
+
+	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -166,31 +167,88 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 				progressDialog = new ProgressDialog(GroupDetailsActivity.this);
 				progressDialog.setMessage("正在添加...");
 				progressDialog.setCanceledOnTouchOutside(false);
-				progressDialog.show();
 			}
 			switch (requestCode) {
 			case REQUEST_CODE_ADD_USER:// 添加群成员
 				final String[] newmembers = data.getStringArrayExtra("newmembers");
+				progressDialog.show();
 				addMembersToGroup(newmembers);
-
 				break;
 			case REQUEST_CODE_EXIT: // 退出群
 				progressDialog.setMessage("正在退出群聊...");
+				progressDialog.show();
 				exitGrop();
 				break;
 			case REQUEST_CODE_EXIT_DELETE: // 解散群
 				progressDialog.setMessage("正在解散群聊...");
+				progressDialog.show();
 				deleteGrop();
 				break;
 			case REQUEST_CODE_CLEAR_ALL_HISTORY:
-				//清空此群聊的聊天记录
+				// 清空此群聊的聊天记录
 				progressDialog.setMessage("正在清空群消息...");
-				
+				progressDialog.show();
 				clearGroupHistory();
-				
-				
 				break;
 
+			case REQUEST_CODE_EDIT_GROUPNAME: //修改群名称
+				final String returnData = data.getStringExtra("data");
+				if(!TextUtils.isEmpty(returnData)){
+					progressDialog.setMessage("正在修改群名称...");
+					progressDialog.show();
+					
+					new Thread(new Runnable() {
+						public void run() {
+							try {
+								EMGroupManager.getInstance().changeGroupName(groupId, returnData);
+								runOnUiThread(new Runnable() {
+									public void run() {
+										((TextView) findViewById(R.id.group_name)).setText(returnData + "(" + group.getAffiliationsCount()
+												+ "人)");
+										progressDialog.dismiss();
+										Toast.makeText(getApplicationContext(), "修改群名称成功", 0).show();
+									}
+								});
+								
+							} catch (EaseMobException e) {
+								e.printStackTrace();
+								runOnUiThread(new Runnable() {
+									public void run() {
+										progressDialog.dismiss();
+										Toast.makeText(getApplicationContext(), "改变群名称失败，请检查网络或稍后重试", 0).show();
+									}
+								});
+							}
+						}
+					}).start();
+				}
+				break;
+			case REQUEST_CODE_ADD_TO_BALCKLIST:
+				progressDialog.setMessage("正在移入至黑名单");
+				progressDialog.show();
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							EMGroupManager.getInstance().blockUser(groupId, longClickUsername);
+							runOnUiThread(new Runnable() {
+								public void run() {
+									adapter.notifyDataSetChanged();
+									progressDialog.dismiss();
+									Toast.makeText(getApplicationContext(), "移入黑名单成功", 0).show();
+								}
+							});
+						} catch (EaseMobException e) {
+							runOnUiThread(new Runnable() {
+								public void run() {
+									progressDialog.dismiss();
+									Toast.makeText(getApplicationContext(), "移入黑名单失败,请检查网络或稍后重试", 0).show();
+								}
+							});
+						}
+					}
+				}).start();
+
+				break;
 			default:
 				break;
 			}
@@ -218,24 +276,17 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 
 	}
 
-	
-	
-	
 	/**
 	 * 清空群聊天记录
 	 */
-	public void clearGroupHistory(){
-		
-		
+	public void clearGroupHistory() {
+
 		EMChatManager.getInstance().clearConversation(group.getGroupId());
 		progressDialog.dismiss();
-//		adapter.refresh(EMChatManager.getInstance().getConversation(toChatUsername));
-		
-		
-		
+		// adapter.refresh(EMChatManager.getInstance().getConversation(toChatUsername));
+
 	}
-	
-	
+
 	/**
 	 * 退出群组
 	 * 
@@ -306,17 +357,18 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 
 			public void run() {
 				try {
-					//创建者调用add方法
-					if(EMChatManager.getInstance().getCurrentUser().equals(group.getOwner())){
+					// 创建者调用add方法
+					if (EMChatManager.getInstance().getCurrentUser().equals(group.getOwner())) {
 						EMGroupManager.getInstance().addUsersToGroup(groupId, newmembers);
-					}else{
-						//一般成员调用invite方法
+					} else {
+						// 一般成员调用invite方法
 						EMGroupManager.getInstance().inviteUser(groupId, newmembers, null);
 					}
 					runOnUiThread(new Runnable() {
 						public void run() {
 							adapter.notifyDataSetChanged();
-							((TextView) findViewById(R.id.group_name)).setText(group.getGroupName()+"("+group.getAffiliationsCount()+"人)");
+							((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getAffiliationsCount()
+									+ "人)");
 							progressDialog.dismiss();
 						}
 					});
@@ -330,6 +382,55 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 				}
 			}
 		}).start();
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.rl_switch_block_groupmsg: // 屏蔽群组
+			if (iv_switch_block_groupmsg.getVisibility() == View.VISIBLE) {
+				System.out.println("change to unblock group msg");
+				try {
+					EMGroupManager.getInstance().unblockGroupMessage(groupId);
+					iv_switch_block_groupmsg.setVisibility(View.INVISIBLE);
+					iv_switch_unblock_groupmsg.setVisibility(View.VISIBLE);
+				} catch (Exception e) {
+					e.printStackTrace();
+					// todo: 显示错误给用户
+				}
+			} else {
+				System.out.println("change to block group msg");
+				try {
+					EMGroupManager.getInstance().blockGroupMessage(groupId);
+					iv_switch_block_groupmsg.setVisibility(View.VISIBLE);
+					iv_switch_unblock_groupmsg.setVisibility(View.INVISIBLE);
+				} catch (Exception e) {
+					e.printStackTrace();
+					// todo: 显示错误给用户
+				}
+			}
+			break;
+
+		case R.id.clear_all_history: // 清空聊天记录
+			Intent intent = new Intent(GroupDetailsActivity.this, AlertDialog.class);
+			intent.putExtra("cancel", true);
+			intent.putExtra("titleIsCancel", true);
+			intent.putExtra("msg", "确定清空此群的聊天记录吗？");
+			startActivityForResult(intent, REQUEST_CODE_CLEAR_ALL_HISTORY);
+			break;
+
+		case R.id.rl_blacklist: // 黑名单列表
+			startActivity(new Intent(GroupDetailsActivity.this, GroupBlacklistActivity.class).putExtra("groupId", groupId));
+			break;
+
+		case R.id.rl_change_group_name:
+			startActivityForResult(new Intent(this, EditActivity.class).putExtra("data", group.getGroupName()), REQUEST_CODE_EDIT_GROUPNAME);
+			break;
+
+		default:
+			break;
+		}
+
 	}
 
 	/**
@@ -363,7 +464,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 				// 设置成删除按钮
 				button.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.smiley_minus_btn, 0, 0);
 				// 如果不是创建者或者没有相应权限，不提供加减人按钮
-				if (!group.getOwner().equals(DemoApplication.getInstance().getUserName())) {
+				if (!group.getOwner().equals(EMChatManager.getInstance().getCurrentUser())) {
 					// if current user is not group admin, hide add/remove btn
 					convertView.setVisibility(View.INVISIBLE);
 				} else { // 显示删除按钮
@@ -387,8 +488,8 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 			} else if (position == getCount() - 2) { // 添加群组成员按钮
 				button.setText("");
 				button.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.smiley_add_btn, 0, 0);
-				//如果不是创建者或者没有相应权限
-				if (!group.isAllowInvites() && !group.getOwner().equals(DemoApplication.getInstance().getUserName())) {
+				// 如果不是创建者或者没有相应权限
+				if (!group.isAllowInvites() && !group.getOwner().equals(EMChatManager.getInstance().getCurrentUser())) {
 					// if current user is not group admin, hide add/remove btn
 					convertView.setVisibility(View.INVISIBLE);
 				} else {
@@ -446,12 +547,13 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 							// Intent(GroupDetailsActivity.this,
 							// ChatActivity.class).putExtra("userId",
 							// user.getUsername()));
-							
+
 						}
 					}
-					
+
 					/**
 					 * 删除群成员
+					 * 
 					 * @param username
 					 */
 					protected void deleteMembersFromGroup(final String username) {
@@ -473,7 +575,8 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 										public void run() {
 											deleteDialog.dismiss();
 											notifyDataSetChanged();
-											((TextView) findViewById(R.id.group_name)).setText(group.getGroupName()+"("+group.getAffiliationsCount()+"人)");
+											((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "("
+													+ group.getAffiliationsCount() + "人)");
 										}
 									});
 								} catch (final Exception e) {
@@ -489,6 +592,21 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 						}).start();
 					}
 				});
+
+				button.setOnLongClickListener(new OnLongClickListener() {
+
+					@Override
+					public boolean onLongClick(View v) {
+						if (group.getOwner().equals(EMChatManager.getInstance().getCurrentUser())) {
+							Intent intent = new Intent(GroupDetailsActivity.this, AlertDialog.class);
+							intent.putExtra("msg", "确认将此成员加入至此群黑名单?");
+							intent.putExtra("cancel", true);
+							startActivityForResult(intent, REQUEST_CODE_ADD_TO_BALCKLIST);
+							longClickUsername = username;
+						}
+						return false;
+					}
+				});
 			}
 			return convertView;
 		}
@@ -498,40 +616,41 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 			return super.getCount() + 2;
 		}
 	}
-	
+
 	protected void updateGroup() {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
 					EMGroup returnGroup = EMGroupManager.getInstance().getGroupFromServer(groupId);
-					//更新本地数据
+					// 更新本地数据
 					EMGroupManager.getInstance().createOrUpdateLocalGroup(returnGroup);
-					
+
 					runOnUiThread(new Runnable() {
 						public void run() {
-							((TextView) findViewById(R.id.group_name)).setText(group.getGroupName()+"("+group.getAffiliationsCount()+"人)");
+							((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getAffiliationsCount()
+									+ "人)");
 							loadingPB.setVisibility(View.INVISIBLE);
 							adapter.notifyDataSetChanged();
 							if (EMChatManager.getInstance().getCurrentUser().equals(group.getOwner())) {
-								//显示解散按钮
+								// 显示解散按钮
 								exitBtn.setVisibility(View.GONE);
 								deleteBtn.setVisibility(View.VISIBLE);
-							}else{
-								//显示退出按钮
+							} else {
+								// 显示退出按钮
 								exitBtn.setVisibility(View.VISIBLE);
 								deleteBtn.setVisibility(View.GONE);
-								
+
 							}
-							
-							//update block 
-					        System.out.println("group msg is blocked:" + group.getMsgBlocked());
-					        if (group.getMsgBlocked()) {
-					        	iv_switch_block_groupmsg.setVisibility(View.VISIBLE);
+
+							// update block
+							System.out.println("group msg is blocked:" + group.getMsgBlocked());
+							if (group.getMsgBlocked()) {
+								iv_switch_block_groupmsg.setVisibility(View.VISIBLE);
 								iv_switch_unblock_groupmsg.setVisibility(View.INVISIBLE);
-					        } else {
-					        	iv_switch_block_groupmsg.setVisibility(View.INVISIBLE);
+							} else {
+								iv_switch_block_groupmsg.setVisibility(View.INVISIBLE);
 								iv_switch_unblock_groupmsg.setVisibility(View.VISIBLE);
-					        }
+							}
 						}
 					});
 
@@ -551,15 +670,11 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		finish();
 	}
 
-
-
 	@Override
 	public void onBackPressed() {
 		setResult(RESULT_OK);
 		finish();
 	}
-
-
 
 	@Override
 	protected void onDestroy() {
@@ -567,40 +682,4 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		instance = null;
 	}
 
-
-
-	@Override
-	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.rl_switch_block_groupmsg:
-			if (iv_switch_block_groupmsg.getVisibility() == View.VISIBLE) {
-				System.out.println("change to unblock group msg");
-				try {
-				    EMGroupManager.getInstance().unblockGroupMessage(groupId);
-				    iv_switch_block_groupmsg.setVisibility(View.INVISIBLE);
-					iv_switch_unblock_groupmsg.setVisibility(View.VISIBLE);
-				} catch (Exception e) {
-					e.printStackTrace();
-					//todo: 显示错误给用户
-				}
-			} else {
-				System.out.println("change to block group msg");
-				try {
-				    EMGroupManager.getInstance().blockGroupMessage(groupId);
-				    iv_switch_block_groupmsg.setVisibility(View.VISIBLE);
-					iv_switch_unblock_groupmsg.setVisibility(View.INVISIBLE);
-				} catch (Exception e) {
-					e.printStackTrace();
-					//todo: 显示错误给用户
-				}
-			}
-			break;
-			default:
-		}
-		
-	}
-	
-	
-	
-	
 }

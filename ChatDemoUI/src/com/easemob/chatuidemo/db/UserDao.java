@@ -111,7 +111,6 @@ public class UserDao {
 		}
 	}
 	
-	
 	/**
 	 * 保存一个联系人
 	 * @param user
@@ -126,7 +125,4 @@ public class UserDao {
 			db.replace(TABLE_NAME, null, values);
 		}
 	}
-	
-	
-
 }

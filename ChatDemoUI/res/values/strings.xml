@@ -50,7 +50,7 @@
     <string name="button_save">保存</string>
     <string name="button_search">查找</string>
     <string name="button_add">添加</string>
-    <string name="search_header">S</string>
+    <string name="search_header">搜</string>
     
     <string name="network_isnot_available">网络不可用</string>
     <string name="recoding_fail">录音失败，请重试！</string>
@@ -62,5 +62,6 @@
     <string name="dissolution_group_hint">退出后，此群将被解散</string>
       <string name="exit_group">退出</string>
       <string name="connect_conflict">同一帐号已在其他设备登录</string>
+      <string name="em_user_remove">此用户已被移除</string>
       
 </resources>

@@ -32,15 +32,18 @@ import android.widget.Toast;
 
 import com.easemob.EMCallBack;
 import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
+import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.db.UserDao;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.util.EMLog;
 import com.easemob.util.HanziToPinyin;
+import com.umeng.analytics.MobclickAgent;
 
 /**
  * 登陆页面
@@ -52,19 +55,24 @@ public class LoginActivity extends BaseActivity {
 	private EditText passwordEditText;
 
 	private boolean progressShow;
+	private boolean autoLogin = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// 如果用户名密码都有，直接进入主页面
+		if (DemoHXSDKHelper.getInstance().isLogined()) {
+			autoLogin = true;
+			startActivity(new Intent(LoginActivity.this, MainActivity.class));
+
+			return;
+		}
 		setContentView(R.layout.activity_login);
 
 		usernameEditText = (EditText) findViewById(R.id.username);
 		passwordEditText = (EditText) findViewById(R.id.password);
-		// 如果用户名密码都有，直接进入主页面
-		if (DemoApplication.getInstance().getUserName() != null && DemoApplication.getInstance().getPassword() != null) {
-			startActivity(new Intent(this, MainActivity.class));
-			finish();
-		}
+
 		// 如果用户名改变，清空密码
 		usernameEditText.addTextChangedListener(new TextWatcher() {
 			@Override
@@ -126,11 +134,16 @@ public class LoginActivity extends BaseActivity {
 					});
 					pd.setMessage("正在登陆...");
 					pd.show();
+
+					final long start = System.currentTimeMillis();
 					// 调用sdk登陆方法登陆聊天服务器
 					EMChatManager.getInstance().login(username, password, new EMCallBack() {
 
 						@Override
 						public void onSuccess() {
+							//umeng自定义事件，开发者可以把这个删掉
+							loginSuccess2Umeng(start);
+							
 							if (!progressShow) {
 								return;
 							}
@@ -143,8 +156,15 @@ public class LoginActivity extends BaseActivity {
 								}
 							});
 							try {
+								// ** 第一次登录或者之前logout后再登录，加载所有本地群和回话
+								// ** manually load all local groups and
+								// conversations in case we are auto login
+								EMGroupManager.getInstance().loadAllGroups();
+								EMChatManager.getInstance().loadAllConversations();
+
 								// demo中简单的处理成每次登陆都去获取好友username，开发者自己根据情况而定
-								List<String> usernames = EMChatManager.getInstance().getContactUserNames();
+								List<String> usernames = EMContactManager.getInstance().getContactUserNames();
+								EMLog.d("roster", "contacts size: " + usernames.size());
 								Map<String, User> userlist = new HashMap<String, User>();
 								for (String username : usernames) {
 									User user = new User();
@@ -178,11 +198,21 @@ public class LoginActivity extends BaseActivity {
 								List<User> users = new ArrayList<User>(userlist.values());
 								dao.saveContactList(users);
 
-								// 获取群聊列表(群聊里只有groupid和groupname的简单信息),sdk会把群组存入到内存和db中
+								// 获取群聊列表(群聊里只有groupid和groupname等简单信息，不包含members),sdk会把群组存入到内存和db中
 								EMGroupManager.getInstance().getGroupsFromServer();
 							} catch (Exception e) {
 								e.printStackTrace();
+								//取好友或者群聊失败，不让进入主页面，也可以不管这个exception继续进到主页面
+								runOnUiThread(new Runnable() {
+	                                public void run() {
+	                                    pd.dismiss();
+	                                    DemoApplication.getInstance().logout(null);
+	                                    Toast.makeText(getApplicationContext(), "登录失败: 获取好友或群聊失败", 1).show();
+	                                }
+	                            });
+								return;
 							}
+							//更新当前用户的nickname 此方法的作用是在ios离线推送时能够显示用户nick
 							boolean updatenick = EMChatManager.getInstance().updateCurrentUserNick(DemoApplication.currentUserNick);
 							if (!updatenick) {
 								EMLog.e("LoginActivity", "update current user nick fail");
@@ -201,7 +231,9 @@ public class LoginActivity extends BaseActivity {
 						}
 
 						@Override
-						public void onError(int code, final String message) {
+						public void onError(final int code, final String message) {
+							loginFailure2Umeng(start,code,message);
+
 							if (!progressShow) {
 								return;
 							}
@@ -214,6 +246,7 @@ public class LoginActivity extends BaseActivity {
 							});
 						}
 					});
+
 				}
 
 			}
@@ -233,6 +266,10 @@ public class LoginActivity extends BaseActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		if (autoLogin) {
+			return;
+		}
+
 		if (DemoApplication.getInstance().getUserName() != null) {
 			usernameEditText.setText(DemoApplication.getInstance().getUserName());
 		}
@@ -262,5 +299,31 @@ public class LoginActivity extends BaseActivity {
 				user.setHeader("#");
 			}
 		}
+	}
+	
+	private void loginSuccess2Umeng(final long start) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				long costTime = System.currentTimeMillis() - start;
+				Map<String, String> params = new HashMap<String, String>();
+				params.put("status", "success");
+				MobclickAgent.onEventValue(LoginActivity.this, "login1", params, (int) costTime);
+				MobclickAgent.onEventDuration(LoginActivity.this, "login1", (int) costTime);
+			}
+		});
+	}
+	private void loginFailure2Umeng(final long start, final int code, final String message) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				long costTime = System.currentTimeMillis() - start;
+				Map<String, String> params = new HashMap<String, String>();
+				params.put("status", "failure");
+				params.put("error_code", code + "");
+				params.put("error_description", message);
+				MobclickAgent.onEventValue(LoginActivity.this, "login1", params, (int) costTime);
+				MobclickAgent.onEventDuration(LoginActivity.this, "login1", (int) costTime);
+				
+			}
+		});
 	}
 }

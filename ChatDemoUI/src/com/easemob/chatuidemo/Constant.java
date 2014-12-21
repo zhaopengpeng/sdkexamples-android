@@ -18,4 +18,5 @@ public class Constant {
 	public static final String GROUP_USERNAME = "item_groups";
 	public static final String MEDIA_CONF_USERNAME = "item_conf_rooms";
 	public static final String MESSAGE_ATTR_IS_VOICE_CALL = "is_voice_call";
+	public static final String ACCOUNT_REMOVED = "account_removed";
 }
