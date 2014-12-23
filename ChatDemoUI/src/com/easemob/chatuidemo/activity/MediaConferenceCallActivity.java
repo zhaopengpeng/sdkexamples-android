@@ -63,19 +63,100 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
+			    final View fv = v;
 				if(event.getAction() == MotionEvent.ACTION_DOWN){
 					if(!isTalkTokenGranted){
 						//请求获取话语权
-						requireTalkToken();
-						ledImageview.setImageResource(R.drawable.talk_room_led_green);
-						v.setPressed(true);
+						requireTalkToken(new EMCallBack(){
+
+                            @Override
+                            public void onSuccess() {
+                             // TODO Auto-generated method stub
+                                isTalkTokenGranted = true;
+                                runOnUiThread(new Runnable(){
+
+                                    @Override
+                                    public void run() {
+                                        chronometer.setVisibility(View.VISIBLE);
+                                        chronometer.setBase(SystemClock.elapsedRealtime());
+                                        // 开始记时
+                                        chronometer.start();
+                                        micInfoText.setText("说话中...");
+                                        // TODO Auto-generated method stub
+                                        ledImageview.setImageResource(R.drawable.talk_room_led_green);
+                                        fv.setPressed(true);
+                                    }
+                                    
+                                });
+                            }
+
+                            @Override
+                            public void onError(int code, String message) {
+                                // TODO Auto-generated method stub
+                                runOnUiThread(new Runnable(){
+
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(MediaConferenceCallActivity.this, "failed to require the talk token", 0).show();
+                                    }
+                                    
+                                });
+                            }
+
+                            @Override
+                            public void onProgress(int progress, String status) {
+                                // TODO Auto-generated method stub
+                                
+                            }
+						    
+						});
 					}
 					return true;
 				}else if(event.getAction() == MotionEvent.ACTION_UP){
-					//释放话语token
-				    releaseTalkToken();
-					ledImageview.setImageResource(R.drawable.talk_room_led_black);
-					v.setPressed(false);
+				    if(isTalkTokenGranted){
+				      //释放话语token
+	                    releaseTalkToken(new EMCallBack(){
+
+                            @Override
+                            public void onSuccess() {
+                                // TODO Auto-generated method stub
+                             // TODO Auto-generated method stub
+                                isTalkTokenGranted = false;
+                                runOnUiThread(new Runnable(){
+
+                                    @Override
+                                    public void run() {
+                                        chronometer.stop();
+                                        chronometer.setVisibility(View.GONE);
+                                        micInfoText.setText("");
+                                        ledImageview.setImageResource(R.drawable.talk_room_led_black);
+                                        fv.setPressed(false);
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onError(int code, String message) {
+                                final String msg = message;
+                                // TODO Auto-generated method stub
+                                runOnUiThread(new Runnable(){
+
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(MediaConferenceCallActivity.this, "failed to release the talk token" + " due to " + msg, 0).show();
+                                    }
+                                    
+                                });
+                            }
+
+                            @Override
+                            public void onProgress(int progress, String status) {
+                                // TODO Auto-generated method stub
+                                
+                            }
+	                        
+	                    });    
+				    }
 					return true;
 				}
 				return false;
@@ -87,85 +168,16 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 	/**
 	 * 请求talk token
 	 */
-	private void requireTalkToken(){
+	private void requireTalkToken(final EMCallBack callback){
 		micInfoText.setText("准备中...");
-		EMCallManager.getInstance().asyncRequireTalkToken(confId, new EMCallBack(){
-
-			@Override
-			public void onSuccess() {
-				// TODO Auto-generated method stub
-				isTalkTokenGranted = true;
-				runOnUiThread(new Runnable(){
-
-					@Override
-					public void run() {
-						chronometer.setVisibility(View.VISIBLE);
-						chronometer.setBase(SystemClock.elapsedRealtime());
-						// 开始记时
-						chronometer.start();
-						micInfoText.setText("说话中...");
-					}
-					
-				});
-			}
-
-			@Override
-			public void onError(int code, String message) {
-				// TODO Auto-generated method stub
-				runOnUiThread(new Runnable(){
-
-					@Override
-					public void run() {
-						Toast.makeText(MediaConferenceCallActivity.this, "failed to require the talk token", 0).show();
-					}
-					
-				});
-			}
-
-			@Override
-			public void onProgress(int progress, String status) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-		});
+		EMCallManager.getInstance().asyncRequireTalkToken(confId, callback);
 	}
 	
 	/**
 	 * 释放话语token
 	 */
-	private void releaseTalkToken(){
-		EMCallManager.getInstance().asyncReleaseTalkToken(confId,new EMCallBack(){
-
-			@Override
-			public void onSuccess() {
-				// TODO Auto-generated method stub
-				isTalkTokenGranted = false;
-				runOnUiThread(new Runnable(){
-
-					@Override
-					public void run() {
-						chronometer.stop();
-						chronometer.setVisibility(View.GONE);
-						micInfoText.setText("");
-					}
-					
-				});
-			}
-
-			@Override
-			public void onError(int code, String message) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void onProgress(int progress, String status) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-		});
+	private void releaseTalkToken(final EMCallBack callback){
+		EMCallManager.getInstance().asyncReleaseTalkToken(confId,callback);
 	}
 	
 	@Override
@@ -236,7 +248,4 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 			return 3;
 		}
 	}
-
-	
-	
 }
