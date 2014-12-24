@@ -2,9 +2,8 @@ package com.easemob.chatuidemo.activity;
 
 import java.util.List;
 
-import org.jivesoftware.smack.XMPPException;
-
 import android.content.Context;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.MotionEvent;
@@ -22,7 +21,6 @@ import android.widget.Toast;
 
 import com.easemob.EMCallBack;
 import com.easemob.chat.EMCallManager;
-import com.easemob.chat.EMChatManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.widget.HorizontalListView;
 
@@ -59,6 +57,7 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 		confName = getIntent().getStringExtra("confName");
 		
 		exitBtn.setOnClickListener(this);
+		switchSpeaker(true);
 		requireToken.setOnTouchListener(new OnTouchListener(){
 
 			@Override
@@ -195,6 +194,10 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 	
 	@Override
 	public void onDestroy(){
+	    switchSpeaker(true);
+	    AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        audioManager.setMode(AudioManager.MODE_NORMAL);
+        
 		exitRoom();
 		super.onDestroy();
 	}
@@ -225,6 +228,18 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 	        
 	    });
 	}
+	
+	void switchSpeaker(boolean on){
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
+        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        if(on){
+            audioManager.setSpeakerphoneOn(true);
+        }else{
+            audioManager.setSpeakerphoneOn(false);
+        }
+        // audioManager.setMode(AudioManager.MODE_NORMAL);
+    }
 	
 	private class UserAdapter extends ArrayAdapter<String>{
 
