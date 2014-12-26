@@ -2,6 +2,7 @@ package com.easemob.chatuidemo.activity;
 
 import java.util.List;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 	private ImageView ledImageview;
 	private HorizontalListView usersListView;
 	private TextView micInfoText;
+	private TextView roomInfo;
 	private Button exitBtn;
 	private Chronometer chronometer;
 	
@@ -46,7 +48,8 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 		ledImageview = (ImageView) findViewById(R.id.iv_led);
 		exitBtn = (Button) findViewById(R.id.btn_exit);
 		micInfoText = (TextView) findViewById(R.id.tv_mic_info);
-		chronometer = (Chronometer) findViewById(R.id.chronometer); 
+		chronometer = (Chronometer) findViewById(R.id.chronometer);
+		roomInfo = (TextView) findViewById(R.id.tv_title);
 		
 		usersListView = (HorizontalListView) findViewById(R.id.user_listview); 
 		//设置adapter
@@ -55,9 +58,15 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 		
 		confId = getIntent().getStringExtra("confId");
 		confName = getIntent().getStringExtra("confName");
-		
+		roomInfo.setText(confName);
 		exitBtn.setOnClickListener(this);
 		switchSpeaker(true);
+		
+		final ProgressDialog pd = new ProgressDialog(this);
+        pd.setMessage("releasing token");
+        pd.setCancelable(false);
+        pd.setCanceledOnTouchOutside(false);
+        
 		requireToken.setOnTouchListener(new OnTouchListener(){
 
 			@Override
@@ -113,6 +122,7 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 					return true;
 				}else if(event.getAction() == MotionEvent.ACTION_UP){
 				    if(isTalkTokenGranted){
+				        pd.show();
 				      //释放话语token
 	                    releaseTalkToken(new EMCallBack(){
 
@@ -130,6 +140,7 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
                                         micInfoText.setText("");
                                         ledImageview.setImageResource(R.drawable.talk_room_led_black);
                                         fv.setPressed(false);
+                                        pd.dismiss();
                                     }
                                 });
                             }
@@ -143,6 +154,7 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
                                     @Override
                                     public void run() {
                                         Toast.makeText(MediaConferenceCallActivity.this, "failed to release the talk token" + " due to " + msg, 0).show();
+                                        pd.dismiss();
                                     }
                                     
                                 });

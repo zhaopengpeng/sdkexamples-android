@@ -285,7 +285,8 @@ public class ContactlistFragment extends Fragment {
 		Iterator<Entry<String, User>> iterator = users.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Entry<String, User> entry = iterator.next();
-			if (!entry.getKey().equals(Constant.NEW_FRIENDS_USERNAME) && !entry.getKey().equals(Constant.GROUP_USERNAME) && !entry.getKey().equals(Constant.MEDIA_CONF_USERNAME))
+			if (!entry.getKey().equals(Constant.NEW_FRIENDS_USERNAME) && !entry.getKey().equals(Constant.GROUP_USERNAME) && !entry.getKey().equals(Constant.MEDIA_CONF_USERNAME)
+			        && !blackList.contains(entry.getKey()))
 				contactList.add(entry.getValue());
 		}
 		// 排序
