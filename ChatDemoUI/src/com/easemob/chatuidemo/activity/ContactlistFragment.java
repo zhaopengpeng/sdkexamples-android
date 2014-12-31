@@ -76,6 +76,9 @@ public class ContactlistFragment extends Fragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		//防止被T后，没点确定按钮然后按了home键，长期在后台又进app导致的crash
+		if(savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false))
+		    return;
 		inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		listView = (ListView) getView().findViewById(R.id.list);
 		sidebar = (Sidebar) getView().findViewById(R.id.sidebar);
@@ -296,5 +299,13 @@ public class ContactlistFragment extends Fragment {
 		contactList.add(0, users.get(Constant.GROUP_USERNAME));
 		// 把"申请与通知"添加到首位
 		contactList.add(0, users.get(Constant.NEW_FRIENDS_USERNAME));
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+	    if(((MainActivity)getActivity()).isConflict)
+	        outState.putBoolean("isConflict", true);
+	    super.onSaveInstanceState(outState);
+	    
 	}
 }

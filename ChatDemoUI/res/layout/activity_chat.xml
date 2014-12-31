@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -68,7 +67,12 @@
         android:orientation="vertical"
         android:paddingBottom="2dip"
         android:paddingTop="2dip" >
-        <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/gray_normal"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@color/gray_normal" />
+
         <LinearLayout
             android:id="@+id/rl_bottom"
             android:layout_width="match_parent"
@@ -100,10 +104,10 @@
                 android:id="@+id/btn_press_to_speak"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
                 android:layout_marginLeft="6dp"
                 android:layout_marginRight="6dp"
                 android:layout_marginTop="6dp"
-                android:layout_marginBottom="6dp"
                 android:layout_weight="1"
                 android:background="@drawable/chat_press_speak_btn"
                 android:gravity="center"
@@ -122,14 +126,13 @@
                 android:id="@+id/edittext_layout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="3dp"
                 android:layout_marginLeft="6dp"
                 android:layout_marginRight="6dp"
-                android:layout_marginBottom="3dp"
-                android:gravity="bottom"
                 android:layout_weight="1"
-                >
+                android:gravity="bottom" >
 
-                <com.easemob.chatuidemo.widget.emojicon.EmojiconEditText
+                <com.easemob.chatuidemo.widget.PasteEditText
                     android:id="@+id/et_sendmessage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -138,11 +141,10 @@
                     android:maxLines="3"
                     android:minHeight="40dp"
                     android:onClick="editClick"
-                    android:paddingLeft="1dp"
-                    android:paddingTop="3dp"
-                    android:paddingRight="1dp"
                     android:paddingBottom="3dp"
-                    emojicon:emojiconSize="24sp"
+                    android:paddingLeft="1dp"
+                    android:paddingRight="1dp"
+                    android:paddingTop="3dp"
                     android:textSize="18sp" />
 
                 <ImageView
@@ -174,8 +176,8 @@
                 android:id="@+id/btn_more"
                 android:layout_width="32dip"
                 android:layout_height="32dip"
-                android:layout_marginRight="10dp"
                 android:layout_marginLeft="4dp"
+                android:layout_marginRight="10dp"
                 android:background="@drawable/type_select_btn"
                 android:onClick="more" />
 
@@ -209,11 +211,10 @@
                 android:orientation="vertical"
                 android:visibility="visible" >
 
-                
-                <!-- <android.support.v4.view.ViewPager
+                <android.support.v4.view.ViewPager
                     android:id="@+id/vPager"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" /> -->
+                    android:layout_height="wrap_content" />
             </LinearLayout>
 
             <!-- 图片，表情，名片等按钮 -->
@@ -389,7 +390,7 @@
                             android:text="@string/attach_file"
                             android:textColor="#727171" />
                     </LinearLayout>
-                    
+
                     <LinearLayout
                         android:id="@+id/container_voice_call"
                         android:layout_width="0dp"

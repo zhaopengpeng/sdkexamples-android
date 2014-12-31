@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.easemob.chatuidemo"
-    android:versionCode="11"
-    android:versionName="2.1.1" >
+    android:versionCode="12"
+    android:versionName="2.1.3" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -29,7 +29,7 @@
     <permission android:name="android.permission.BAIDU_LOCATION_SERVICE" />
 
     <uses-permission android:name="android.permission.BAIDU_LOCATION_SERVICE" />
-
+ 
     <application
         android:name="DemoApplication"
         android:allowBackup="true"
@@ -42,9 +42,10 @@
             android:theme="@style/horizontal_slide"
             android:windowSoftInputMode="adjustPan" >
         </activity>
-        <!-- 登陆 -->
-        <activity
-            android:name=".activity.LoginActivity"
+        
+        <!-- 开屏页 -->
+           <activity
+            android:name=".activity.SplashActivity"
             android:screenOrientation="portrait"
             android:theme="@style/horizontal_slide" >
             <intent-filter>
@@ -52,6 +53,13 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        
+        <!-- 登陆 -->
+        <activity
+            android:name=".activity.LoginActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/horizontal_slide" >
         </activity>
 
         <!-- 注册 -->
@@ -177,6 +185,18 @@
             android:screenOrientation="portrait"
             android:theme="@style/horizontal_slide" >
         </activity>
+        <!-- 群组黑名单用户列表 -->
+        <activity
+            android:name=".activity.GroupBlacklistActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/horizontal_slide" >
+        </activity>
+        <activity
+            android:name=".activity.EditActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateVisible"
+            android:theme="@style/horizontal_slide" >
+        </activity>
         <activity
             android:name=".activity.ShowVideoActivity"
             android:screenOrientation="portrait"
@@ -221,10 +241,20 @@
             android:value="easemob-demo#chatdemoui" />
         <!-- 声明sdk所需的service -->
         <service android:name="com.easemob.chat.EMChatService" />
+        
+        <!-- 百度地图所需的service -->
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
             android:process=":remote" />
+        
+        <!-- umeng appkey，可忽略 -->
+         <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="53912a3156240b01a7075ed1" >
+        </meta-data>
+        
+        
     </application>
 
 </manifest>
