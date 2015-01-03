@@ -57,4 +57,10 @@ public class DemoHXSDKModel extends DefaultHXSDKModel{
         // TODO Auto-generated method stub
         DbOpenHelper.getInstance(context).closeDB();
     }
+    
+    @Override
+    public String getAppProcessName() {
+        // TODO Auto-generated method stub
+        return "com.easemob.chatuidemo";
+    }
 }

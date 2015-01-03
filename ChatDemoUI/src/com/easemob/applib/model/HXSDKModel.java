@@ -38,6 +38,11 @@ public abstract class HXSDKModel {
     public abstract String getPwd();
     
     /**
+     * 返回application所在的process name,默认是包名
+     * @return
+     */
+    public abstract String getAppProcessName();
+    /**
      * 是否总是接收好友邀请
      * @return
      */
