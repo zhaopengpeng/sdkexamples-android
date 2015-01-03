@@ -21,7 +21,6 @@ import android.content.IntentFilter;
 import com.easemob.EMCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.applib.model.HXSDKModel;
-
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
@@ -115,6 +114,15 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         intent.putExtra("conflict", true);
         appContext.startActivity(intent);
     }
+    
+    @Override
+    protected void onCurrentAccountRemoved(){
+    	Intent intent = new Intent(appContext, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(Constant.ACCOUNT_REMOVED, true);
+        appContext.startActivity(intent);
+    }
+    
     
     @Override
     protected void initListener(){

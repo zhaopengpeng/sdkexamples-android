@@ -27,7 +27,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
-import android.widget.Filter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -40,6 +39,7 @@ import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
+import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ChatAllHistoryAdapter;
@@ -266,10 +266,12 @@ public class ChatAllHistoryFragment extends Fragment {
 
 	@Override
     public void onSaveInstanceState(Bundle outState) {
-        if(((MainActivity)getActivity()).isConflict)
-            outState.putBoolean("isConflict", true);
-        super.onSaveInstanceState(outState);
-        
+		super.onSaveInstanceState(outState);
+        if(((MainActivity)getActivity()).isConflict){
+        	outState.putBoolean("isConflict", true);
+        }else if(((MainActivity)getActivity()).getCurrentAccountRemoved()){
+        	outState.putBoolean(Constant.ACCOUNT_REMOVED, true);
+        }
     }
 
 }

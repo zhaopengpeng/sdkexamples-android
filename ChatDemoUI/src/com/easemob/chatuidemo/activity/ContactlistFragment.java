@@ -303,9 +303,12 @@ public class ContactlistFragment extends Fragment {
 	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-	    if(((MainActivity)getActivity()).isConflict)
-	        outState.putBoolean("isConflict", true);
-	    super.onSaveInstanceState(outState);
+		super.onSaveInstanceState(outState);
+	    if(((MainActivity)getActivity()).isConflict){
+	    	outState.putBoolean("isConflict", true);
+	    }else if(((MainActivity)getActivity()).getCurrentAccountRemoved()){
+	    	outState.putBoolean(Constant.ACCOUNT_REMOVED, true);
+	    }
 	    
 	}
 }

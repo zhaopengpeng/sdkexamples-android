@@ -13,14 +13,13 @@
  */
 package com.easemob.chatuidemo.activity;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -28,36 +27,32 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.Toast;
-
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.BDNotifyListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
-import com.baidu.mapapi.BMapManager;
-import com.baidu.mapapi.MKGeneralListener;
-import com.baidu.mapapi.map.ItemizedOverlay;
-import com.baidu.mapapi.map.MKEvent;
-import com.baidu.mapapi.map.MKMapViewListener;
-import com.baidu.mapapi.map.MapController;
-import com.baidu.mapapi.map.MapPoi;
+import com.baidu.mapapi.SDKInitializer;
+import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BaiduMapOptions;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdate;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
-import com.baidu.mapapi.map.OverlayItem;
-import com.baidu.mapapi.utils.CoordinateConvert;
-import com.baidu.platform.comapi.basestruct.GeoPoint;
+import com.baidu.mapapi.map.MarkerOptions;
+import com.baidu.mapapi.map.MyLocationConfiguration;
+import com.baidu.mapapi.map.MyLocationConfiguration.LocationMode;
+import com.baidu.mapapi.map.OverlayOptions;
+import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.utils.CoordinateConverter;
 import com.easemob.chatuidemo.R;
-import com.easemob.util.EMLog;
 
 public class BaiduMapActivity extends BaseActivity {
 
 	private final static String TAG = "map";
 	static MapView mMapView = null;
-
-	private MapController mMapController = null;
-
-	public MKMapViewListener mMapListener = null;
 	FrameLayout mMapViewContainer = null;
-
 	// 定位相关
 	LocationClient mLocClient;
 	public MyLocationListenner myListener = new MyLocationListenner();
@@ -69,61 +64,81 @@ public class BaiduMapActivity extends BaseActivity {
 	int index = 0;
 	// LocationData locData = null;
 	static BDLocation lastLocation = null;
-
 	public static BaiduMapActivity instance = null;
-
 	ProgressDialog progressDialog;
+	private BaiduMap mBaiduMap;
+	
+	private LocationMode mCurrentMode;
+	
+	/**
+	 * 构造广播监听类，监听 SDK key 验证以及网络异常广播
+	 */
+	public class BaiduSDKReceiver extends BroadcastReceiver {
+		public void onReceive(Context context, Intent intent) {
+			String s = intent.getAction();
+			if (s.equals(SDKInitializer.SDK_BROADTCAST_ACTION_STRING_PERMISSION_CHECK_ERROR)) {
+				Toast.makeText(instance, "key 验证出错! 请在 AndroidManifest.xml 文件中检查 key 设置", Toast.LENGTH_SHORT).show();
+			} else if (s.equals(SDKInitializer.SDK_BROADCAST_ACTION_STRING_NETWORK_ERROR)) {
+				Toast.makeText(instance, "网络出错", Toast.LENGTH_SHORT).show();
+			}
+		}
+	}
 
-	ItemizedOverlay<OverlayItem> mAddrOverlay = null;
-
-	// for baidu map
-	public BMapManager mBMapManager = null;
-	public static final String strKey = "3AB1810EBAAE0175EB41A744CF3B2D6497407B87";
-
+	private BaiduSDKReceiver mBaiduReceiver;
+	
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		instance = this;
-		// Gl app = (Gl)this.getApplication();
-		if (mBMapManager == null) {
-			initEngineManager(this.getApplicationContext());
-		}
+		//在使用SDK各组件之前初始化context信息，传入ApplicationContext  
+        //注意该方法要再setContentView方法之前实现  
+        SDKInitializer.initialize(getApplicationContext());  
 		setContentView(R.layout.activity_baidumap);
 		mMapView = (MapView) findViewById(R.id.bmapView);
-		mMapController = mMapView.getController();
 		sendButton = (Button) findViewById(R.id.btn_location_send);
-		initMapView();
-
-		mMapView.getController().setZoom(17);
-		mMapView.getController().enableClick(true);
-		mMapView.setBuiltInZoomControls(true);
 		Intent intent = getIntent();
 		double latitude = intent.getDoubleExtra("latitude", 0);
+		mCurrentMode = LocationMode.NORMAL;
+		mBaiduMap = mMapView.getMap();
+		MapStatusUpdate msu = MapStatusUpdateFactory.zoomTo(15.0f);
+		mBaiduMap.setMapStatus(msu);
+		initMapView();
 		if (latitude == 0) {
+			mMapView = new MapView(this, new BaiduMapOptions());
+			mBaiduMap.setMyLocationConfigeration(new MyLocationConfiguration(
+							mCurrentMode, true, null));
 			showMapWithLocationClient();
 		} else {
 			double longtitude = intent.getDoubleExtra("longitude", 0);
 			String address = intent.getStringExtra("address");
+			LatLng p = new LatLng(latitude, longtitude);
+			mMapView = new MapView(this,
+					new BaiduMapOptions().mapStatus(new MapStatus.Builder()
+							.target(p).build()));
 			showMap(latitude, longtitude, address);
 		}
+		// 注册 SDK 广播监听者
+		IntentFilter iFilter = new IntentFilter();
+		iFilter.addAction(SDKInitializer.SDK_BROADTCAST_ACTION_STRING_PERMISSION_CHECK_ERROR);
+		iFilter.addAction(SDKInitializer.SDK_BROADCAST_ACTION_STRING_NETWORK_ERROR);
+		mBaiduReceiver = new BaiduSDKReceiver();
+		registerReceiver(mBaiduReceiver, iFilter);
 	}
 
 	private void showMap(double latitude, double longtitude, String address) {
 		sendButton.setVisibility(View.GONE);
-
-		GeoPoint point1 = new GeoPoint((int) (latitude * 1e6), (int) (longtitude * 1e6));
-		point1 = CoordinateConvert.fromGcjToBaidu(point1);
-		mMapController.setCenter(point1);
-		Drawable marker = this.getResources().getDrawable(R.drawable.icon_marka);
-		// 为maker定义位置和边界
-		marker.setBounds(0, 0, marker.getIntrinsicWidth(), marker.getIntrinsicHeight());
-		mAddrOverlay = new ItemizedOverlay<OverlayItem>(marker, mMapView);
-		GeoPoint point = new GeoPoint((int) (latitude * 1e6), (int) (longtitude * 1e6));
-		point = CoordinateConvert.fromGcjToBaidu(point);
-		OverlayItem addrItem = new OverlayItem(point, "", address);
-		mAddrOverlay.addItem(addrItem);
-		mMapView.getOverlays().add(mAddrOverlay);
-		mMapView.refresh();
+		LatLng llA = new LatLng(latitude, longtitude);
+		CoordinateConverter converter= new CoordinateConverter();
+		converter.coord(llA);
+		converter.from(CoordinateConverter.CoordType.COMMON);
+		LatLng convertLatLng = converter.convert();
+		OverlayOptions ooA = new MarkerOptions().position(convertLatLng).icon(BitmapDescriptorFactory
+				.fromResource(R.drawable.icon_marka))
+				.zIndex(4).draggable(true);
+		mBaiduMap.addOverlay(ooA);
+		MapStatusUpdate u = MapStatusUpdateFactory.newLatLngZoom(convertLatLng, 17.0f);
+		mBaiduMap.animateMapStatus(u);
 	}
 
 	private void showMapWithLocationClient() {
@@ -157,49 +172,6 @@ public class BaiduMapActivity extends BaseActivity {
 		option.setScanSpan(30000);
 		option.setAddrType("all");
 		mLocClient.setLocOption(option);
-
-		Drawable marker = this.getResources().getDrawable(R.drawable.icon_marka);
-		// 为maker定义位置和边界
-		marker.setBounds(0, 0, marker.getIntrinsicWidth(), marker.getIntrinsicHeight());
-		mAddrOverlay = new ItemizedOverlay<OverlayItem>(marker, mMapView);
-		mMapView.getOverlays().add(mAddrOverlay);
-
-		mMapListener = new MKMapViewListener() {
-
-			@Override
-			public void onMapMoveFinish() {
-				// TODO Auto-generated method stub
-			}
-
-			@Override
-			public void onClickMapPoi(MapPoi mapPoiInfo) {
-				// TODO Auto-generated method stub
-				String title = "";
-				if (mapPoiInfo != null) {
-					title = mapPoiInfo.strText;
-					Toast.makeText(BaiduMapActivity.this, title, Toast.LENGTH_SHORT).show();
-				}
-			}
-
-			@Override
-			public void onGetCurrentMap(Bitmap b) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void onMapAnimationFinish() {
-			}
-		};
-		mMapView.regMapViewListener(mBMapManager, mMapListener);
-
-		if (lastLocation != null) {
-			GeoPoint point1 = new GeoPoint((int) (lastLocation.getLatitude() * 1e6), (int) (lastLocation.getLongitude() * 1e6));
-			point1 = CoordinateConvert.fromGcjToBaidu(point1);
-			mMapController.setCenter(point1);
-		}
-		mMapView.refresh();
-		mMapView.invalidate();
 	}
 
 	@Override
@@ -225,28 +197,10 @@ public class BaiduMapActivity extends BaseActivity {
 	protected void onDestroy() {
 		if (mLocClient != null)
 			mLocClient.stop();
-		mMapView.destroy();
-
-		// Gl app = (Gl)this.getApplication();
-		if (mBMapManager != null) {
-			mBMapManager.destroy();
-			mBMapManager = null;
-		}
+		mMapView.onDestroy();
+		unregisterReceiver(mBaiduReceiver);
 		super.onDestroy();
 	}
-
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		mMapView.onSaveInstanceState(outState);
-	}
-
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		mMapView.onRestoreInstanceState(savedInstanceState);
-	}
-
 	private void initMapView() {
 		mMapView.setLongClickable(true);
 	}
@@ -274,27 +228,19 @@ public class BaiduMapActivity extends BaseActivity {
 					return;
 				}
 			}
-
 			lastLocation = location;
-
-			GeoPoint gcj02Point = new GeoPoint((int) (location.getLatitude() * 1e6), (int) (location.getLongitude() * 1e6));
-			EMLog.d(TAG, "GCJ-02 loc:" + gcj02Point);
-			GeoPoint point = CoordinateConvert.fromGcjToBaidu(gcj02Point);
-			EMLog.d(TAG, "converted BD-09 loc:" + point);
-
-			// GeoPoint p1 = gcjToBaidu(location.getLatitude(),
-			// location.getLongitude());
-			// System.err.println("johnson change to baidu:" + p1);
-			// GeoPoint p2 = baiduToGcj(location.getLatitude(),
-			// location.getLongitude());
-			// System.err.println("johnson change to gcj:" + p2);
-
-			OverlayItem addrItem = new OverlayItem(point, "title", location.getAddrStr());
-			mAddrOverlay.removeAll();
-			mAddrOverlay.addItem(addrItem);
-			mMapView.getController().setZoom(17);
-			mMapView.refresh();
-			mMapController.animateTo(point);
+			mBaiduMap.clear();
+			LatLng llA = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+			CoordinateConverter converter= new CoordinateConverter();
+			converter.coord(llA);
+			converter.from(CoordinateConverter.CoordType.COMMON);
+			LatLng convertLatLng = converter.convert();
+			OverlayOptions ooA = new MarkerOptions().position(convertLatLng).icon(BitmapDescriptorFactory
+					.fromResource(R.drawable.icon_marka))
+					.zIndex(4).draggable(true);
+			mBaiduMap.addOverlay(ooA);
+			MapStatusUpdate u = MapStatusUpdateFactory.newLatLngZoom(convertLatLng, 17.0f);
+			mBaiduMap.animateMapStatus(u);
 		}
 
 		public void onReceivePoi(BDLocation poiLocation) {
@@ -323,54 +269,4 @@ public class BaiduMapActivity extends BaseActivity {
 		overridePendingTransition(R.anim.slide_in_from_left, R.anim.slide_out_to_right);
 	}
 
-	public void initEngineManager(Context context) {
-		if (mBMapManager == null) {
-			mBMapManager = new BMapManager(context);
-		}
-
-		if (!mBMapManager.init(strKey, new MyGeneralListener())) {
-			Toast.makeText(this.getApplicationContext(), "BMapManager  初始化错误!", Toast.LENGTH_LONG).show();
-		}
-	}
-
-	class MyGeneralListener implements MKGeneralListener {
-
-		@Override
-		public void onGetNetworkState(int iError) {
-			if (iError == MKEvent.ERROR_NETWORK_CONNECT) {
-				Toast.makeText(BaiduMapActivity.this, "您的网络出错啦！", Toast.LENGTH_LONG).show();
-			} else if (iError == MKEvent.ERROR_NETWORK_DATA) {
-				Toast.makeText(BaiduMapActivity.this, "输入正确的检索条件！", Toast.LENGTH_LONG).show();
-			}
-			// ...
-		}
-
-		@Override
-		public void onGetPermissionState(int iError) {
-			if (iError == MKEvent.ERROR_PERMISSION_DENIED) {
-				// 授权Key错误：
-				Log.e("map", "permissio denied. check your app key");
-			}
-		}
-	}
-
-	static final double x_pi = 3.14159265358979324 * 3000.0 / 180.0;
-
-	public static GeoPoint gcjToBaidu(double lat, double lng) {
-		double x = lng, y = lat;
-		double z = Math.sqrt(x * x + y * y) + 0.00002 * Math.sin(y * x_pi);
-		double theta = Math.atan2(y, x) + 0.000003 * Math.cos(x * x_pi);
-		double bdLng = z * Math.cos(theta) + 0.0065;
-		double bdLat = z * Math.sin(theta) + 0.006;
-		return new GeoPoint((int) (bdLat * 1e6), (int) (bdLng * 1e6));
-	}
-
-	public static GeoPoint baiduToGcj(double lat, double lng) {
-		double x = lng - 0.0065, y = lat - 0.006;
-		double z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * x_pi);
-		double theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * x_pi);
-		double gcjLng = z * Math.cos(theta);
-		double gcjLat = z * Math.sin(theta);
-		return new GeoPoint((int) (gcjLat * 1e6), (int) (gcjLng * 1e6));
-	}
 }

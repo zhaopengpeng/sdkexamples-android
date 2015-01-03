@@ -18,7 +18,6 @@ import java.util.Map;
 import android.app.Application;
 import android.content.Context;
 
-import com.baidu.mapapi.BMapManager;
 import com.easemob.EMCallBack;
 import com.easemob.chatuidemo.domain.User;
 

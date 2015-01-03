@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMGroupManager;
-import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 
@@ -23,7 +22,7 @@ public class SplashActivity extends BaseActivity {
 	private LinearLayout rootLayout;
 	private TextView versionText;
 	
-	private static final int sleepTime = 2500;
+	private static final int sleepTime = 2000;
 
 	@Override
 	protected void onCreate(Bundle arg0) {
@@ -35,7 +34,7 @@ public class SplashActivity extends BaseActivity {
 
 		versionText.setText(getVersion());
 		AlphaAnimation animation = new AlphaAnimation(0.3f, 1.0f);
-		animation.setDuration(2000);
+		animation.setDuration(1500);
 		rootLayout.startAnimation(animation);
 	}
 

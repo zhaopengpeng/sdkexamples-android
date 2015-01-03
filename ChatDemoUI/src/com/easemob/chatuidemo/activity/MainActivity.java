@@ -53,6 +53,7 @@ import com.easemob.chat.GroupChangeListener;
 import com.easemob.chat.TextMessageBody;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
+import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.db.InviteMessgeDao;
 import com.easemob.chatuidemo.db.UserDao;
@@ -86,11 +87,27 @@ public class MainActivity extends BaseActivity {
 	private NewMessageBroadcastReceiver msgReceiver;
 	// 账号在别处登录
 	public boolean isConflict = false;
-
+	//账号被移除
+	private boolean isCurrentAccountRemoved = false;
+	
+	/**
+	 * 检查当前用户是否被删除
+	 */
+	public boolean getCurrentAccountRemoved(){
+		return isCurrentAccountRemoved;
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false)) {
+		if(savedInstanceState != null && savedInstanceState.getBoolean(Constant.ACCOUNT_REMOVED, false)){
+        	// 防止被移除后，没点确定按钮然后按了home键，长期在后台又进app导致的crash
+            // 三个fragment里加的判断同理
+        	DemoApplication.getInstance().logout(null);
+        	finish();
+            startActivity(new Intent(this, LoginActivity.class));
+            return;
+        }else if (savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false)) {
             // 防止被T后，没点确定按钮然后按了home键，长期在后台又进app导致的crash
             // 三个fragment里加的判断同理
             finish();
@@ -103,8 +120,11 @@ public class MainActivity extends BaseActivity {
 //		MobclickAgent.setDebugMode( true );
 		MobclickAgent.updateOnlineConfig(this);
 		
-		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow)
+		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow){
 			showConflictDialog();
+		}else if(getIntent().getBooleanExtra(Constant.ACCOUNT_REMOVED, false) && !isAccountRemovedDialogShow){
+			showAccountRemovedDialog();
+		}
 		
 		inviteMessgeDao = new InviteMessgeDao(this);
 		userDao = new UserDao(this);
@@ -212,6 +232,11 @@ public class MainActivity extends BaseActivity {
 			unregisterReceiver(ackMessageReceiver);
 		} catch (Exception e) {
 		}
+		try {
+			unregisterReceiver(cmdMessageReceiver);
+		} catch (Exception e) {
+		}
+		
 		// try {
 		// unregisterReceiver(offlineMessageReceiver);
 		// } catch (Exception e) {
@@ -591,7 +616,11 @@ public class MainActivity extends BaseActivity {
 
 				@Override
 				public void run() {
-					if (error == EMError.CONNECTION_CONFLICT) {
+					
+					if(error == EMError.USER_REMOVED){
+						// 显示帐号已经被移除
+						showAccountRemovedDialog();
+					}else if (error == EMError.CONNECTION_CONFLICT) {
 						// 显示帐号在其他设备登陆dialog
 						showConflictDialog();
 					} else {
@@ -751,7 +780,7 @@ public class MainActivity extends BaseActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (!isConflict) {
+		if (!isConflict||!isCurrentAccountRemoved) {
 			updateUnreadLabel();
 			updateUnreadAddressLable();
 			EMChatManager.getInstance().activityResumed();
@@ -762,6 +791,7 @@ public class MainActivity extends BaseActivity {
 	@Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBoolean("isConflict", isConflict);
+        outState.putBoolean(Constant.ACCOUNT_REMOVED, isCurrentAccountRemoved);
         super.onSaveInstanceState(outState);
     }
 
@@ -775,7 +805,9 @@ public class MainActivity extends BaseActivity {
 	}
 
 	private android.app.AlertDialog.Builder conflictBuilder;
+	private android.app.AlertDialog.Builder accountRemovedBuilder;
 	private boolean isConflictDialogShow;
+	private boolean isAccountRemovedDialogShow;
 
 	/**
 	 * 显示帐号在别处登录dialog
@@ -811,12 +843,53 @@ public class MainActivity extends BaseActivity {
 		}
 
 	}
+	
+	
+	
+	/**
+	 * 帐号被移除的dialog
+	 */
+	private void showAccountRemovedDialog() {
+		isAccountRemovedDialogShow = true;
+		DemoApplication.getInstance().logout(null);
+
+		if (!MainActivity.this.isFinishing()) {
+			// clear up global variables
+			try {
+				if (accountRemovedBuilder == null)
+					accountRemovedBuilder = new android.app.AlertDialog.Builder(MainActivity.this);
+				accountRemovedBuilder.setTitle("移除通知");
+				accountRemovedBuilder.setMessage(R.string.em_user_remove);
+				accountRemovedBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+						accountRemovedBuilder = null;
+						finish();
+						startActivity(new Intent(MainActivity.this, LoginActivity.class));
+					}
+				});
+				accountRemovedBuilder.setCancelable(false);
+				accountRemovedBuilder.create().show();
+				isCurrentAccountRemoved = true;
+			} catch (Exception e) {
+				EMLog.e(TAG, "---------color userRemovedBuilder error" + e.getMessage());
+			}
+
+		}
+
+	}
+
 
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow)
+		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow){
 			showConflictDialog();
+		}else if(getIntent().getBooleanExtra(Constant.ACCOUNT_REMOVED, false) && !isAccountRemovedDialogShow){
+			showAccountRemovedDialog();
+		}
 	}
 	
 }

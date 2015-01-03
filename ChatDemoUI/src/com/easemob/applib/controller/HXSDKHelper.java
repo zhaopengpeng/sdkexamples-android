@@ -111,23 +111,23 @@ public abstract class HXSDKHelper {
         }
 
         appContext = context;
+        // create HX SDK model
+        hxModel = createModel();
+        
         int pid = android.os.Process.myPid();
         String processAppName = getAppName(pid);
         
-        // 如果使用到百度地图或者类似启动remote service的第三方库，这个if判断不能少
-        if (processAppName == null || processAppName.equals("")) {
+        Log.d(TAG, "process app name : " + processAppName);
+        
+        // 如果app启用了远程的service，此application:onCreate会被调用2次
+        // 为了防止环信SDK被初始化2次，加此判断会保证SDK被初始化1次
+        // 默认的app会在以包名为默认的process name下运行，如果查到的process name不是app的process name就立即返回
+        if (processAppName == null || !processAppName.equalsIgnoreCase(hxModel.getAppProcessName())) {
             Log.e(TAG, "enter the service process!");
-            // workaround for baidu location sdk
-            // 百度定位sdk，定位服务运行在一个单独的进程，每次定位服务启动的时候，都会调用application::onCreate
-            // 创建新的进程。
-            // 但环信的sdk只需要在主进程中初始化一次。 这个特殊处理是，如果从pid 找不到对应的processInfo
-            // processName，
+            
             // 则此application::onCreate 是被service 调用的，直接返回
             return false;
         }
-        
-        // create HX SDK model
-        hxModel = createModel();
         
         // create a defalut HX SDK model in case subclass did not provide the model
         if(hxModel == null){
@@ -301,7 +301,9 @@ public abstract class HXSDKHelper {
         connectionListener = new EMConnectionListener() {
             @Override
             public void onDisconnected(int error) {
-                if (error == EMError.CONNECTION_CONFLICT) {
+            	if (error == EMError.USER_REMOVED) {
+            		onCurrentAccountRemoved();
+            	}else if (error == EMError.CONNECTION_CONFLICT) {
                     onConnectionConflict();
                 }else{
                     onConnectionDisconnected(error);
@@ -321,6 +323,13 @@ public abstract class HXSDKHelper {
      */
     protected void onConnectionConflict(){}
 
+    
+    /**
+     * the developer can override this function to handle user is removed error
+     */
+    protected void onCurrentAccountRemoved(){}
+    
+    
     /**
      * handle the connection connected
      */
