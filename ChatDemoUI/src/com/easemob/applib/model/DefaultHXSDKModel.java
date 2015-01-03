@@ -121,4 +121,10 @@ public class DefaultHXSDKModel extends HXSDKModel{
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         return preferences.getString(PREF_PWD, null);
     }
+
+    @Override
+    public String getAppProcessName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
