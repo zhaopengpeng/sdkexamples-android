@@ -111,8 +111,14 @@ public abstract class HXSDKHelper {
         }
 
         appContext = context;
+        
         // create HX SDK model
         hxModel = createModel();
+        
+        // create a defalut HX SDK model in case subclass did not provide the model
+        if(hxModel == null){
+            hxModel = new DefaultHXSDKModel(appContext);
+        }
         
         int pid = android.os.Process.myPid();
         String processAppName = getAppName(pid);
@@ -127,11 +133,6 @@ public abstract class HXSDKHelper {
             
             // 则此application::onCreate 是被service 调用的，直接返回
             return false;
-        }
-        
-        // create a defalut HX SDK model in case subclass did not provide the model
-        if(hxModel == null){
-            hxModel = new DefaultHXSDKModel(appContext);
         }
 
         // 初始化环信SDK,一定要先调用init()
