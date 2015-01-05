@@ -23,3 +23,7 @@ local.properties
 */.project
 */.settings
 ChatDemoUI/project.properties
+
+ChatDemoUI/project.properties
+
+*.properties
