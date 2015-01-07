@@ -77,6 +77,8 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
         confName = getIntent().getStringExtra("confName");
         roomInfo.setText(confName);
         exitBtn.setOnClickListener(this);
+        
+        currentTalkUser = getCurrentSpeaker();
         // 显示members
         showGroupMembers();
         // 设置监听
@@ -106,6 +108,11 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 
                                     @Override
                                     public void run() {
+                                        //当前说话人置为自己
+                                        currentTalkUser = EMChatManager.getInstance().getCurrentUser();
+                                        if(adapter != null)
+                                            adapter.notifyDataSetChanged();
+                                        
                                         chronometer.setVisibility(View.VISIBLE);
                                         chronometer.setBase(SystemClock.elapsedRealtime());
                                         // 开始记时
@@ -127,6 +134,8 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
                                     @Override
                                     public void run() {
                                         micInfoText.setText("");
+                                        if(currentTalkUser != null)
+                                            micInfoText.setText(currentTalkUser);
                                         Toast.makeText(MediaConferenceCallActivity.this, "failed to require the talk token", 0).show();
                                     }
 
@@ -211,6 +220,9 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
      * 释放话语token
      */
     private void releaseTalkToken(final EMCallBack callback) {
+        currentTalkUser = null;
+        if(adapter != null)
+            adapter.notifyDataSetChanged();
         EMCallManager.getInstance().asyncReleaseTalkToken(confId, callback);
     }
 
@@ -255,6 +267,10 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
         // audioManager.setMode(AudioManager.MODE_NORMAL);
     }
 
+    /**
+     * 会议成员adpater
+     *
+     */
     private class UserAdapter extends ArrayAdapter<String> {
 
         public UserAdapter(Context context, int textViewResourceId, List<String> objects) {
@@ -287,7 +303,7 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
 
             @Override
             public void onReleasedToken(String actor) {
-                currentTalkUser = "";
+                currentTalkUser = null;
                 Message msg = handler.obtainMessage(RELEASE, actor);
                 handler.sendMessage(msg);
             }
@@ -338,6 +354,11 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
                 Toast.makeText(getApplicationContext(), username+"加入房间", 0).show();
                 break;
             case ACQUIRE:
+                //正在讲话被人抢掉话语权，置为false
+                if(!EMChatManager.getInstance().getCurrentUser().equals(currentTalkUser)){
+                    isTalkTokenGranted = false;
+                    ledImageview.setVisibility(View.INVISIBLE);
+                }
                 micInfoText.setText(username);
                 chronometer.setVisibility(View.VISIBLE);
                 chronometer.setBase(SystemClock.elapsedRealtime());
@@ -387,5 +408,13 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
             }
         }).start();
 
+    }
+    
+    /**
+     * 获取当前说话人
+     * @return
+     */
+    private String getCurrentSpeaker(){
+        return EMCallManager.getInstance().getMediaConfRoomCurrentSpeaker();
     }
 }
