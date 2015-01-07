@@ -39,11 +39,13 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- <Button
+        <!--
+             <Button
             android:id="@+id/btn_up"
             android:layout_width="39dp"
             android:layout_height="39dp"
-            android:background="@drawable/talk_room_up_btn_bg" /> -->
+            android:background="@drawable/talk_room_up_btn_bg" />
+        -->
     </LinearLayout>
 
     <FrameLayout
@@ -62,15 +64,27 @@
             android:paddingRight="3.0dip"
             android:paddingTop="6.0dip" >
 
-            <com.easemob.chatuidemo.widget.HorizontalListView
-                android:id="@+id/user_listview"
-                android:layout_width="290.0dip"
-                android:layout_height="58.0dip"
-                android:fadingEdge="none"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="6.0dip"
-                android:paddingLeft="3.0dip"
-                android:paddingRight="3.0dip" />
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <com.easemob.chatuidemo.widget.HorizontalListView
+                    android:id="@+id/user_listview"
+                    android:layout_width="290.0dip"
+                    android:layout_height="58.0dip"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="6.0dip"
+                    android:fadingEdge="none"
+                    android:paddingLeft="3.0dip"
+                    android:paddingRight="3.0dip"
+                     />
+
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_gravity="center" />
+            </FrameLayout>
 
             <RelativeLayout
                 android:layout_width="fill_parent"
