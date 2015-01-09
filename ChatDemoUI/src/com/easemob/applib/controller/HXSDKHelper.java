@@ -140,7 +140,8 @@ public abstract class HXSDKHelper {
         // 设置sandbox测试环境
         // 建议开发者开发时设置此模式
         if(hxModel.isSandboxMode()){
-            EMChat.getInstance().setEnv(EMEnvMode.EMSandboxMode);
+//            EMChat.getInstance().setEnv(EMEnvMode.EMSandboxMode);
+            EMChat.getInstance().setEnv(EMEnvMode.EMDevMode);
         }
         
         if(hxModel.isDebugMode()){
