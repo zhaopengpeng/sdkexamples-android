@@ -54,6 +54,7 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
     private ProgressBar progressBar;
 
     private String currentTalkUser;
+    private TextView membersCountText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +66,7 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
         ledImageview = (ImageView) findViewById(R.id.iv_led);
         exitBtn = (Button) findViewById(R.id.btn_exit);
         micInfoText = (TextView) findViewById(R.id.tv_mic_info);
+        membersCountText = (TextView) findViewById(R.id.count_tv);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         roomInfo = (TextView) findViewById(R.id.tv_title);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
@@ -352,6 +354,7 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
             switch (msg.what) {
             case JOIN:
                 Toast.makeText(getApplicationContext(), username+"加入房间", 0).show();
+                membersCountText.setText(String.valueOf(members.size()));
                 break;
             case ACQUIRE:
                 //正在讲话被人抢掉话语权，置为false
@@ -372,6 +375,7 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
                 break;
             case EXIT:
                 Toast.makeText(getApplicationContext(), username+"退出房间", 0).show();
+                membersCountText.setText(String.valueOf(members.size()));
                 break;
 
             default:
@@ -385,11 +389,15 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
             public void run() {
                 try {
                     EMGroup group = EMGroupManager.getInstance().getGroupFromServer(confId);
+                    String owner = group.getOwner();
                     members.addAll(group.getMembers());
+                    if(owner != null && members.contains(owner))
+                        members.remove(group.getOwner());
                     runOnUiThread(new Runnable() {
 
                         public void run() {
                             progressBar.setVisibility(View.INVISIBLE);
+                            membersCountText.setText(String.valueOf(members.size()));
                             // 设置adapter
                             adapter = new UserAdapter(MediaConferenceCallActivity.this, 1, members);
                             usersListView.setAdapter(adapter);
@@ -415,6 +423,6 @@ public class MediaConferenceCallActivity extends BaseActivity implements OnClick
      * @return
      */
     private String getCurrentSpeaker(){
-        return EMCallManager.getInstance().getMediaConfRoomCurrentSpeaker();
+        return EMCallManager.getInstance().getMediaConfCallCurrentSpeaker();
     }
 }
