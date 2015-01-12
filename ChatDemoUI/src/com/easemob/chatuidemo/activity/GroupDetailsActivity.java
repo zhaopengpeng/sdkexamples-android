@@ -171,6 +171,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 			switch (requestCode) {
 			case REQUEST_CODE_ADD_USER:// 添加群成员
 				final String[] newmembers = data.getStringArrayExtra("newmembers");
+				progressDialog.setMessage("正在添加...");
 				progressDialog.show();
 				addMembersToGroup(newmembers);
 				break;
@@ -390,24 +391,67 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		case R.id.rl_switch_block_groupmsg: // 屏蔽群组
 			if (iv_switch_block_groupmsg.getVisibility() == View.VISIBLE) {
 				System.out.println("change to unblock group msg");
-				try {
-					EMGroupManager.getInstance().unblockGroupMessage(groupId);
-					iv_switch_block_groupmsg.setVisibility(View.INVISIBLE);
-					iv_switch_unblock_groupmsg.setVisibility(View.VISIBLE);
-				} catch (Exception e) {
-					e.printStackTrace();
-					// todo: 显示错误给用户
-				}
+				if (progressDialog == null) {
+	                progressDialog = new ProgressDialog(GroupDetailsActivity.this);
+	                progressDialog.setCanceledOnTouchOutside(false);
+	            }
+				progressDialog.setMessage("正在解除屏蔽...");
+				progressDialog.show();
+				new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            EMGroupManager.getInstance().unblockGroupMessage(groupId);
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    iv_switch_block_groupmsg.setVisibility(View.INVISIBLE);
+                                    iv_switch_unblock_groupmsg.setVisibility(View.VISIBLE);
+                                    progressDialog.dismiss();
+                                }
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(getApplicationContext(), "解除群屏蔽失败，请检查网络或稍后重试", 1).show();
+                                }
+                            });
+                            
+                        }
+                    }
+                }).start();
+				
 			} else {
 				System.out.println("change to block group msg");
-				try {
-					EMGroupManager.getInstance().blockGroupMessage(groupId);
-					iv_switch_block_groupmsg.setVisibility(View.VISIBLE);
-					iv_switch_unblock_groupmsg.setVisibility(View.INVISIBLE);
-				} catch (Exception e) {
-					e.printStackTrace();
-					// todo: 显示错误给用户
-				}
+				if (progressDialog == null) {
+                    progressDialog = new ProgressDialog(GroupDetailsActivity.this);
+                    progressDialog.setCanceledOnTouchOutside(false);
+                }
+				progressDialog.setMessage("正在屏蔽群组...");
+				progressDialog.show();
+				new Thread(new Runnable() {
+                    public void run() {
+                        try {
+                            EMGroupManager.getInstance().blockGroupMessage(groupId);
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    iv_switch_block_groupmsg.setVisibility(View.VISIBLE);
+                                    iv_switch_unblock_groupmsg.setVisibility(View.INVISIBLE);
+                                    progressDialog.dismiss();
+                                }
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(getApplicationContext(), "群屏蔽失败，请检查网络或稍后重试", 1).show();
+                                }
+                            });
+                        }
+                        
+                    }
+                }).start();
 			}
 			break;
 
