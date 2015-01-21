@@ -558,9 +558,15 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 			if (!EMChatManager.getInstance().isConnected())
 				Toast.makeText(this, "尚未连接至服务器，请稍后重试", 0).show();
 			else
-				startActivity(new Intent(ChatActivity.this, VoiceCallActivity.class).putExtra("username", toChatUsername).putExtra(
-						"isComingCall", false));
-		}
+				startActivity(new Intent(ChatActivity.this, VoiceCallActivity.class).putExtra("username", toChatUsername)
+				        .putExtra("isComingCall", false));
+		}else if (id == R.id.btn_video_call) { //视频通话
+		    if (!EMChatManager.getInstance().isConnected())
+                Toast.makeText(this, "尚未连接至服务器，请稍后重试", 0).show();
+            else
+                startActivity(new Intent(this, VideoCallActivity.class).putExtra("username", toChatUsername)
+                        .putExtra("isComingCall", false));
+        }
 	}
 
 	/**
