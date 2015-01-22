@@ -53,7 +53,6 @@ import com.easemob.chat.GroupChangeListener;
 import com.easemob.chat.TextMessageBody;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
-import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.db.InviteMessgeDao;
 import com.easemob.chatuidemo.db.UserDao;
@@ -81,7 +80,6 @@ public class MainActivity extends BaseActivity {
 	private SettingsFragment settingFragment;
 	private Fragment[] fragments;
 	private int index;
-	private RelativeLayout[] tab_containers;
 	// 当前fragment的index
 	private int currentTabIndex;
 	private NewMessageBroadcastReceiver msgReceiver;
@@ -118,6 +116,7 @@ public class MainActivity extends BaseActivity {
 		initView();
 		
 //		MobclickAgent.setDebugMode( true );
+		//--?--
 		MobclickAgent.updateOnlineConfig(this);
 		
 		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow){
@@ -331,7 +330,7 @@ public class MainActivity extends BaseActivity {
 			// 注销广播接收者，否则在ChatActivity中会收到这个广播
 			abortBroadcast();
 			
-			notifyNewMessage(message);
+			notifyNewMessage(message);  
 
 			// 刷新bottom bar消息未读数
 			updateUnreadLabel();
@@ -706,7 +705,6 @@ public class MainActivity extends BaseActivity {
 					} catch (Exception e) {
 						EMLog.e(TAG, "refresh exception " + e.getMessage());
 					}
-
 				}
 			});
 		}
