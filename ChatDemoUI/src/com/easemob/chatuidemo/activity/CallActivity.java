@@ -37,6 +37,7 @@ public class CallActivity extends BaseActivity {
         if (ringtone != null && ringtone.isPlaying())
             ringtone.stop();
         audioManager.setMode(AudioManager.MODE_NORMAL);
+        audioManager.setMicrophoneMute(false);
     }
     
     /**
