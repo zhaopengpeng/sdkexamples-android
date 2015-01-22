@@ -30,11 +30,17 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Filter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
+import com.easemob.applib.utils.HXPreferenceUtils;
+import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMConversation;
+import com.easemob.chat.EMGroup;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.domain.User;
@@ -46,6 +52,9 @@ import com.easemob.chatuidemo.widget.Sidebar;
  */
 public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexer{
 
+	List<String> list;
+	List<User> userList;
+	List<User> copyUserList;
 	private LayoutInflater layoutInflater;
 	private EditText query;
 	private ImageButton clearSearch;
@@ -53,11 +62,17 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	private SparseIntArray sectionOfPosition;
 	private Sidebar sidebar;
 	private int res;
+	String str;
+	public MyFilter myFilter;
 
 	public ContactAdapter(Context context, int resource, List<User> objects,Sidebar sidebar) {
 		super(context, resource, objects);
+		str = context.getResources().getString(R.string.search);
 		this.res = resource;
 		this.sidebar=sidebar;
+		this.userList=objects;
+		copyUserList = new ArrayList<User>();
+		copyUserList.addAll(objects);
 		layoutInflater = LayoutInflater.from(context);
 	}
 	
@@ -75,41 +90,46 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (position == 0) {//搜索框
 			if(convertView == null){
-				convertView = layoutInflater.inflate(R.layout.search_bar_with_padding, null);
-				query = (EditText) convertView.findViewById(R.id.query);
-				clearSearch = (ImageButton) convertView.findViewById(R.id.search_clear);
-				query.addTextChangedListener(new TextWatcher() {
-					public void onTextChanged(CharSequence s, int start, int before, int count) {
-						getFilter().filter(s);
-						if (s.length() > 0) {
-							clearSearch.setVisibility(View.VISIBLE);
-							if (sidebar != null)
-								sidebar.setVisibility(View.GONE);
-						} else {
-							clearSearch.setVisibility(View.INVISIBLE);
-							if (sidebar != null)
-								sidebar.setVisibility(View.VISIBLE);
-						}
-					}
-	
-					public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-					}
-	
-					public void afterTextChanged(Editable s) {
-					}
-				});
-				clearSearch.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						InputMethodManager manager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-						if (((Activity) getContext()).getWindow().getAttributes().softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
-							if (((Activity) getContext()).getCurrentFocus() != null)
-							manager.hideSoftInputFromWindow(((Activity) getContext()).getCurrentFocus().getWindowToken(),
-									InputMethodManager.HIDE_NOT_ALWAYS);
-						//清除搜索框文字
-						query.getText().clear();
-					}
-				});
+				convertView = layoutInflater.inflate(R.layout.activity_null, null);
+				/*
+				 * 原先的代码      
+				 * mender：      zhaopeng
+				 */
+//				query = (EditText) convertView.findViewById(R.id.query);
+//				query.setHint(str);
+//				clearSearch = (ImageButton) convertView.findViewById(R.id.search_clear);
+//				query.addTextChangedListener(new TextWatcher() {
+//					public void onTextChanged(CharSequence s, int start, int before, int count) {
+//						ContactAdapter.this.getFilter().filter(s);
+//						if (s.length() > 0) {
+//							clearSearch.setVisibility(View.VISIBLE);
+//							if (sidebar != null)
+//								sidebar.setVisibility(View.GONE);
+//						} else {
+//							clearSearch.setVisibility(View.INVISIBLE);
+//							if (sidebar != null)
+//								sidebar.setVisibility(View.VISIBLE);
+//						}
+//					}
+//	
+//					public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//					}
+//	
+//					public void afterTextChanged(Editable s) {
+//					}
+//				});
+//				clearSearch.setOnClickListener(new OnClickListener() {
+//					@Override
+//					public void onClick(View v) {
+//						InputMethodManager manager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+//						if (((Activity) getContext()).getWindow().getAttributes().softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
+//							if (((Activity) getContext()).getCurrentFocus() != null)
+//							manager.hideSoftInputFromWindow(((Activity) getContext()).getCurrentFocus().getWindowToken(),
+//									InputMethodManager.HIDE_NOT_ALWAYS);
+//						//清除搜索框文字
+//						query.getText().clear();
+//					}
+//				});
 			}
 		}else{
 			if(convertView == null){
@@ -181,13 +201,13 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	public int getSectionForPosition(int position) {
 		return sectionOfPosition.get(position);
 	}
-
+	
 	@Override
 	public Object[] getSections() {
 		positionOfSection = new SparseIntArray();
 		sectionOfPosition = new SparseIntArray();
 		int count = getCount();
-		List<String> list = new ArrayList<String>();
+		list = new ArrayList<String>();
 		list.add(getContext().getString(R.string.search_header));
 		positionOfSection.put(0, 0);
 		sectionOfPosition.put(0, 0);
@@ -205,5 +225,82 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 		}
 		return list.toArray(new String[list.size()]);
 	}
+	
+	@Override
+	public Filter getFilter() {
+		if(myFilter==null){
+			myFilter = new MyFilter(userList);
+		}
+		return myFilter;
+	}
+	
+	private class MyFilter extends Filter{
+		List<User> mList=null;
+		
+		public MyFilter(List<User> myList) {
+			super();
+			this.mList = myList;
+		}
+
+		@Override
+		protected FilterResults performFiltering(CharSequence prefix) {
+			FilterResults results = new FilterResults();
+			if(mList==null){
+				mList = new ArrayList<User>();
+			}
+			if(prefix==null || prefix.length()==0){
+				results.values = copyUserList;
+				results.count = copyUserList.size();
+			}else{
+				String prefixString = prefix.toString();
+				final int count = mList.size();
+				final ArrayList<User> newValues = new ArrayList<User>();
+				for(int i=0;i<count;i++){
+					User user = mList.get(i);
+					String username = user.getUsername();
+					
+					EMConversation conversation = EMChatManager.getInstance().getConversation(username);
+					if(conversation != null){
+						username = conversation.getUserName();
+					}
+					
+					if(username.startsWith(prefixString)){
+						newValues.add(user);
+					}
+					else{
+						 final String[] words = username.split(" ");
+	                     final int wordCount = words.length;
+	
+	                     // Start at index 0, in case valueText starts with space(s)
+	                     for (int k = 0; k < wordCount; k++) {
+	                         if (words[k].startsWith(prefixString)) {
+	                             newValues.add(user);
+	                             break;
+	                         }
+	                     }
+					}
+				}
+				results.values=newValues;
+				results.count=newValues.size();
+			}
+			return results;
+		}
+
+		@Override
+		protected void publishResults(CharSequence constraint,
+				FilterResults results) {
+			userList.clear();
+			userList.addAll((List<User>)results.values);
+			if (results.count > 0) {
+				notifyDataSetChanged();
+			} else {
+				notifyDataSetInvalidated();
+			}
+		}
+	}
+	
+	
+	
+	
 
 }
