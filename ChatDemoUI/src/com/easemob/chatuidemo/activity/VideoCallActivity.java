@@ -71,13 +71,16 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
     private Chronometer chronometer;
     private LinearLayout voiceContronlLayout;
     private RelativeLayout rootContainer;
-    private LinearLayout btnsContainer;
+    private RelativeLayout btnsContainer;
     private CameraHelper cameraHelper;
+    private LinearLayout topContainer;
+    private LinearLayout bottomContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_call);
+        
         getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
                         | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
@@ -95,7 +98,9 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
         nickTextView = (TextView) findViewById(R.id.tv_nick);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         voiceContronlLayout = (LinearLayout) findViewById(R.id.ll_voice_control);
-        btnsContainer = (LinearLayout) findViewById(R.id.ll_btns);
+        btnsContainer = (RelativeLayout) findViewById(R.id.ll_btns);
+        topContainer = (LinearLayout) findViewById(R.id.ll_top_container);
+        bottomContainer = (LinearLayout) findViewById(R.id.ll_bottom_container);
 
         refuseBtn.setOnClickListener(this);
         answerBtn.setOnClickListener(this);
@@ -115,6 +120,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
         // 显示本地图像的surfaceview
         localSurface = (SurfaceView) findViewById(R.id.local_surface);
         localSurface.setZOrderMediaOverlay(true);
+        localSurface.setZOrderOnTop(true);
         localSurfaceHolder = localSurface.getHolder();
 
         // 获取callHelper,cameraHelper
@@ -148,6 +154,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
             }, 300);
         } else { // 有电话进来
             voiceContronlLayout.setVisibility(View.INVISIBLE);
+            localSurface.setVisibility(View.INVISIBLE);
             Uri ringUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
             audioManager.setMode(AudioManager.MODE_RINGTONE);
             audioManager.setSpeakerphoneOn(true);
@@ -261,7 +268,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                             chronometer.setBase(SystemClock.elapsedRealtime());
                             // 开始记时
                             chronometer.start();
-                            findViewById(R.id.ll_header_container).setVisibility(View.INVISIBLE);
+                            nickTextView.setVisibility(View.INVISIBLE);
                             callStateTextView.setText("通话中...");
                             callingState = CallingState.NORMAL;
                         }
@@ -362,6 +369,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
             comingBtnContainer.setVisibility(View.INVISIBLE);
             hangupBtn.setVisibility(View.VISIBLE);
             voiceContronlLayout.setVisibility(View.VISIBLE);
+            localSurface.setVisibility(View.VISIBLE);
             if (ringtone != null)
                 ringtone.stop();
 
@@ -423,10 +431,13 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
             break;
         case R.id.root_layout:
             if (callingState == CallingState.NORMAL) {
-                if (btnsContainer.getVisibility() == View.VISIBLE) {
-                    btnsContainer.setVisibility(View.GONE);
+                if (bottomContainer.getVisibility() == View.VISIBLE) {
+                    bottomContainer.setVisibility(View.GONE);
+                    topContainer.setVisibility(View.GONE);
+                    
                 } else {
-                    btnsContainer.setVisibility(View.VISIBLE);
+                    bottomContainer.setVisibility(View.VISIBLE);
+                    topContainer.setVisibility(View.VISIBLE);
 
                 }
             }
