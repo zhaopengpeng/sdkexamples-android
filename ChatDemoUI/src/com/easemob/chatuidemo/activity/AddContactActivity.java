@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -27,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
@@ -34,7 +36,7 @@ import com.easemob.chatuidemo.R;
 public class AddContactActivity extends BaseActivity{
 	private EditText editText;
 	private LinearLayout searchedUserLayout;
-	private TextView nameText;
+	private TextView nameText,mTextView;
 	private Button searchBtn;
 	private ImageView avatar;
 	private InputMethodManager inputMethodManager;
@@ -45,8 +47,13 @@ public class AddContactActivity extends BaseActivity{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_contact);
+		mTextView = (TextView) findViewById(R.id.add_list_friends);
 		
 		editText = (EditText) findViewById(R.id.edit_note);
+		String strAdd = getResources().getString(R.string.add_friend);
+		mTextView.setText(strAdd);
+		String strUserName = getResources().getString(R.string.user_name);
+		editText.setHint(strUserName);
 		searchedUserLayout = (LinearLayout) findViewById(R.id.ll_user);
 		nameText = (TextView) findViewById(R.id.name);
 		searchBtn = (Button) findViewById(R.id.search);
@@ -66,7 +73,8 @@ public class AddContactActivity extends BaseActivity{
 		if (getString(R.string.button_search).equals(saveText)) {
 			toAddUsername = name;
 			if(TextUtils.isEmpty(name)) {
-				startActivity(new Intent(this, AlertDialog.class).putExtra("msg", "请输入用户名"));
+				String st = getResources().getString(R.string.Please_enter_a_username);
+				startActivity(new Intent(this, AlertDialog.class).putExtra("msg", st));
 				return;
 			}
 			

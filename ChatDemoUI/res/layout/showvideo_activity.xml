@@ -29,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="正在下载视频请稍候..."
+            android:text="@string/is_down_please_wait"
             android:textColor="@android:color/black"
             
             />

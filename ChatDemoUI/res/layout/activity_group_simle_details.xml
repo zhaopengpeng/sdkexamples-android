@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="群聊资料"
+            android:text="@string/Group_chat_information"
             android:textColor="#ffffff"
             android:textSize="20sp" />
 
@@ -79,7 +79,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="9dp"
-                android:text="群主"
+                android:text="@string/Group_of_Lord"
                 android:textColor="#8F8F8F"
                 android:textSize="16sp" />
 
@@ -103,7 +103,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="9dp"
-                android:text="简介"
+                android:text="@string/Introduction"
                 android:textColor="#8F8F8F"
                 android:textSize="16sp" />
 
@@ -128,7 +128,7 @@
         android:layout_marginTop="15dp"
         android:background="@drawable/btn_green_selector"
         android:padding="7dp"
-        android:text="加入该聊"
+        android:text="@string/To_join_the_chat"
         android:onClick="addToGroup"
         android:enabled="false"
         android:textColor="@android:color/white"

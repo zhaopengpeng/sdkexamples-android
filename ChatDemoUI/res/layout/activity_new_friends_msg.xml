@@ -18,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="申请与通知"
+            android:text="@string/Application_and_notify"
             android:textColor="#fff"
             android:textSize="18sp" />
     </RelativeLayout>

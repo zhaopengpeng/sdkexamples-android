@@ -22,6 +22,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -178,6 +179,7 @@ public class LoginActivity extends BaseActivity {
 
 							// demo中简单的处理成每次登陆都去获取好友username，开发者自己根据情况而定
 							List<String> usernames = EMContactManager.getInstance().getContactUserNames();
+							System.out.println("----------------"+usernames.toString());
 							EMLog.d("roster", "contacts size: " + usernames.size());
 							Map<String, User> userlist = new HashMap<String, User>();
 							for (String username : usernames) {
@@ -189,13 +191,15 @@ public class LoginActivity extends BaseActivity {
 							// 添加user"申请与通知"
 							User newFriends = new User();
 							newFriends.setUsername(Constant.NEW_FRIENDS_USERNAME);
-							newFriends.setNick("申请与通知");
-							newFriends.setHeader("");
+							String strChat = getResources().getString(R.string.Application_and_notify);
+							newFriends.setNick(strChat);
+							
 							userlist.put(Constant.NEW_FRIENDS_USERNAME, newFriends);
 							// 添加"群聊"
 							User groupUser = new User();
+							String strGroup = getResources().getString(R.string.group_chat);
 							groupUser.setUsername(Constant.GROUP_USERNAME);
-							groupUser.setNick("群聊");
+							groupUser.setNick(strGroup);
 							groupUser.setHeader("");
 							userlist.put(Constant.GROUP_USERNAME, groupUser);
 

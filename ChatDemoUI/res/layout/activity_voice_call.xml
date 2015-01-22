@@ -102,7 +102,7 @@
                     android:layout_marginTop="3dp"
                     android:gravity="center"
                     android:textColor="#666167"
-                    android:text="静音" />
+                    android:text="@string/mute" />
             </LinearLayout>
 
             <LinearLayout
@@ -125,7 +125,7 @@
                     android:layout_marginTop="3dp"
                     android:gravity="center"
                     android:textColor="#666167"
-                    android:text="免提" />
+                    android:text="@string/Hands_free" />
             </LinearLayout>
         </LinearLayout>
 
@@ -140,7 +140,7 @@
                 android:layout_height="60dp"
                 android:background="@drawable/voice_call_hangup_bg"
                 android:gravity="center"
-                android:text="挂断"
+                android:text="@string/hang_up"
                 android:textColor="@android:color/white"
                 android:textSize="20sp"
                 android:visibility="invisible" />
@@ -157,7 +157,7 @@
                     android:layout_weight="1"
                     android:background="@drawable/voice_call_hangup_bg"
                     android:gravity="center"
-                    android:text="挂断"
+                    android:text="@string/hang_up"
                     android:textColor="@android:color/white"
                     android:textSize="20sp" />
 
@@ -169,7 +169,7 @@
                     android:layout_weight="1"
                     android:background="@drawable/voice_call_hangup_bg"
                     android:gravity="center"
-                    android:text="接听"
+                    android:text="@string/answer"
                     android:textColor="@android:color/white"
                     android:textSize="20sp" />
             </LinearLayout>
