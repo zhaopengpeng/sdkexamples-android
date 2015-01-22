@@ -41,7 +41,6 @@ import com.easemob.audio.EMVideoCallHelper;
 import com.easemob.chat.EMCallStateChangeListener;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chatuidemo.R;
-import com.easemob.chatuidemo.activity.CallActivity.CallingState;
 import com.easemob.chatuidemo.utils.CameraHelper;
 import com.easemob.exceptions.EMServiceNotReadyException;
 
@@ -69,10 +68,8 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
     private ImageView muteImage;
     private ImageView handsFreeImage;
     private TextView nickTextView;
-    private TextView durationTextView;
     private Chronometer chronometer;
     private LinearLayout voiceContronlLayout;
-    private byte[] yuv_Rotate90lr;
     private RelativeLayout rootContainer;
     private LinearLayout btnsContainer;
     private CameraHelper cameraHelper;
@@ -83,7 +80,8 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
         setContentView(R.layout.activity_video_call);
         getWindow().addFlags(
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                        | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
         callStateTextView = (TextView) findViewById(R.id.tv_call_state);
         comingBtnContainer = (LinearLayout) findViewById(R.id.ll_coming_call);
@@ -95,7 +93,6 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
         handsFreeImage = (ImageView) findViewById(R.id.iv_handsfree);
         callStateTextView = (TextView) findViewById(R.id.tv_call_state);
         nickTextView = (TextView) findViewById(R.id.tv_nick);
-        durationTextView = (TextView) findViewById(R.id.tv_calling_duration);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         voiceContronlLayout = (LinearLayout) findViewById(R.id.ll_voice_control);
         btnsContainer = (LinearLayout) findViewById(R.id.ll_btns);
@@ -111,7 +108,6 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
         // 获取通话是否为接收方向的
         isInComingCall = getIntent().getBooleanExtra("isComingCall", false);
         username = getIntent().getStringExtra("username");
-        
 
         // 设置通话人
         nickTextView.setText(username);
@@ -144,7 +140,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
             comingBtnContainer.setVisibility(View.INVISIBLE);
             hangupBtn.setVisibility(View.VISIBLE);
             callStateTextView.setText("正在连接对方...");
-            
+
             handler.postDelayed(new Runnable() {
                 public void run() {
                     streamID = playMakeCallSounds();
@@ -172,14 +168,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-//            try {
-                cameraHelper.startCapture();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                Toast.makeText(getApplicationContext(), "没有打开相机的权限", 1).show();
-//                EMChatManager.getInstance().endCall();
-//                finish();
-//            }
+            cameraHelper.startCapture();
         }
 
         @Override
@@ -332,7 +321,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                                         if (callingState != CallingState.NORMAL) {
                                             callingState = CallingState.CANCED;
                                             callStateTextView.setText("已取消");
-                                        }else {
+                                        } else {
                                             callStateTextView.setText("挂断...");
                                         }
                                     }
@@ -375,13 +364,13 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
             voiceContronlLayout.setVisibility(View.VISIBLE);
             if (ringtone != null)
                 ringtone.stop();
-            
+
             if (isInComingCall) {
                 try {
                     isAnswered = true;
                     EMChatManager.getInstance().answerCall();
                     cameraHelper.setStartFlag(true);
-                    
+
                     openSpeakerOn();
                     handsFreeImage.setImageResource(R.drawable.icon_speaker_on);
                     isHandsfreeState = true;
@@ -433,20 +422,20 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
             }
             break;
         case R.id.root_layout:
-            if(callingState == CallingState.NORMAL){
-                if(btnsContainer.getVisibility() == View.VISIBLE){
+            if (callingState == CallingState.NORMAL) {
+                if (btnsContainer.getVisibility() == View.VISIBLE) {
                     btnsContainer.setVisibility(View.GONE);
-                }else {
+                } else {
                     btnsContainer.setVisibility(View.VISIBLE);
-                    
+
                 }
             }
-            
+
             break;
         default:
             break;
         }
-        
+
     }
 
     @Override
