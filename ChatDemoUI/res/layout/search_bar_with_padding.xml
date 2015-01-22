@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:paddingLeft="@dimen/padding_search_bar"
     android:paddingRight="27dp"
-     android:paddingTop="7dp"
+    android:paddingTop="7dp"
     android:paddingBottom="7dp"
     android:background="#ededed"
      >
@@ -22,7 +22,6 @@
         android:focusable="true"
         android:focusableInTouchMode="true"
          android:textSize="16sp"
-        android:hint="搜索"
          android:layout_marginLeft="4dp"
         android:singleLine="true"
          />
