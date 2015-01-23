@@ -35,10 +35,12 @@ import com.easemob.chatuidemo.R;
 public class GroupAdapter extends ArrayAdapter<EMGroup> {
 
 	private LayoutInflater inflater;
+	private String str;
 
 	public GroupAdapter(Context context, int res, List<EMGroup> groups) {
 		super(context, res, groups);
 		this.inflater = LayoutInflater.from(context);
+		str = context.getResources().getString(R.string.The_new_group_chat);
 	}
 	
 	@Override
@@ -92,7 +94,7 @@ public class GroupAdapter extends ArrayAdapter<EMGroup> {
 				convertView = inflater.inflate(R.layout.row_add_group, null);
 			}
 			((ImageView)convertView.findViewById(R.id.avatar)).setImageResource(R.drawable.roominfo_add_btn);
-			((TextView)convertView.findViewById(R.id.name)).setText("新建群组");
+			((TextView)convertView.findViewById(R.id.name)).setText(str);
 		} else {
 			if (convertView == null) {
 				convertView = inflater.inflate(R.layout.row_group, null);

@@ -33,6 +33,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContact;
 import com.easemob.chat.EMConversation;
@@ -131,11 +132,12 @@ public class ChatAllHistoryFragment extends Fragment {
 		});
 		// 搜索框
 		query = (EditText) getView().findViewById(R.id.query);
+		String strSearch = getResources().getString(R.string.search);
+		query.setHint(strSearch);
 		// 搜索框中清除button
 		clearSearch = (ImageButton) getView().findViewById(R.id.search_clear);
 		query.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-
 				adapter.getFilter().filter(s);
 				if (s.length() > 0) {
 					clearSearch.setVisibility(View.VISIBLE);

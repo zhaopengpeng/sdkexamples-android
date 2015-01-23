@@ -52,8 +52,9 @@ public class DiagnoseActivity extends BaseActivity implements OnClickListener {
 		}
 		if (!TextUtils.isEmpty(strVersion))
 			currentVersion.setText("V" + strVersion);
-		else
-			currentVersion.setText("未设置");
+		else{
+			String st = getResources().getString(R.string.Not_Set);
+			currentVersion.setText(st);}
 	}
 
 	public void back(View view) {
@@ -90,7 +91,8 @@ public class DiagnoseActivity extends BaseActivity implements OnClickListener {
 
 		if (progressDialog == null)
 			progressDialog = new ProgressDialog(this);
-		progressDialog.setMessage("上传日志中...");
+		String stri = getResources().getString(R.string.Upload_the_log);
+		progressDialog.setMessage(stri);
 		progressDialog.setCancelable(false);
 		progressDialog.show();
 
