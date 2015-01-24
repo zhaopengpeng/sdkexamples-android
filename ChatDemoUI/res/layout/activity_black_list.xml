@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="黑名单"
+            android:text="@string/black_item"
             android:textColor="#ffffff"
             android:textSize="20sp" />
 

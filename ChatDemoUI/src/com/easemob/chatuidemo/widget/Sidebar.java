@@ -25,6 +25,7 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ContactAdapter;
 import com.easemob.util.DensityUtil;
@@ -44,17 +45,25 @@ public class Sidebar extends View{
 	public Sidebar(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		this.context = context;
+//		context.getResources().getString(R.string.search_header);
 		init();
 	}
 
-	private String[] sections = new String[]{"搜","#","A","B","C","D","E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+	private String[] sections; 
 
 	private void init(){
+		if(HXPreferenceUtils.getInstance().getSystemLanguage()){
+			sections= new String[]{"搜","#","A","B","C","D","E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+		}else{
+			sections= new String[]{"search","#","A","B","C","D","E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+		}
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setColor(Color.DKGRAY);
 		paint.setTextAlign(Align.CENTER);
 		paint.setTextSize(DensityUtil.sp2px(context, 10));
 	}
+	
+	
 	
 	
 	@Override

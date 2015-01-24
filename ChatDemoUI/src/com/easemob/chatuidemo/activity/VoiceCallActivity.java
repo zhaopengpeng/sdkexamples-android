@@ -122,7 +122,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 				e.printStackTrace();
 				runOnUiThread(new Runnable() {
 					public void run() {
-						Toast.makeText(VoiceCallActivity.this, "尚未连接至服务器", 0);
+						Toast.makeText(VoiceCallActivity.this, "尚未连接至服务器", 0).show();
 					}
 				});
 			}
