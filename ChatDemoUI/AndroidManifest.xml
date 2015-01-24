@@ -5,7 +5,7 @@
     android:versionName="2.1.5" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="9"
         android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -176,11 +176,19 @@
             android:theme="@style/horizontal_slide"
             android:windowSoftInputMode="adjustPan" >
         </activity>
-        <!-- 语音通话页面 -->
+        <!-- 语音通话 -->
         <activity
             android:name=".activity.VoiceCallActivity"
             android:screenOrientation="portrait"
             android:theme="@style/nornal_style" >
+        </activity>
+        <!-- 视频通话 -->
+        <activity
+            android:name=".activity.VideoCallActivity"
+            android:theme="@style/horizontal_slide" 
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            >
         </activity>
         <!-- 群聊简单信息 -->
         <activity
