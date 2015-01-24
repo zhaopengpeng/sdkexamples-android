@@ -64,12 +64,10 @@
     <string name="set">set</string>
     <string name="notify">New message to remind</string>
     <string name="newnotify">Receive the new message notification</string>
-    <string name="voice">voice</string>
     <string name="shake">shake</string>
     <string name="chatset">Chat Settings</string>
     <string name="yangshengqi">Use the speaker voice</string>
     <string name="book_black">The address book list</string>
-    <string name="diagnose">diagnose</string>
     <string name="session">session</string>
     <string name="address_book">address book</string>
     <string name="setting">set</string>
@@ -77,7 +75,6 @@
     <string name="Application_and_notify">Application and notify</string>
     <string name="group_chat">group chat</string>
     <string name="add_friend">add friends</string>
-    <string name="user_name">user name</string>
     <string name="search">search</string>
     <string name="black_item">blacklist</string>
     <string name="diagnose">diagnose</string>
@@ -93,7 +90,6 @@
     <string name="blacklist">blacklist</string>
     <string name="Empty_the_chat_record">Empty the chat record</string>
     <string name="Shielding_of_the_message">Shielding of the message</string>
-    <string name="Exit_the_group_chat">Exit the group chat</string>
     <string name="The_dissolution_of_chatting">The dissolution of chatting</string>
     <string name="Select_the_contact">Select the contact</string>
     <string name="Group_chat_information">Group chat information</string>
