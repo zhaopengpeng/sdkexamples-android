@@ -20,12 +20,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.zip.Inflater;
 
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -40,6 +43,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -67,6 +72,8 @@ public class ContactlistFragment extends Fragment {
 	private Sidebar sidebar;
 	private InputMethodManager inputMethodManager;
 	private List<String> blackList;
+	ImageButton clearSearch;
+	EditText query;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -88,6 +95,36 @@ public class ContactlistFragment extends Fragment {
 		contactList = new ArrayList<User>();
 		// 获取设置contactlist
 		getContactList();
+		
+		//搜索框
+		query = (EditText) getView().findViewById(R.id.query);
+		String strSearch = getResources().getString(R.string.search);
+		query.setHint(strSearch);
+		clearSearch = (ImageButton) getView().findViewById(R.id.search_clear);
+		query.addTextChangedListener(new TextWatcher() {
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				adapter.getFilter().filter(s);
+				if (s.length() > 0) {
+					clearSearch.setVisibility(View.VISIBLE);
+				} else {
+					clearSearch.setVisibility(View.INVISIBLE);
+					
+				}
+			}
+
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+
+			public void afterTextChanged(Editable s) {
+			}
+		});
+		clearSearch.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				query.getText().clear();
+			}
+		});
+		
 		// 设置adapter
 		adapter = new ContactAdapter(getActivity(), R.layout.row_contact, contactList, sidebar);
 		listView.setAdapter(adapter);
