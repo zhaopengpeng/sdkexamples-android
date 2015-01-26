@@ -37,9 +37,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.easemob.audio.EMVideoCallHelper;
 import com.easemob.chat.EMCallStateChangeListener;
 import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMVideoCallHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.utils.CameraHelper;
 import com.easemob.exceptions.EMServiceNotReadyException;
@@ -131,7 +131,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
         oppositeSurface = (SurfaceView) findViewById(R.id.opposite_surface);
         oppositeSurfaceHolder = oppositeSurface.getHolder();
         // 设置显示对方图像的surfaceview
-        callHelper.setOppositeSurfaceview(oppositeSurface);
+        callHelper.setSurfaceView(oppositeSurface);
 
         localSurfaceHolder.addCallback(new localCallback());
         oppositeSurfaceHolder.addCallback(new oppositeCallback());
@@ -195,7 +195,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            callHelper.onOppositeResize(width, height, format);
+            callHelper.onWindowResize(width, height, format);
             if (!cameraHelper.isStarted()) {
                 if (!isInComingCall) {
                     try {
@@ -209,7 +209,6 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                 }
 
             } else {
-                callHelper.onOppositeResume();
             }
         }
 
@@ -452,7 +451,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        callHelper.setOppositeSurfaceview(null);
+        callHelper.setSurfaceView(null);
         cameraHelper.stopCapture();
         oppositeSurface = null;
         cameraHelper = null;
