@@ -19,7 +19,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class HXPreferenceUtils {
-	private int test;
 	/**
 	 * 保存Preference的name
 	 */
