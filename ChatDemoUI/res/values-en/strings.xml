@@ -14,7 +14,7 @@
     <string name="attach_location">location</string>
     <string name="attach_file">file</string>
     <string name="attach_voice_call">voice call</string>
-    <string name="attach_video_cal">video call</string>
+    <string name="attach_video_call">video call</string>
     <string name="user_card">business card</string>
     <string name="move_up_to_cancel">slide up cancel sending</string>
     <string name="release_to_cancel">release finger to cancel sending</string>
@@ -32,8 +32,8 @@
     <string name="forward">forwarding</string>
     <string name="button_logout">logout</string>
     <string name="button_uploadlog">uplod the log</string>
-    <string name="ok">ok</string>
-    <string name="cancel">cancel</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
     <string name="prompt">prompt</string>
     <string name="clear_records">clear chat?</string>
     <string name="clear_all_records">clear all chats？</string>
@@ -46,7 +46,7 @@
     <string name="video">[video]</string>
     <string name="file">[file]</string>
     <string name="voice_call">[voice call]</string>
-    <string name="button_cancel">cancel</string>
+    <string name="button_cancel">Cancel</string>
     <string name="button_save">save</string>
     <string name="button_search">find</string>
     <string name="button_add">add</string>
@@ -72,7 +72,7 @@
     <string name="session">conversation</string>
     <string name="address_book">address book</string>
     <string name="setting">setting</string>
-    <string name="now_refresh_list">refreshing contact list...</string>
+    <string name="now_refresh_list">refreshing contact list</string>
     <string name="Application_and_notify">invitation and notification</string>
     <string name="group_chat">group chat</string>
     <string name="add_friend">add friends</string>
@@ -81,7 +81,7 @@
     <string name="diagnose">diagnose</string>
     <string name="Current_version">current version</string>
     <string name="Not_Set">not set</string>
-    <string name="Upload_the_log">uploading the log...</string>
+    <string name="Upload_the_log">uploading the log</string>
     <string name="The_new_group_chat">the new group</string>
     <string name="group_name">group name</string>
     <string name="Group_chat_profile">group profile</string>
@@ -112,7 +112,7 @@
     <string name="agree">agree</string>
     <string name="Group_chat">group chat:</string>
     <string name="not_download">Did not download:</string>
-    <string name="is_down_please_wait">downloading video, please try again later...</string>
+    <string name="is_down_please_wait">downloading video, please try again later</string>
     <string name="Exit_the_group_chat">exit the group</string>
     <string name="Please_enter_a_username">Please enter a username</string>
     

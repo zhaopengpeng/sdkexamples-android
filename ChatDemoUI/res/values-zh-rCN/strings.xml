@@ -72,7 +72,7 @@
     <string name="session">会话</string>
     <string name="address_book">通讯录</string>
     <string name="setting">设置</string>
-    <string name="now_refresh_list">正在刷新联系人...</string>
+    <string name="now_refresh_list">正在刷新联系人</string>
     <string name="Application_and_notify">申请与通知</string>
     <string name="group_chat">群聊</string>
     <string name="add_friend">添加好友</string>
@@ -81,7 +81,7 @@
     <string name="diagnose">诊断</string>
     <string name="Current_version">当前版本</string>
     <string name="Not_Set">未设置</string>
-    <string name="Upload_the_log">上传日志中...</string>
+    <string name="Upload_the_log">上传日志中</string>
     <string name="The_new_group_chat">新建群组</string>
     <string name="group_name">群聊名称</string>
     <string name="Group_chat_profile">群聊简介</string>
@@ -102,7 +102,7 @@
     <string name="password">密码</string>
     <string name="register">注册</string>
     <string name="confirmpassword">确认密码</string>
-    <string name="downwaiting">正在下载文件请稍后...</string>
+    <string name="downwaiting">正在下载文件请稍后</string>
     <string name="mute">静音</string>
     <string name="Hands_free">免提</string>
     <string name="hang_up">挂断</string>
@@ -113,7 +113,7 @@
     <string name="Group_chat">群聊:</string>
     <string name="not_download">未下载:</string>
 	<string name="Please_enter_a_username">请输入用户名</string>
-    <string name="is_down_please_wait">正在下载视频请稍候...</string>
+    <string name="is_down_please_wait">正在下载视频请稍候</string>
     <string name="Exit_the_group_chat">退出群聊</string>
     
 </resources>
