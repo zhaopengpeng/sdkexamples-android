@@ -15,9 +15,6 @@ package com.easemob.chatuidemo.activity;
 
 import java.util.List;
 
-import org.jivesoftware.smack.Chat;
-
-import u.aly.bu;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
