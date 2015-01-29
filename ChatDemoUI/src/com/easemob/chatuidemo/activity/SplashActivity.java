@@ -80,6 +80,7 @@ public class SplashActivity extends BaseActivity {
 	 * 获取当前应用程序的版本号
 	 */
 	private String getVersion() {
+		String st = getResources().getString(R.string.Version_number_is_wrong);
 		PackageManager pm = getPackageManager();
 		try {
 			PackageInfo packinfo = pm.getPackageInfo(getPackageName(), 0);
@@ -87,7 +88,7 @@ public class SplashActivity extends BaseActivity {
 			return version;
 		} catch (NameNotFoundException e) {
 			e.printStackTrace();
-			return "版本号错误";
+			return st;
 		}
 	}
 }

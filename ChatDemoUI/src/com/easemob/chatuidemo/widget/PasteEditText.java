@@ -24,6 +24,7 @@ import android.util.AttributeSet;
 import android.widget.EditText;
 import android.widget.TextView.BufferType;
 
+import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.activity.AlertDialog;
 import com.easemob.chatuidemo.activity.ChatActivity;
 import com.easemob.chatuidemo.utils.SmileUtils;
@@ -62,7 +63,8 @@ public class PasteEditText extends EditText{
 //                intent.setDataAndType(Uri.fromFile(new File("/sdcard/mn1.jpg")), "image/*");     
                 text = text.replace(ChatActivity.COPY_IMAGE, "");
                 Intent intent = new Intent(context,AlertDialog.class);
-                intent.putExtra("title", "发送以下图片？");
+                String str = context.getResources().getString(R.string.Send_the_following_pictures);
+                intent.putExtra("title", str);
                 intent.putExtra("forwardImage", text);
                 intent.putExtra("cancel", true);
                 ((Activity)context).startActivityForResult(intent,ChatActivity.REQUEST_CODE_COPY_AND_PASTE);
