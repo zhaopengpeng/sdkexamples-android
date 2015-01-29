@@ -93,17 +93,20 @@ public class AddContactActivity extends BaseActivity{
 	 */
 	public void addContact(View view){
 		if(DemoApplication.getInstance().getUserName().equals(nameText.getText().toString())){
-			startActivity(new Intent(this, AlertDialog.class).putExtra("msg", "不能添加自己"));
+			String str = getResources().getString(R.string.not_add_myself);
+			startActivity(new Intent(this, AlertDialog.class).putExtra("msg", str));
 			return;
 		}
 		
 		if(DemoApplication.getInstance().getContactList().containsKey(nameText.getText().toString())){
-			startActivity(new Intent(this, AlertDialog.class).putExtra("msg", "此用户已是你的好友"));
+			String strin = getResources().getString(R.string.This_user_is_already_your_friend);
+			startActivity(new Intent(this, AlertDialog.class).putExtra("msg", strin));
 			return;
 		}
 		
 		progressDialog = new ProgressDialog(this);
-		progressDialog.setMessage("正在发送请求...");
+		String stri = getResources().getString(R.string.Is_sending_a_request);
+		progressDialog.setMessage(stri);
 		progressDialog.setCanceledOnTouchOutside(false);
 		progressDialog.show();
 		
@@ -112,18 +115,21 @@ public class AddContactActivity extends BaseActivity{
 				
 				try {
 					//demo写死了个reason，实际应该让用户手动填入
-					EMContactManager.getInstance().addContact(toAddUsername, "加个好友呗");
+					String s = getResources().getString(R.string.Add_a_friend);
+					EMContactManager.getInstance().addContact(toAddUsername, s);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							progressDialog.dismiss();
-							Toast.makeText(getApplicationContext(), "发送请求成功,等待对方验证", 1).show();
+							String s1 = getResources().getString(R.string.send_successful);
+							Toast.makeText(getApplicationContext(), s1, 1).show();
 						}
 					});
 				} catch (final Exception e) {
 					runOnUiThread(new Runnable() {
 						public void run() {
 							progressDialog.dismiss();
-							Toast.makeText(getApplicationContext(), "请求添加好友失败:" + e.getMessage(), 1).show();
+							String s2 = getResources().getString(R.string.Request_add_buddy_failure);
+							Toast.makeText(getApplicationContext(), s2 + e.getMessage(), 1).show();
 						}
 					});
 				}

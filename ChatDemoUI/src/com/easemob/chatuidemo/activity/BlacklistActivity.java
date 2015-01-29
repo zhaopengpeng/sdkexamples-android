@@ -82,7 +82,8 @@ public class BlacklistActivity extends Activity {
 			e.printStackTrace();
 			runOnUiThread(new Runnable() {
 				public void run() {
-					Toast.makeText(getApplicationContext(), "移出失败", 0).show();
+					String str2 = getResources().getString(R.string.Removed_from_the_failure);
+					Toast.makeText(getApplicationContext(), str2, 0).show();
 				}
 			});
 		}

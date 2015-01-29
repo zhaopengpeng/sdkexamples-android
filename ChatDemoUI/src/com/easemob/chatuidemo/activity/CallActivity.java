@@ -4,6 +4,7 @@ import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.TextMessageBody;
 import com.easemob.chatuidemo.Constant;
+import com.easemob.chatuidemo.R;
 
 import android.content.Context;
 import android.media.AudioManager;
@@ -116,30 +117,38 @@ public class CallActivity extends BaseActivity {
             message.setFrom(username);
         }
 
+        String st1 = getResources().getString(R.string.call_duration);
+        String st2 = getResources().getString(R.string.Refused);
+        String st3 = getResources().getString(R.string.The_other_party_has_refused_to);
+        String st4 = getResources().getString(R.string.The_other_is_not_online);
+        String st5 = getResources().getString(R.string.The_other_is_on_the_phone);
+        String st6 = getResources().getString(R.string.The_other_party_did_not_answer);
+        String st7 = getResources().getString(R.string.did_not_answer);
+        String st8 = getResources().getString(R.string.Has_been_cancelled);
         switch (callingState) {
         case NORMAL:
-            txtBody = new TextMessageBody("通话时长 " + callDruationText);
+            txtBody = new TextMessageBody(st1 + callDruationText);
             break;
         case REFUESD:
-            txtBody = new TextMessageBody("已拒绝");
+            txtBody = new TextMessageBody(st2);
             break;
         case BEREFUESD:
-            txtBody = new TextMessageBody("对方已拒绝");
+            txtBody = new TextMessageBody(st3);
             break;
         case OFFLINE:
-            txtBody = new TextMessageBody("对方不在线");
+            txtBody = new TextMessageBody(st4);
             break;
         case BUSY:
-            txtBody = new TextMessageBody("对方正在通话中");
+            txtBody = new TextMessageBody(st5);
             break;
         case NORESPONSE:
-            txtBody = new TextMessageBody("对方未接听");
+            txtBody = new TextMessageBody(st6);
             break;
         case UNANSWERED:
-            txtBody = new TextMessageBody("未接听");
+            txtBody = new TextMessageBody(st7);
             break;
         default:
-            txtBody = new TextMessageBody("已取消");
+            txtBody = new TextMessageBody(st8);
             break;
         }
         // 设置扩展属性

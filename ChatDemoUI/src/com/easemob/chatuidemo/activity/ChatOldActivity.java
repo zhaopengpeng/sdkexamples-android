@@ -520,7 +520,8 @@ public class ChatOldActivity extends BaseActivity implements OnClickListener {
 					more(more);
 					sendLocationMsg(latitude, longitude, "", locationAddress);
 				} else {
-					Toast.makeText(this, "无法获取到您的位置信息！", 0).show();
+					String st4 = getResources().getString(R.string.unable_to_get_loaction);
+					Toast.makeText(this, st4, 0).show();
 				}
 				// 重发消息
 			} else if (requestCode == REQUEST_CODE_TEXT) {

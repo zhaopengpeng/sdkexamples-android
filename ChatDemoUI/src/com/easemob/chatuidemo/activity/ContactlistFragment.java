@@ -224,8 +224,10 @@ public class ContactlistFragment extends Fragment {
 	 * @param toDeleteUser
 	 */
 	public void deleteContact(final User tobeDeleteUser) {
+		String st1 = getResources().getString(R.string.deleting);
+		final String st2 = getResources().getString(R.string.Delete_failed);
 		final ProgressDialog pd = new ProgressDialog(getActivity());
-		pd.setMessage("正在删除...");
+		pd.setMessage(st1);
 		pd.setCanceledOnTouchOutside(false);
 		pd.show();
 		new Thread(new Runnable() {
@@ -248,7 +250,7 @@ public class ContactlistFragment extends Fragment {
 					getActivity().runOnUiThread(new Runnable() {
 						public void run() {
 							pd.dismiss();
-							Toast.makeText(getActivity(), "删除失败: " + e.getMessage(), 1).show();
+							Toast.makeText(getActivity(), st2 + e.getMessage(), 1).show();
 						}
 					});
 
@@ -264,7 +266,10 @@ public class ContactlistFragment extends Fragment {
 	 */
 	private void moveToBlacklist(final String username){
 		final ProgressDialog pd = new ProgressDialog(getActivity());
-		pd.setMessage("正在移入黑名单...");
+		String st1 = getResources().getString(R.string.Is_moved_into_blacklist);
+		final String st2 = getResources().getString(R.string.Move_into_blacklist_success);
+		final String st3 = getResources().getString(R.string.Move_into_blacklist_failure);
+		pd.setMessage(st1);
 		pd.setCanceledOnTouchOutside(false);
 		pd.show();
 		new Thread(new Runnable() {
@@ -275,7 +280,7 @@ public class ContactlistFragment extends Fragment {
 					getActivity().runOnUiThread(new Runnable() {
 						public void run() {
 							pd.dismiss();
-							Toast.makeText(getActivity(), "移入黑名单成功", 0).show();
+							Toast.makeText(getActivity(), st2, 0).show();
 							refresh();
 						}
 					});
@@ -284,7 +289,7 @@ public class ContactlistFragment extends Fragment {
 					getActivity().runOnUiThread(new Runnable() {
 						public void run() {
 							pd.dismiss();
-							Toast.makeText(getActivity(), "移入黑名单失败", 0).show();
+							Toast.makeText(getActivity(), st3, 0).show();
 						}
 					});
 				}

@@ -27,6 +27,7 @@ import android.view.View;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.Type;
+import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.util.EasyUtils;
 import com.umeng.analytics.MobclickAgent;
@@ -74,8 +75,9 @@ public class BaseActivity extends FragmentActivity {
                 .setWhen(System.currentTimeMillis()).setAutoCancel(true);
         
         String ticker = CommonUtils.getMessageDigest(message, this);
+        String st = getResources().getString(R.string.expression);
         if(message.getType() == Type.TXT)
-            ticker = ticker.replaceAll("\\[.{2,3}\\]", "[表情]");
+            ticker = ticker.replaceAll("\\[.{2,3}\\]", st);
         //设置状态栏提示
         mBuilder.setTicker(message.getFrom()+": " + ticker);
         

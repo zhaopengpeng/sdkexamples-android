@@ -276,7 +276,8 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 
 	void logout() {
 		final ProgressDialog pd = new ProgressDialog(getActivity());
-		pd.setMessage("正在退出登陆..");
+		String st = getResources().getString(R.string.Are_logged_out);
+		pd.setMessage(st);
 		pd.setCanceledOnTouchOutside(false);
 		pd.show();
 		DemoApplication.getInstance().logout(new EMCallBack() {

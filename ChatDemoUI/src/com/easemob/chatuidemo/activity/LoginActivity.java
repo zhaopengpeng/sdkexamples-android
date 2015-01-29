@@ -106,6 +106,9 @@ public class LoginActivity extends BaseActivity {
 	 * @param view
 	 */
 	public void login(View view) {
+		String st1 = getResources().getString(R.string.User_name_cannot_be_empty);
+		String st2 = getResources().getString(R.string.Password_cannot_be_empty);
+		String st3 = getResources().getString(R.string.please_set_the_current);
 		if (!CommonUtils.isNetWorkConnected(this)) {
 			Toast.makeText(this, R.string.network_isnot_available, Toast.LENGTH_SHORT).show();
 			return;
@@ -114,17 +117,17 @@ public class LoginActivity extends BaseActivity {
 		currentPassword = passwordEditText.getText().toString().trim();
 		
 		if(TextUtils.isEmpty(currentUsername)){
-			Toast.makeText(this, "用户名不能为空！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, st1, Toast.LENGTH_SHORT).show();
 			return;
 		}
 		if(TextUtils.isEmpty(currentPassword)){
-			Toast.makeText(this, "密码不能为空！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, st2, Toast.LENGTH_SHORT).show();
 			return;
 		}
 		Intent intent = new Intent(LoginActivity.this, com.easemob.chatuidemo.activity.AlertDialog.class);
 		intent.putExtra("editTextShow", true);
 		intent.putExtra("titleIsCancel", true);
-		intent.putExtra("msg", "请设置当前用户的昵称\n为了ios离线推送不是userid而是nick，详情见注释");
+		intent.putExtra("msg", st3);
 		intent.putExtra("edit_text", currentUsername);
 		startActivityForResult(intent, REQUEST_CODE_SETNICK);
 
@@ -133,6 +136,10 @@ public class LoginActivity extends BaseActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		String str5 = getResources().getString(R.string.Is_landing);
+		final String str6 = getResources().getString(R.string.list_is_for);
+		final String str7 = getResources().getString(R.string.login_failure_failed);
+		final String str8 = getResources().getString(R.string.Login_failed);
 		if (resultCode == RESULT_OK) {
 			if (requestCode == REQUEST_CODE_SETNICK) {
 				DemoApplication.currentUserNick = data.getStringExtra("edittext");
@@ -147,7 +154,7 @@ public class LoginActivity extends BaseActivity {
 						progressShow = false;
 					}
 				});
-				pd.setMessage("正在登陆...");
+				pd.setMessage(str5);
 				pd.show();
 
 				final long start = System.currentTimeMillis();
@@ -167,7 +174,7 @@ public class LoginActivity extends BaseActivity {
 						DemoApplication.getInstance().setPassword(currentPassword);
 						runOnUiThread(new Runnable() {
 							public void run() {
-								pd.setMessage("正在获取好友和群聊列表...");
+								pd.setMessage(str6);
 							}
 						});
 						try {
@@ -219,7 +226,7 @@ public class LoginActivity extends BaseActivity {
                                 public void run() {
                                     pd.dismiss();
                                     DemoApplication.getInstance().logout(null);
-                                    Toast.makeText(getApplicationContext(), "登录失败: 获取好友或群聊失败", 1).show();
+                                    Toast.makeText(getApplicationContext(), str7, 1).show();
                                 }
                             });
 							return;
@@ -249,7 +256,7 @@ public class LoginActivity extends BaseActivity {
 						runOnUiThread(new Runnable() {
 							public void run() {
 								pd.dismiss();
-								Toast.makeText(getApplicationContext(), "登录失败: " + message, Toast.LENGTH_SHORT).show();
+								Toast.makeText(getApplicationContext(), str8 + message, Toast.LENGTH_SHORT).show();
 							}
 						});
 					}

@@ -41,6 +41,7 @@ public class GroupBlacklistActivity extends BaseActivity {
 		groupId = getIntent().getStringExtra("groupId");
 		// 注册上下文菜单
 		registerForContextMenu(listView);
+		final String st1 = getResources().getString(R.string.get_failed_please_check);
 		new Thread(new Runnable() {
 
 			public void run() {
@@ -59,7 +60,7 @@ public class GroupBlacklistActivity extends BaseActivity {
 				} catch (EaseMobException e) {
 					runOnUiThread(new Runnable() {
 						public void run() {
-							Toast.makeText(getApplicationContext(), "获取失败,请检查网络或稍后再试", 1).show();
+							Toast.makeText(getApplicationContext(), st1, 1).show();
 							progressBar.setVisibility(View.INVISIBLE);
 						}
 					});
@@ -92,6 +93,7 @@ public class GroupBlacklistActivity extends BaseActivity {
 	 * @param tobeRemoveUser
 	 */
 	void removeOutBlacklist(final String tobeRemoveUser) {
+		final String st2 = getResources().getString(R.string.Removed_from_the_failure);
 		try {
 			// 移出黑民单
 			EMGroupManager.getInstance().unblockUser(groupId, tobeRemoveUser);
@@ -100,7 +102,7 @@ public class GroupBlacklistActivity extends BaseActivity {
 			e.printStackTrace();
 			runOnUiThread(new Runnable() {
 				public void run() {
-					Toast.makeText(getApplicationContext(), "移出失败", 0).show();
+					Toast.makeText(getApplicationContext(), st2, 0).show();
 				}
 			});
 		}

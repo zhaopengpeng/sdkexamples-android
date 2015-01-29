@@ -145,7 +145,8 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
 
             comingBtnContainer.setVisibility(View.INVISIBLE);
             hangupBtn.setVisibility(View.VISIBLE);
-            callStateTextView.setText("正在连接对方...");
+            String st = getResources().getString(R.string.Are_connected_to_each_other);
+            callStateTextView.setText(st);
 
             handler.postDelayed(new Runnable() {
                 public void run() {
@@ -204,7 +205,8 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                         // 通知cameraHelper可以写入数据
                         cameraHelper.setStartFlag(true);
                     } catch (EMServiceNotReadyException e) {
-                        Toast.makeText(VideoCallActivity.this, "尚未连接至服务器", 1).show();
+                    	String st1 = getResources().getString(R.string.Is_not_yet_connected_to_the_server);
+                        Toast.makeText(VideoCallActivity.this, st1 , 1).show();
                     }
                 }
 
@@ -234,7 +236,8 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
 
                         @Override
                         public void run() {
-                            callStateTextView.setText("正在连接对方...");
+                        	String st2 = getResources().getString(R.string.Are_connected_to_each_other);
+                            callStateTextView.setText(st2);
                         }
 
                     });
@@ -244,7 +247,8 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
 
                         @Override
                         public void run() {
-                            callStateTextView.setText("已经和对方建立连接，等待对方接受...");
+                        	String st3 = getResources().getString(R.string.have_connected_with);
+                            callStateTextView.setText(st3);
                         }
 
                     });
@@ -268,7 +272,8 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                             // 开始记时
                             chronometer.start();
                             nickTextView.setVisibility(View.INVISIBLE);
-                            callStateTextView.setText("通话中...");
+                            String st5 = getResources().getString(R.string.In_the_call);
+                            callStateTextView.setText(st5);
                             callingState = CallingState.NORMAL;
                         }
 
@@ -296,39 +301,49 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                         public void run() {
                             chronometer.stop();
                             callDruationText = chronometer.getText().toString();
-
+                            String s1 = getResources().getString(R.string.The_other_party_refused_to_accept);
+                            String s2 = getResources().getString(R.string.Connection_failure);
+                            String s3 = getResources().getString(R.string.The_other_party_is_not_online);
+                            String s4 = getResources().getString(R.string.The_other_is_on_the_phone_please);
+                            String s5 = getResources().getString(R.string.The_other_party_did_not_answer);
+                            
+                            String s6 = getResources().getString(R.string.hang_up);
+                            String s7 = getResources().getString(R.string.The_other_is_hang_up);
+                            String s8 = getResources().getString(R.string.did_not_answer);
+                            String s9 = getResources().getString(R.string.Has_been_cancelled);
+                            
                             if (fError == CallError.REJECTED) {
                                 callingState = CallingState.BEREFUESD;
-                                callStateTextView.setText("对方拒绝接受！...");
+                                callStateTextView.setText(s1);
                             } else if (fError == CallError.ERROR_TRANSPORT) {
-                                callStateTextView.setText("连接建立失败！...");
+                                callStateTextView.setText(s2);
                             } else if (fError == CallError.ERROR_INAVAILABLE) {
                                 callingState = CallingState.OFFLINE;
-                                callStateTextView.setText("对方不在线，请稍后再拨...");
+                                callStateTextView.setText(s3);
                             } else if (fError == CallError.ERROR_BUSY) {
                                 callingState = CallingState.BUSY;
-                                callStateTextView.setText("对方正在通话中，请稍后再拨");
+                                callStateTextView.setText(s4);
                             } else if (fError == CallError.ERROR_NORESPONSE) {
                                 callingState = CallingState.NORESPONSE;
-                                callStateTextView.setText("对方未接听");
+                                callStateTextView.setText(s5);
                             } else {
                                 if (isAnswered) {
                                     callingState = CallingState.NORMAL;
                                     if (endCallTriggerByMe) {
-                                        callStateTextView.setText("挂断...");
+                                        callStateTextView.setText(s6);
                                     } else {
-                                        callStateTextView.setText("对方已经挂断");
+                                        callStateTextView.setText(s7);
                                     }
                                 } else {
                                     if (isInComingCall) {
                                         callingState = CallingState.UNANSWERED;
-                                        callStateTextView.setText("未接听");
+                                        callStateTextView.setText(s8);
                                     } else {
                                         if (callingState != CallingState.NORMAL) {
                                             callingState = CallingState.CANCED;
-                                            callStateTextView.setText("已取消");
+                                            callStateTextView.setText(s9);
                                         } else {
-                                            callStateTextView.setText("挂断...");
+                                            callStateTextView.setText(s6);
                                         }
                                     }
                                 }

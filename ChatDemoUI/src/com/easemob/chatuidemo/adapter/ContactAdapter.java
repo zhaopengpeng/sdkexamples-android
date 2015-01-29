@@ -76,21 +76,22 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 		layoutInflater = LayoutInflater.from(context);
 	}
 	
-	@Override
-	public int getViewTypeCount() {
-		return 2;
-	}
+//	@Override
+//	public int getViewTypeCount() {
+//		return 2;
+//	}
 
-	@Override
-	public int getItemViewType(int position) {
-		return position == 0 ? 0 : 1;
-	}
+//	@Override
+//	public int getItemViewType(int position) {
+//		return position == 0 ? 0 : 1;
+//		return 0;
+//	}
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		if (position == 0) {//搜索框
-			if(convertView == null){
-				convertView = layoutInflater.inflate(R.layout.activity_null, null);
+//		if (position == 0) {//搜索框
+//			if(convertView == null){
+//				convertView = layoutInflater.inflate(R.layout.activity_null, null);
 				/*
 				 * 原先的代码      
 				 * mender：      zhaopeng
@@ -130,8 +131,8 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 //						query.getText().clear();
 //					}
 //				});
-			}
-		}else{
+//			}
+//		}else{
 			if(convertView == null){
 				convertView = layoutInflater.inflate(res, null);
 			}
@@ -176,7 +177,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 					unreadMsgView.setVisibility(View.INVISIBLE);
 				avatar.setImageResource(R.drawable.default_avatar);
 			}
-		}
+//		}
 		
 		return convertView;
 	}
@@ -185,13 +186,14 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	public User getItem(int position) {
 		User user = new User();
 		user.setHeader(getContext().getString(R.string.search_header));
-		return position == 0 ? user : super.getItem(position - 1);
+//		return position == 0 ? user : super.getItem(position - 1);
+		return super.getItem(position);
 	}
 	
 	@Override
 	public int getCount() {
 		//有搜索框，count+1
-		return super.getCount() + 1;
+		return super.getCount();
 	}
 
 	public int getPositionForSection(int section) {
@@ -234,7 +236,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 		return myFilter;
 	}
 	
-	private class MyFilter extends Filter{
+	private class  MyFilter extends Filter{
 		List<User> mList=null;
 		
 		public MyFilter(List<User> myList) {
@@ -243,7 +245,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 		}
 
 		@Override
-		protected FilterResults performFiltering(CharSequence prefix) {
+		protected synchronized FilterResults  performFiltering(CharSequence prefix) {
 			FilterResults results = new FilterResults();
 			if(mList==null){
 				mList = new ArrayList<User>();
@@ -256,7 +258,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 				final int count = mList.size();
 				final ArrayList<User> newValues = new ArrayList<User>();
 				for(int i=0;i<count;i++){
-					User user = mList.get(i);
+					final User user = mList.get(i);
 					String username = user.getUsername();
 					
 					EMConversation conversation = EMChatManager.getInstance().getConversation(username);
@@ -287,7 +289,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 		}
 
 		@Override
-		protected void publishResults(CharSequence constraint,
+		protected synchronized void publishResults(CharSequence constraint,
 				FilterResults results) {
 			userList.clear();
 			userList.addAll((List<User>)results.values);
