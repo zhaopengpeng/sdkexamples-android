@@ -93,13 +93,14 @@ public class ChatHistoryFragment extends Fragment {
 		adapter = new ChatHistoryAdapter(getActivity(), 1, loadUsersWithRecentChat());
 		// 设置adapter
 		listView.setAdapter(adapter);
+		final String st = getResources().getString(R.string.Cant_chat_with_yourself);
 		listView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				EMContact emContact = adapter.getItem(position);
 				if (adapter.getItem(position).getUsername().equals(DemoApplication.getInstance().getUserName()))
-					Toast.makeText(getActivity(), "不能和自己聊天", 0).show();
+					Toast.makeText(getActivity(), st, 0).show();
 				else {
 					// 进入聊天页面
 					  Intent intent = new Intent(getActivity(), ChatActivity.class);

@@ -218,6 +218,8 @@ public class RecorderVideoActivity extends BaseActivity implements
 
 	@Override
 	public void onClick(View view) {
+		String st1 = getResources().getString(R.string.The_video_to_start);
+		String st2 = getResources().getString(R.string.Whether_to_send);
 		switch (view.getId()) {
 		case R.id.switch_btn:
 			switchCamera();
@@ -225,7 +227,7 @@ public class RecorderVideoActivity extends BaseActivity implements
 		case R.id.recorder_start:
 			// start recording
 			startRecording();
-			Toast.makeText(this, "录像开始", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, st1, Toast.LENGTH_SHORT).show();
 			btn_switch.setVisibility(View.INVISIBLE);
 			btnStart.setVisibility(View.INVISIBLE);
 			btnStop.setVisibility(View.VISIBLE);
@@ -241,7 +243,7 @@ public class RecorderVideoActivity extends BaseActivity implements
 			btnStart.setVisibility(View.VISIBLE);
 			btnStop.setVisibility(View.INVISIBLE);
 			new AlertDialog.Builder(this)
-					.setMessage("是否发送？")
+					.setMessage(st2)
 					.setPositiveButton(R.string.ok,
 							new DialogInterface.OnClickListener() {
 
@@ -480,8 +482,9 @@ public class RecorderVideoActivity extends BaseActivity implements
 			if (localPath == null) {
 				return;
 			}
+			String st3 = getResources().getString(R.string.Whether_to_send);
 			new AlertDialog.Builder(this)
-					.setMessage("是否发送？")
+					.setMessage(st3)
 					.setPositiveButton(R.string.ok,
 							new DialogInterface.OnClickListener() {
 
@@ -540,9 +543,11 @@ public class RecorderVideoActivity extends BaseActivity implements
 	}
 
 	private void showFailDialog() {
+		String st5 = getResources().getString(R.string.prompt);
+		String st6 = getResources().getString(R.string.Open_the_equipment_failure);
 		new AlertDialog.Builder(this)
-				.setTitle("提示")
-				.setMessage("打开设备失败！")
+				.setTitle(st5)
+				.setMessage(st6)
 				.setPositiveButton(R.string.ok,
 						new DialogInterface.OnClickListener() {
 

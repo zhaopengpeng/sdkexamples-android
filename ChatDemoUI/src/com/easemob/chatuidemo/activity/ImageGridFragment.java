@@ -179,7 +179,8 @@ public class ImageGridFragment extends Fragment implements OnItemClickListener {
 			VideoEntity vEntty=mList.get(position-1);
 			// 限制大小不能超过10M
 			if (vEntty.size > 1024 * 1024 * 10) {
-				Toast.makeText(getActivity(), "暂不支持大于10M的视频！", Toast.LENGTH_SHORT).show();
+				String st = getResources().getString(R.string.temporary_does_not);
+				Toast.makeText(getActivity(), st, Toast.LENGTH_SHORT).show();
 				return;
 			}
 			Intent intent=getActivity().getIntent().putExtra("path", vEntty.filePath).putExtra("dur", vEntty.duration);
@@ -243,11 +244,12 @@ public class ImageGridFragment extends Fragment implements OnItemClickListener {
 			// Finally load the image asynchronously into the ImageView, this
 			// also takes care of
 			// setting a placeholder image while the background thread runs
+			String st1 = getResources().getString(R.string.Video_footage);
 			if(position==0)
 			{
 				holder.icon.setVisibility(View.GONE);
 				holder.tvDur.setVisibility(View.GONE);
-				holder.tvSize.setText("拍摄录像");
+				holder.tvSize.setText(st1);
 				holder.imageView.setImageResource(R.drawable.actionbar_camera_icon);
 			}else{
 				holder.icon.setVisibility(View.VISIBLE);

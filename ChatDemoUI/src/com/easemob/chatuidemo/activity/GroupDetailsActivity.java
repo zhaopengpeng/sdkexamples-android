@@ -81,7 +81,8 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	private ImageView iv_switch_unblock_groupmsg;
 
 	public static GroupDetailsActivity instance;
-
+	
+	String st = getResources().getString(R.string.people);
 	// 清空所有聊天记录
 	private RelativeLayout clearAllHistory;
 	private RelativeLayout blacklistLayout;
@@ -127,7 +128,8 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 			exitBtn.setVisibility(View.GONE);
 			deleteBtn.setVisibility(View.VISIBLE);
 		}
-		((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getAffiliationsCount() + "人)");
+		
+		((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getAffiliationsCount() + st);
 		adapter = new GridAdapter(this, R.layout.grid, group.getMembers());
 		userGridview.setAdapter(adapter);
 
@@ -163,32 +165,43 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		String st1 = getResources().getString(R.string.being_added);
+		String st2 = getResources().getString(R.string.is_quit_the_group_chat);
+		String st3 = getResources().getString(R.string.chatting_is_dissolution);
+		String st4 = getResources().getString(R.string.are_empty_group_of_news);
+		String st5 = getResources().getString(R.string.is_modify_the_group_name);
+		final String st6 = getResources().getString(R.string.Modify_the_group_name_successful);
+		final String st7 = getResources().getString(R.string.change_the_group_name_failed_please);
+		String st8 = getResources().getString(R.string.Are_moving_to_blacklist);
+		final String st9 = getResources().getString(R.string.failed_to_move_into);
+		
+		final String stsuccess = getResources().getString(R.string.Move_into_blacklist_success);
 		if (resultCode == RESULT_OK) {
 			if (progressDialog == null) {
 				progressDialog = new ProgressDialog(GroupDetailsActivity.this);
-				progressDialog.setMessage("正在添加...");
+				progressDialog.setMessage(st1);
 				progressDialog.setCanceledOnTouchOutside(false);
 			}
 			switch (requestCode) {
 			case REQUEST_CODE_ADD_USER:// 添加群成员
 				final String[] newmembers = data.getStringArrayExtra("newmembers");
-				progressDialog.setMessage("正在添加...");
+				progressDialog.setMessage(st1);
 				progressDialog.show();
 				addMembersToGroup(newmembers);
 				break;
 			case REQUEST_CODE_EXIT: // 退出群
-				progressDialog.setMessage("正在退出群聊...");
+				progressDialog.setMessage(st2);
 				progressDialog.show();
 				exitGrop();
 				break;
 			case REQUEST_CODE_EXIT_DELETE: // 解散群
-				progressDialog.setMessage("正在解散群聊...");
+				progressDialog.setMessage(st3);
 				progressDialog.show();
 				deleteGrop();
 				break;
 			case REQUEST_CODE_CLEAR_ALL_HISTORY:
 				// 清空此群聊的聊天记录
-				progressDialog.setMessage("正在清空群消息...");
+				progressDialog.setMessage(st4);
 				progressDialog.show();
 				clearGroupHistory();
 				break;
@@ -196,7 +209,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 			case REQUEST_CODE_EDIT_GROUPNAME: //修改群名称
 				final String returnData = data.getStringExtra("data");
 				if(!TextUtils.isEmpty(returnData)){
-					progressDialog.setMessage("正在修改群名称...");
+					progressDialog.setMessage(st5);
 					progressDialog.show();
 					
 					new Thread(new Runnable() {
@@ -206,9 +219,9 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 								runOnUiThread(new Runnable() {
 									public void run() {
 										((TextView) findViewById(R.id.group_name)).setText(returnData + "(" + group.getAffiliationsCount()
-												+ "人)");
+												+ st);
 										progressDialog.dismiss();
-										Toast.makeText(getApplicationContext(), "修改群名称成功", 0).show();
+										Toast.makeText(getApplicationContext(), st6, 0).show();
 									}
 								});
 								
@@ -217,7 +230,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 								runOnUiThread(new Runnable() {
 									public void run() {
 										progressDialog.dismiss();
-										Toast.makeText(getApplicationContext(), "改变群名称失败，请检查网络或稍后重试", 0).show();
+										Toast.makeText(getApplicationContext(), st7, 0).show();
 									}
 								});
 							}
@@ -226,7 +239,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 				}
 				break;
 			case REQUEST_CODE_ADD_TO_BALCKLIST:
-				progressDialog.setMessage("正在移入至黑名单");
+				progressDialog.setMessage(st8);
 				progressDialog.show();
 				new Thread(new Runnable() {
 					public void run() {
@@ -236,14 +249,14 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 								public void run() {
 									adapter.notifyDataSetChanged();
 									progressDialog.dismiss();
-									Toast.makeText(getApplicationContext(), "移入黑名单成功", 0).show();
+									Toast.makeText(getApplicationContext(), stsuccess, 0).show();
 								}
 							});
 						} catch (EaseMobException e) {
 							runOnUiThread(new Runnable() {
 								public void run() {
 									progressDialog.dismiss();
-									Toast.makeText(getApplicationContext(), "移入黑名单失败,请检查网络或稍后重试", 0).show();
+									Toast.makeText(getApplicationContext(), st9, 0).show();
 								}
 							});
 						}
@@ -295,6 +308,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	 * @param groupId
 	 */
 	private void exitGrop() {
+		String st1 = getResources().getString(R.string.Exit_the_group_chat_failure);
 		new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -326,6 +340,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	 * @param groupId
 	 */
 	private void deleteGrop() {
+		final String st5 = getResources().getString(R.string.Dissolve_group_chat_tofail);
 		new Thread(new Runnable() {
 			public void run() {
 				try {
@@ -343,7 +358,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 					runOnUiThread(new Runnable() {
 						public void run() {
 							progressDialog.dismiss();
-							Toast.makeText(getApplicationContext(), "解散群聊失败: " + e.getMessage(), 1).show();
+							Toast.makeText(getApplicationContext(), st5 + e.getMessage(), 1).show();
 						}
 					});
 				}
@@ -357,8 +372,9 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	 * @param newmembers
 	 */
 	private void addMembersToGroup(final String[] newmembers) {
+		final String st6 = getResources().getString(R.string.Add_group_members_fail);
 		new Thread(new Runnable() {
-
+			
 			public void run() {
 				try {
 					// 创建者调用add方法
@@ -372,7 +388,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 						public void run() {
 							adapter.notifyDataSetChanged();
 							((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getAffiliationsCount()
-									+ "人)");
+									+ st);
 							progressDialog.dismiss();
 						}
 					});
@@ -380,7 +396,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 					runOnUiThread(new Runnable() {
 						public void run() {
 							progressDialog.dismiss();
-							Toast.makeText(getApplicationContext(), "添加群成员失败: " + e.getMessage(), 1).show();
+							Toast.makeText(getApplicationContext(), st6 + e.getMessage(), 1).show();
 						}
 					});
 				}
@@ -390,6 +406,8 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 
 	@Override
 	public void onClick(View v) {
+		String st6 = getResources().getString(R.string.Is_unblock);
+		final String st7 = getResources().getString(R.string.remove_group_of);
 		switch (v.getId()) {
 		case R.id.rl_switch_block_groupmsg: // 屏蔽群组
 			if (iv_switch_block_groupmsg.getVisibility() == View.VISIBLE) {
@@ -398,7 +416,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	                progressDialog = new ProgressDialog(GroupDetailsActivity.this);
 	                progressDialog.setCanceledOnTouchOutside(false);
 	            }
-				progressDialog.setMessage("正在解除屏蔽...");
+				progressDialog.setMessage(st6);
 				progressDialog.show();
 				new Thread(new Runnable() {
                     public void run() {
@@ -416,7 +434,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
                             runOnUiThread(new Runnable() {
                                 public void run() {
                                     progressDialog.dismiss();
-                                    Toast.makeText(getApplicationContext(), "解除群屏蔽失败，请检查网络或稍后重试", 1).show();
+                                    Toast.makeText(getApplicationContext(), st7, 1).show();
                                 }
                             });
                             
@@ -425,12 +443,14 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
                 }).start();
 				
 			} else {
+				String st8 = getResources().getString(R.string.group_is_blocked);
+				final String st9 = getResources().getString(R.string.group_of_shielding);
 				System.out.println("change to block group msg");
 				if (progressDialog == null) {
                     progressDialog = new ProgressDialog(GroupDetailsActivity.this);
                     progressDialog.setCanceledOnTouchOutside(false);
                 }
-				progressDialog.setMessage("正在屏蔽群组...");
+				progressDialog.setMessage(st8);
 				progressDialog.show();
 				new Thread(new Runnable() {
                     public void run() {
@@ -448,7 +468,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
                             runOnUiThread(new Runnable() {
                                 public void run() {
                                     progressDialog.dismiss();
-                                    Toast.makeText(getApplicationContext(), "群屏蔽失败，请检查网络或稍后重试", 1).show();
+                                    Toast.makeText(getApplicationContext(), st9, 1).show();
                                 }
                             });
                         }
@@ -459,10 +479,11 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 			break;
 
 		case R.id.clear_all_history: // 清空聊天记录
+			String st9 = getResources().getString(R.string.sure_to_empty_this);
 			Intent intent = new Intent(GroupDetailsActivity.this, AlertDialog.class);
 			intent.putExtra("cancel", true);
 			intent.putExtra("titleIsCancel", true);
-			intent.putExtra("msg", "确定清空此群的聊天记录吗？");
+			intent.putExtra("msg", st9);
 			startActivityForResult(intent, REQUEST_CODE_CLEAR_ALL_HISTORY);
 			break;
 
@@ -523,10 +544,11 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 						convertView.setVisibility(View.VISIBLE);
 						convertView.findViewById(R.id.badge_delete).setVisibility(View.INVISIBLE);
 					}
+					final String st10 = getResources().getString(R.string.The_delete_button_is_clicked);
 					button.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View v) {
-							EMLog.d(TAG, "删除按钮被点击");
+							EMLog.d(TAG, st10);
 							isInDeleteMode = true;
 							notifyDataSetChanged();
 						}
@@ -547,10 +569,11 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 						convertView.setVisibility(View.VISIBLE);
 						convertView.findViewById(R.id.badge_delete).setVisibility(View.INVISIBLE);
 					}
+					final String st11 = getResources().getString(R.string.Add_a_button_was_clicked);
 					button.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View v) {
-							EMLog.d(TAG, "添加按钮被点击");
+							EMLog.d(TAG, st11);
 							// 进入选人页面
 							startActivityForResult(
 									(new Intent(GroupDetailsActivity.this, GroupPickContactsActivity.class).putExtra("groupId", groupId)),
@@ -573,13 +596,17 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 				} else {
 					convertView.findViewById(R.id.badge_delete).setVisibility(View.INVISIBLE);
 				}
+				final String st12 = getResources().getString(R.string.not_delete_myself);
+				final String st13 = getResources().getString(R.string.Are_removed);
+				final String st14 = getResources().getString(R.string.Delete_failed);
+				final String st15 = getResources().getString(R.string.confirm_the_members);
 				button.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
 						if (isInDeleteMode) {
 							// 如果是删除自己，return
 							if (EMChatManager.getInstance().getCurrentUser().equals(username)) {
-								startActivity(new Intent(GroupDetailsActivity.this, AlertDialog.class).putExtra("msg", "不能删除自己"));
+								startActivity(new Intent(GroupDetailsActivity.this, AlertDialog.class).putExtra("msg", st12));
 								return;
 							}
 							if (!NetUtils.hasNetwork(getApplicationContext())) {
@@ -605,7 +632,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 					 */
 					protected void deleteMembersFromGroup(final String username) {
 						final ProgressDialog deleteDialog = new ProgressDialog(GroupDetailsActivity.this);
-						deleteDialog.setMessage("正在移除...");
+						deleteDialog.setMessage(st13);
 						deleteDialog.setCanceledOnTouchOutside(false);
 						deleteDialog.show();
 						new Thread(new Runnable() {
@@ -623,14 +650,14 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 											deleteDialog.dismiss();
 											notifyDataSetChanged();
 											((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "("
-													+ group.getAffiliationsCount() + "人)");
+													+ group.getAffiliationsCount() + st);
 										}
 									});
 								} catch (final Exception e) {
 									deleteDialog.dismiss();
 									runOnUiThread(new Runnable() {
 										public void run() {
-											Toast.makeText(getApplicationContext(), "删除失败：" + e.getMessage(), 1).show();
+											Toast.makeText(getApplicationContext(), st14 + e.getMessage(), 1).show();
 										}
 									});
 								}
@@ -646,7 +673,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 					public boolean onLongClick(View v) {
 						if (group.getOwner().equals(EMChatManager.getInstance().getCurrentUser())) {
 							Intent intent = new Intent(GroupDetailsActivity.this, AlertDialog.class);
-							intent.putExtra("msg", "确认将此成员加入至此群黑名单?");
+							intent.putExtra("msg", st15);
 							intent.putExtra("cancel", true);
 							startActivityForResult(intent, REQUEST_CODE_ADD_TO_BALCKLIST);
 							longClickUsername = username;

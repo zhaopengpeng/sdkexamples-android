@@ -75,10 +75,11 @@ public class GroupSimpleDetailActivity extends BaseActivity {
 					});
 				} catch (final EaseMobException e) {
 					e.printStackTrace();
+					final String st1 = getResources().getString(R.string.Failed_to_get_group_chat_information);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							progressBar.setVisibility(View.INVISIBLE);
-							Toast.makeText(GroupSimpleDetailActivity.this, "获取群聊信息失败: "+e.getMessage(), 1).show();
+							Toast.makeText(GroupSimpleDetailActivity.this, st1+e.getMessage(), 1).show();
 						}
 					});
 				}
@@ -90,8 +91,14 @@ public class GroupSimpleDetailActivity extends BaseActivity {
 	
 	//加入群聊
 	public void addToGroup(View view){
+		String st1 = getResources().getString(R.string.Is_sending_a_request);
+		final String st2 = getResources().getString(R.string.Request_to_join);
+		final String st3 = getResources().getString(R.string.send_the_request_is);
+		final String st4 = getResources().getString(R.string.Join_the_group_chat);
+		final String st5 = getResources().getString(R.string.Failed_to_join_the_group_chat);
 		final ProgressDialog pd = new ProgressDialog(this);
-		pd.setMessage("正在发送请求...");
+//		getResources().getString(R.string)
+		pd.setMessage(st1);
 		pd.setCanceledOnTouchOutside(false);
 		pd.show();
 		new Thread(new Runnable() {
@@ -99,7 +106,7 @@ public class GroupSimpleDetailActivity extends BaseActivity {
 				try {
 					//如果是membersOnly的群，需要申请加入，不能直接join
 					if(group.isMembersOnly()){
-						EMGroupManager.getInstance().applyJoinToGroup(groupid, "求加入");
+						EMGroupManager.getInstance().applyJoinToGroup(groupid, st2);
 					}else{
 						EMGroupManager.getInstance().joinGroup(groupid);
 					}
@@ -107,9 +114,9 @@ public class GroupSimpleDetailActivity extends BaseActivity {
 						public void run() {
 							pd.dismiss();
 							if(group.isMembersOnly())
-								Toast.makeText(GroupSimpleDetailActivity.this, "发送请求成功，等待群主同意", 0).show();
+								Toast.makeText(GroupSimpleDetailActivity.this, st3, 0).show();
 							else
-								Toast.makeText(GroupSimpleDetailActivity.this, "加入群聊成功", 0).show();
+								Toast.makeText(GroupSimpleDetailActivity.this, st4, 0).show();
 							btn_add_group.setEnabled(false);
 						}
 					});
@@ -118,7 +125,7 @@ public class GroupSimpleDetailActivity extends BaseActivity {
 					runOnUiThread(new Runnable() {
 						public void run() {
 							pd.dismiss();
-							Toast.makeText(GroupSimpleDetailActivity.this, "加入群聊失败："+e.getMessage(), 0).show();
+							Toast.makeText(GroupSimpleDetailActivity.this, st5+e.getMessage(), 0).show();
 						}
 					});
 				}

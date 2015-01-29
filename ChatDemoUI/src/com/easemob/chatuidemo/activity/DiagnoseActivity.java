@@ -95,7 +95,7 @@ public class DiagnoseActivity extends BaseActivity implements OnClickListener {
 		progressDialog.setMessage(stri);
 		progressDialog.setCancelable(false);
 		progressDialog.show();
-
+		final String st = getResources().getString(R.string.Log_uploaded_successfully);
 		EMChat.getInstance().uploadLog(new EMCallBack() {
 
 			@Override
@@ -105,7 +105,7 @@ public class DiagnoseActivity extends BaseActivity implements OnClickListener {
 					@Override
 					public void run() {
 						progressDialog.dismiss();
-						Toast.makeText(DiagnoseActivity.this, "日志上传成功",
+						Toast.makeText(DiagnoseActivity.this, st,
 								Toast.LENGTH_SHORT).show();
 					}
 				});
@@ -123,7 +123,7 @@ public class DiagnoseActivity extends BaseActivity implements OnClickListener {
 				// });
 
 			}
-
+			String st3 = getResources().getString(R.string.Log_Upload_failed);
 			@Override
 			public void onError(int code, String message) {
 				EMLog.e("###", message);
@@ -132,7 +132,7 @@ public class DiagnoseActivity extends BaseActivity implements OnClickListener {
 					@Override
 					public void run() {
 						progressDialog.dismiss();
-						Toast.makeText(DiagnoseActivity.this, "log上传失败",
+						Toast.makeText(DiagnoseActivity.this, st3,
 								Toast.LENGTH_SHORT).show();
 					}
 				});

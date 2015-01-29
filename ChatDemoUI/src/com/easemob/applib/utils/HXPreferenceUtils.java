@@ -56,39 +56,6 @@ public class HXPreferenceUtils {
 		
 		return mPreferenceUtils;
 	}
-
-	/*
-	 * 判断android系统语言
-	 */
-	public boolean getSystemLanguage(){
-		String language = getLanguageEnv();
-
-        if (language != null
-                && (language.trim().equals("zh-CN") || language.trim().equals("zh-TW")))
-            return true;
-        else
-            return false;
-	}
-	
-	private String getLanguageEnv() {
-        Locale l = Locale.getDefault();
-        String language = l.getLanguage();
-        String country = l.getCountry().toLowerCase();
-        if ("zh".equals(language)) {
-            if ("cn".equals(country)) {
-                language = "zh-CN";
-            } else if ("tw".equals(country)) {
-                language = "zh-TW";
-            }
-        } else if ("pt".equals(language)) {
-            if ("br".equals(country)) {
-                language = "pt-BR";
-            } else if ("pt".equals(country)) {
-                language = "pt-PT";
-            }
-        }
-        return language;
-    }
 	
 	public void setSettingMsgNotification(boolean paramBoolean) {
 		editor.putBoolean(SHARED_KEY_SETTING_NOTIFICATION, paramBoolean);

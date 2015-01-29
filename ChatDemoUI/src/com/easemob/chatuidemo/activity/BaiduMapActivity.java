@@ -76,10 +76,13 @@ public class BaiduMapActivity extends BaseActivity {
 	public class BaiduSDKReceiver extends BroadcastReceiver {
 		public void onReceive(Context context, Intent intent) {
 			String s = intent.getAction();
+			String st1 = getResources().getString(R.string.Network_error);
 			if (s.equals(SDKInitializer.SDK_BROADTCAST_ACTION_STRING_PERMISSION_CHECK_ERROR)) {
-				Toast.makeText(instance, "key 验证出错! 请在 AndroidManifest.xml 文件中检查 key 设置", Toast.LENGTH_SHORT).show();
+				
+				String st2 = getResources().getString(R.string.please_check);
+				Toast.makeText(instance, st2, Toast.LENGTH_SHORT).show();
 			} else if (s.equals(SDKInitializer.SDK_BROADCAST_ACTION_STRING_NETWORK_ERROR)) {
-				Toast.makeText(instance, "网络出错", Toast.LENGTH_SHORT).show();
+				Toast.makeText(instance, st1, Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
@@ -142,10 +145,11 @@ public class BaiduMapActivity extends BaseActivity {
 	}
 
 	private void showMapWithLocationClient() {
+		String str1 = getResources().getString(R.string.Making_sure_your_location);
 		progressDialog = new ProgressDialog(this);
 		progressDialog.setCanceledOnTouchOutside(false);
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-		progressDialog.setMessage("正在确定你的位置...");
+		progressDialog.setMessage(str1);
 
 		progressDialog.setOnCancelListener(new OnCancelListener() {
 

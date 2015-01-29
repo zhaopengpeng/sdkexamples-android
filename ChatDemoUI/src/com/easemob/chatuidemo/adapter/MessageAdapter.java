@@ -417,13 +417,14 @@ public class MessageAdapter extends BaseAdapter{
 			});
 
 		} else {
+			final String st = context.getResources().getString(R.string.Into_the_blacklist);
 			// 长按头像，移入黑名单
 			holder.head_iv.setOnLongClickListener(new OnLongClickListener() {
 
 				@Override
 				public boolean onLongClick(View v) {
 					Intent intent = new Intent(activity, AlertDialog.class);
-					intent.putExtra("msg", "移入到黑名单？");
+					intent.putExtra("msg", st);
 					intent.putExtra("cancel", true);
 					intent.putExtra("position", position);
 					activity.startActivityForResult(intent, ChatActivity.REQUEST_CODE_ADD_TO_BLACKLIST);
@@ -895,14 +896,15 @@ public class MessageAdapter extends BaseAdapter{
 				}
 			}
 		});
-
+		String st1 = context.getResources().getString(R.string.Have_downloaded);
+		String st2 = context.getResources().getString(R.string.Did_not_download);
 		if (message.direct == EMMessage.Direct.RECEIVE) { // 接收的消息
 			System.err.println("it is receive msg");
 			File file = new File(filePath);
 			if (file != null && file.exists()) {
-				holder.tv_file_download_state.setText("已下载");
+				holder.tv_file_download_state.setText(st1);
 			} else {
-				holder.tv_file_download_state.setText("未下载");
+				holder.tv_file_download_state.setText(st2);
 			}
 			return;
 		}

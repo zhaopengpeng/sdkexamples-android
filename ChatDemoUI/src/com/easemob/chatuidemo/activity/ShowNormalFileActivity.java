@@ -65,7 +65,8 @@ public class ShowNormalFileActivity extends BaseActivity {
 									public void run() {
 										if(file != null && file.exists()&&file.isFile())
 											file.delete();
-										Toast.makeText(ShowNormalFileActivity.this, "下载文件失败: "+msg, Toast.LENGTH_SHORT).show();
+										String str4 = getResources().getString(R.string.Failed_to_download_file);
+										Toast.makeText(ShowNormalFileActivity.this, str4+msg, Toast.LENGTH_SHORT).show();
 										finish();
 									}
 								});

@@ -16,6 +16,7 @@ package com.easemob.chatuidemo.activity;
 
 import java.util.UUID;
 
+import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.media.SoundPool;
@@ -62,10 +63,9 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 	private TextView nickTextView;
 	private TextView durationTextView;
 	private Chronometer chronometer;
-
+	String st1;
 	private boolean isAnswered;
 	private LinearLayout voiceContronlLayout;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -109,7 +109,8 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 
 			comingBtnContainer.setVisibility(View.INVISIBLE);
 			hangupBtn.setVisibility(View.VISIBLE);
-			callStateTextView.setText("正在连接对方...");
+			st1 = getResources().getString(R.string.Are_connected_to_each_other);
+			callStateTextView.setText(st1);
 			handler.postDelayed(new Runnable() {
 				public void run() {
 					streamID = playMakeCallSounds();
@@ -120,9 +121,10 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 				EMChatManager.getInstance().makeVoiceCall(username);
 			} catch (EMServiceNotReadyException e) {
 				e.printStackTrace();
+				final String st2 = getResources().getString(R.string.Is_not_yet_connected_to_the_server);
 				runOnUiThread(new Runnable() {
 					public void run() {
-						Toast.makeText(VoiceCallActivity.this, "尚未连接至服务器", 0).show();
+						Toast.makeText(VoiceCallActivity.this, st2, 0).show();
 					}
 				});
 			}
@@ -141,19 +143,19 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 	 */
 	void addCallStateListener() {
 		EMChatManager.getInstance().addVoiceCallStateChangeListener(new EMCallStateChangeListener() {
-
+			
 			@Override
 			public void onCallStateChanged(CallState callState, CallError error) {
 				// Message msg = handler.obtainMessage();
 				switch (callState) {
-
+				
 				case CONNECTING: // 正在连接对方
 					runOnUiThread(new Runnable() {
-
+						
 						@Override
 						public void run() {
 							// TODO Auto-generated method stub
-							callStateTextView.setText("正在连接对方...");
+							callStateTextView.setText(st1);
 						}
 
 					});
@@ -164,7 +166,8 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 						@Override
 						public void run() {
 							// TODO Auto-generated method stub
-							callStateTextView.setText("已经和对方建立连接，等待对方接受...");
+							String st3 = getResources().getString(R.string.have_connected_with);
+							callStateTextView.setText(st3);
 						}
 
 					});
@@ -185,7 +188,8 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 							chronometer.setBase(SystemClock.elapsedRealtime());
 							// 开始记时
 							chronometer.start();
-							callStateTextView.setText("通话中...");
+							String str4 = getResources().getString(R.string.In_the_call);
+							callStateTextView.setText(str4);
 							callingState = CallingState.NORMAL;
 						}
 
@@ -213,39 +217,51 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 						public void run() {
 							chronometer.stop();
 							callDruationText = chronometer.getText().toString();
-
+							String st2 = getResources().getString(R.string.The_other_party_refused_to_accept);
+							String st3 = getResources().getString(R.string.Connection_failure);
+							String st4 = getResources().getString(R.string.The_other_party_is_not_online);
+							String st5 = getResources().getString(R.string.The_other_is_on_the_phone_please);
+							
+							String st6 = getResources().getString(R.string.The_other_party_did_not_answer_new);
+							String st7 = getResources().getString(R.string.hang_up);
+							String st8 = getResources().getString(R.string.The_other_is_hang_up);
+							
+							String st9 = getResources().getString(R.string.did_not_answer);
+							String st10 = getResources().getString(R.string.Has_been_cancelled);
+							String st11 = getResources().getString(R.string.hang_up);
+							
 							if (fError == CallError.REJECTED) {
 								callingState = CallingState.BEREFUESD;
-								callStateTextView.setText("对方拒绝接受！...");
+								callStateTextView.setText(st2);
 							} else if (fError == CallError.ERROR_TRANSPORT) {
-								callStateTextView.setText("连接建立失败！...");
+								callStateTextView.setText(st3);
 							} else if (fError == CallError.ERROR_INAVAILABLE) {
 								callingState = CallingState.OFFLINE;
-								callStateTextView.setText("对方不在线，请稍后再拨...");
+								callStateTextView.setText(st4);
 							} else if (fError == CallError.ERROR_BUSY) {
 								callingState = CallingState.BUSY;
-								callStateTextView.setText("对方正在通话中，请稍后再拨");
+								callStateTextView.setText(st5);
 							} else if (fError == CallError.ERROR_NORESPONSE) {
 								callingState = CallingState.NORESPONSE;
-								callStateTextView.setText("对方未接听");
+								callStateTextView.setText(st6);
 							} else {
 								if (isAnswered) {
 									callingState = CallingState.NORMAL;
 									if (endCallTriggerByMe) {
-										callStateTextView.setText("挂断...");
+										callStateTextView.setText(st7);
 									} else {
-										callStateTextView.setText("对方已经挂断...");
+										callStateTextView.setText(st8);
 									}
 								} else {
 									if (isInComingCall) {
 										callingState = CallingState.UNANSWERED;
-										callStateTextView.setText("未接听");
+										callStateTextView.setText(st9);
 									} else {
 									    if (callingState != CallingState.NORMAL) {
 									        callingState = CallingState.CANCED;
-									        callStateTextView.setText("已取消");
+									        callStateTextView.setText(st10);
 									    }else {
-									        callStateTextView.setText("挂断...");
+									        callStateTextView.setText(st11);
                                         }
 									}
 								}

@@ -79,6 +79,7 @@ public class ChatAllHistoryFragment extends Fragment {
 		listView.setAdapter(adapter);
 				
 		
+		final String st2 = getResources().getString(R.string.Cant_chat_with_yourself);
 		listView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -86,7 +87,7 @@ public class ChatAllHistoryFragment extends Fragment {
 				EMConversation conversation = adapter.getItem(position);
 				String username = conversation.getUserName();
 				if (username.equals(DemoApplication.getInstance().getUserName()))
-					Toast.makeText(getActivity(), "不能和自己聊天", 0).show();
+					Toast.makeText(getActivity(), st2, 0).show();
 				else {
 				    // 进入聊天页面
 				    Intent intent = new Intent(getActivity(), ChatActivity.class);
