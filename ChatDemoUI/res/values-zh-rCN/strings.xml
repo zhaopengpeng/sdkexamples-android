@@ -117,7 +117,6 @@
     <string name="Exit_the_group_chat">退出群聊</string>
     
     <string name="not_add_myself">不能添加自己</string>
-    <string name="Is_sending_a_request">正在发送请求...</string>
     <string name="This_user_is_already_your_friend">此用户已是你的好友</string>
     <string name="Add_a_friend">加个好友呗</string>
     <string name="send_successful">发送请求成功,等待对方验证</string>
