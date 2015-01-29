@@ -117,7 +117,7 @@ public class GroupPickContactsActivity extends BaseActivity {
 		    return members;
 		int length = contactAdapter.isCheckedArray.length;
 		for (int i = 0; i < length; i++) {
-			String username = contactAdapter.getItem(i + 1).getUsername();
+			String username = contactAdapter.getItem(i).getUsername();
 			if (contactAdapter.isCheckedArray[i] && !exitingMembers.contains(username)) {
 				members.add(username);
 			}
