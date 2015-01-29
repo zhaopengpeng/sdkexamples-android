@@ -82,7 +82,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 
 	public static GroupDetailsActivity instance;
 	
-	String st = getResources().getString(R.string.people);
+	String st = "";
 	// 清空所有聊天记录
 	private RelativeLayout clearAllHistory;
 	private RelativeLayout blacklistLayout;
@@ -93,6 +93,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_group_details);
 		instance = this;
+		st = getResources().getString(R.string.people);
 		clearAllHistory = (RelativeLayout) findViewById(R.id.clear_all_history);
 		userGridview = (ExpandGridView) findViewById(R.id.gridview);
 		loadingPB = (ProgressBar) findViewById(R.id.progressBar);
