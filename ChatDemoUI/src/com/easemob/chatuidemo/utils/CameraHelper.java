@@ -31,7 +31,6 @@ public class CameraHelper implements PreviewCallback {
 
     static int mwidth = 320;
     static int mheight = 240;
-    static int bitrate = 384;
 
     private Camera mCamera;
     private int camera_count;
@@ -100,6 +99,8 @@ public class CameraHelper implements PreviewCallback {
             // mCamera.setPreviewDisplay(holder);
             mCamera.setPreviewDisplay(localSurfaceHolder);
             mCamera.setPreviewCallbackWithBuffer(this);
+            
+            EMVideoCallHelper.getInstance().setResolution(mwidth, mheight);
 
             mCamera.startPreview();
             Log.d(TAG, "camera start preview");
