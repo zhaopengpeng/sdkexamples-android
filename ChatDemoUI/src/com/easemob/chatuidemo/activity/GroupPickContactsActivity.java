@@ -134,7 +134,7 @@ public class GroupPickContactsActivity extends BaseActivity {
 		private boolean[] isCheckedArray;
 
 		public PickContactAdapter(Context context, int resource, List<User> users) {
-			super(context, resource, users, null);
+			super(context, resource, users);
 			isCheckedArray = new boolean[users.size()];
 		}
 

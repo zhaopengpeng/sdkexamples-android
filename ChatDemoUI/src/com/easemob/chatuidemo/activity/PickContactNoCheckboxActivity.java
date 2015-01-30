@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -54,7 +53,7 @@ public class PickContactNoCheckboxActivity extends BaseActivity {
 		// 获取设置contactlist
 		getContactList();
 		// 设置adapter
-		contactAdapter = new ContactAdapter(this, R.layout.row_contact, contactList, sidebar);
+		contactAdapter = new ContactAdapter(this, R.layout.row_contact, contactList);
 		listView.setAdapter(contactAdapter);
 		listView.setOnItemClickListener(new OnItemClickListener() {
 

@@ -16,31 +16,20 @@ package com.easemob.chatuidemo.adapter;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.Filter;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
-import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMConversation;
-import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.domain.User;
@@ -56,20 +45,14 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	List<User> userList;
 	List<User> copyUserList;
 	private LayoutInflater layoutInflater;
-	private EditText query;
-	private ImageButton clearSearch;
 	private SparseIntArray positionOfSection;
 	private SparseIntArray sectionOfPosition;
-	private Sidebar sidebar;
 	private int res;
-	String str;
 	public MyFilter myFilter;
 
-	public ContactAdapter(Context context, int resource, List<User> objects,Sidebar sidebar) {
+	public ContactAdapter(Context context, int resource, List<User> objects) {
 		super(context, resource, objects);
-		str = context.getResources().getString(R.string.search);
 		this.res = resource;
-		this.sidebar=sidebar;
 		this.userList=objects;
 		copyUserList = new ArrayList<User>();
 		copyUserList.addAll(objects);

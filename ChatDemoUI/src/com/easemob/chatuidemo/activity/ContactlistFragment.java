@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.zip.Inflater;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -126,7 +125,7 @@ public class ContactlistFragment extends Fragment {
 		});
 		
 		// 设置adapter
-		adapter = new ContactAdapter(getActivity(), R.layout.row_contact, contactList, sidebar);
+		adapter = new ContactAdapter(getActivity(), R.layout.row_contact, contactList);
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(new OnItemClickListener() {
 
