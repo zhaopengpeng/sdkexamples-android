@@ -190,7 +190,7 @@
     <string name="User_name_cannot_be_empty">User name cannot be empty!</string>
     <string name="Password_cannot_be_empty">Password cannot be empty!</string>
     <string name="please_set_the_current">"Please set the current user's nickname \ n to ios offline push not userid but Nick, see comments"</string>
-    <string name="Is_landing">Is landing...</string>
+    <string name="Is_landing">logging in...</string>
     <string name="list_is_for">List is for friends and group chat</string>
     <string name="login_failure_failed">Logon failure: failed to get good friend or a group chat</string>
     <string name="Login_failed">Login failed:</string>

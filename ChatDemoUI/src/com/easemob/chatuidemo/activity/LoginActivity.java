@@ -133,10 +133,6 @@ public class LoginActivity extends BaseActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		String str5 = getResources().getString(R.string.Is_landing);
-		final String str6 = getResources().getString(R.string.list_is_for);
-		final String str7 = getResources().getString(R.string.login_failure_failed);
-		final String str8 = getResources().getString(R.string.Login_failed);
 		if (resultCode == RESULT_OK) {
 			if (requestCode == REQUEST_CODE_SETNICK) {
 				DemoApplication.currentUserNick = data.getStringExtra("edittext");
@@ -151,7 +147,7 @@ public class LoginActivity extends BaseActivity {
 						progressShow = false;
 					}
 				});
-				pd.setMessage(str5);
+				pd.setMessage(getString(R.string.Is_landing));
 				pd.show();
 
 				final long start = System.currentTimeMillis();
@@ -171,7 +167,7 @@ public class LoginActivity extends BaseActivity {
 						DemoApplication.getInstance().setPassword(currentPassword);
 						runOnUiThread(new Runnable() {
 							public void run() {
-								pd.setMessage(str6);
+								pd.setMessage(getString(R.string.list_is_for));
 							}
 						});
 						try {
@@ -189,7 +185,7 @@ public class LoginActivity extends BaseActivity {
                                 public void run() {
                                     pd.dismiss();
                                     DemoApplication.getInstance().logout(null);
-                                    Toast.makeText(getApplicationContext(), str7, 1).show();
+                                    Toast.makeText(getApplicationContext(), R.string.login_failure_failed, 1).show();
                                 }
                             });
 							return;
@@ -221,7 +217,7 @@ public class LoginActivity extends BaseActivity {
 						runOnUiThread(new Runnable() {
 							public void run() {
 								pd.dismiss();
-								Toast.makeText(getApplicationContext(), str8 + message, Toast.LENGTH_SHORT).show();
+								Toast.makeText(getApplicationContext(), getString(R.string.Login_failed) + message, Toast.LENGTH_SHORT).show();
 							}
 						});
 					}
