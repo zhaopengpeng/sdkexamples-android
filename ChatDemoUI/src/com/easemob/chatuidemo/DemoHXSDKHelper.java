@@ -173,6 +173,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             public void onSuccess() {
                 // TODO Auto-generated method stub
                 setContactList(null);
+                endCall();
                 getModel().closeDB();
                 if(callback != null){
                     callback.onSuccess();
@@ -194,5 +195,13 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             }
             
         });
+    }
+    
+    void endCall(){
+        try {
+            EMChatManager.getInstance().endCall();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
