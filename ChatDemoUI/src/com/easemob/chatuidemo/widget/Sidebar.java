@@ -52,8 +52,7 @@ public class Sidebar extends View{
 	private String[] sections; 
 
 	private void init(){
-		String st = context.getString(R.string.search_new);
-		sections= new String[]{st,"#","A","B","C","D","E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+		sections= new String[]{"#","A","B","C","D","E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setColor(Color.DKGRAY);
 		paint.setTextAlign(Align.CENTER);

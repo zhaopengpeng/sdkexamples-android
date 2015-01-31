@@ -41,7 +41,7 @@
     <string name="location_message">The location information</string>
     <string name="recording_video">record video</string>
     <string name="location_prefix">[my location]</string>
-    <string name="voice">[voice]</string>
+    <string name="voice">voice</string>
     <string name="picture">[picture]</string>
     <string name="video">[video]</string>
     <string name="file">[file]</string>
@@ -244,5 +244,10 @@
     <string name="Is_download_voice_click_later">Is download voice, click later</string>
     <string name="Send_the_following_pictures">Send the following pictures?</string>
     <string name="search_new">search</string>
+    
+    <string name="Delete_the_contact">Delete the contact</string>
+    <string name="Move_into_the_blacklist_new">Move into the blacklist</string>
+    <string name="Change_the_group_name">Change the group name</string>
+    <string name="The_dissolution_of_chatting_new">The dissolution of chatting</string>
     
 </resources>
