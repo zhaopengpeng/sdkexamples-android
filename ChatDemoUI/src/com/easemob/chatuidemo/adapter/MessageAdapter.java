@@ -62,7 +62,6 @@ import com.easemob.chatuidemo.activity.AlertDialog;
 import com.easemob.chatuidemo.activity.BaiduMapActivity;
 import com.easemob.chatuidemo.activity.ChatActivity;
 import com.easemob.chatuidemo.activity.ContextMenu;
-import com.easemob.chatuidemo.activity.LoginActivity;
 import com.easemob.chatuidemo.activity.ShowBigImage;
 import com.easemob.chatuidemo.activity.ShowNormalFileActivity;
 import com.easemob.chatuidemo.activity.ShowVideoActivity;
@@ -97,6 +96,8 @@ public class MessageAdapter extends BaseAdapter{
 	private static final int MESSAGE_TYPE_RECV_FILE = 11;
 	private static final int MESSAGE_TYPE_SENT_VOICE_CALL = 12;
 	private static final int MESSAGE_TYPE_RECV_VOICE_CALL = 13;
+	private static final int MESSAGE_TYPE_SENT_VIDEO_CALL = 14;
+	private static final int MESSAGE_TYPE_RECV_VIDEO_CALL = 15;
 
 	public static final String IMAGE_DIR = "chat/image/";
 	public static final String VOICE_DIR = "chat/audio/";
@@ -153,9 +154,11 @@ public class MessageAdapter extends BaseAdapter{
 	public int getItemViewType(int position) {
 		EMMessage message = conversation.getMessage(position);
 		if (message.getType() == EMMessage.Type.TXT) {
-			if (!message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL, false))
-				return message.direct == EMMessage.Direct.RECEIVE ? MESSAGE_TYPE_RECV_TXT : MESSAGE_TYPE_SENT_TXT;
-			return message.direct == EMMessage.Direct.RECEIVE ? MESSAGE_TYPE_RECV_VOICE_CALL : MESSAGE_TYPE_SENT_VOICE_CALL;
+			if (message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL, false))
+			    return message.direct == EMMessage.Direct.RECEIVE ? MESSAGE_TYPE_RECV_VOICE_CALL : MESSAGE_TYPE_SENT_VOICE_CALL;
+			else if (message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VIDEO_CALL, false))
+			    return message.direct == EMMessage.Direct.RECEIVE ? MESSAGE_TYPE_RECV_VIDEO_CALL : MESSAGE_TYPE_SENT_VIDEO_CALL;
+			return message.direct == EMMessage.Direct.RECEIVE ? MESSAGE_TYPE_RECV_TXT : MESSAGE_TYPE_SENT_TXT;
 		}
 		if (message.getType() == EMMessage.Type.IMAGE) {
 			return message.direct == EMMessage.Direct.RECEIVE ? MESSAGE_TYPE_RECV_IMAGE : MESSAGE_TYPE_SENT_IMAGE;
@@ -178,7 +181,7 @@ public class MessageAdapter extends BaseAdapter{
 	}
 
 	public int getViewTypeCount() {
-		return 14;
+		return 16;
 	}
 
 	private View createViewByMessage(EMMessage message, int position) {
@@ -200,10 +203,14 @@ public class MessageAdapter extends BaseAdapter{
 			return message.direct == EMMessage.Direct.RECEIVE ? inflater.inflate(R.layout.row_received_file, null) : inflater.inflate(
 					R.layout.row_sent_file, null);
 		default:
-			// 语音电话
+			// 语音通话
 			if (message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL, false))
 				return message.direct == EMMessage.Direct.RECEIVE ? inflater.inflate(R.layout.row_received_voice_call, null) : inflater
 						.inflate(R.layout.row_sent_voice_call, null);
+			// 视频通话
+			else if (message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VIDEO_CALL, false))
+			    return message.direct == EMMessage.Direct.RECEIVE ? inflater.inflate(R.layout.row_received_video_call, null) : inflater
+                        .inflate(R.layout.row_sent_video_call, null);
 			return message.direct == EMMessage.Direct.RECEIVE ? inflater.inflate(R.layout.row_received_message, null) : inflater.inflate(
 					R.layout.row_sent_message, null);
 		}
@@ -240,8 +247,9 @@ public class MessageAdapter extends BaseAdapter{
 				} catch (Exception e) {
 				}
 
-				// 语音通话
-				if (message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL, false)) {
+				// 语音通话及视频通话
+				if (message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL, false)
+				        || message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VIDEO_CALL, false)) {
 					holder.iv = (ImageView) convertView.findViewById(R.id.iv_call_icon);
 					holder.tv = (TextView) convertView.findViewById(R.id.tv_chatcontent);
 				}
@@ -356,11 +364,12 @@ public class MessageAdapter extends BaseAdapter{
 			handleImageMessage(message, holder, position, convertView);
 			break;
 		case TXT: // 文本
-			if (!message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL, false))
-				handleTextMessage(message, holder, position);
+			if (message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL, false)
+			        || message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VIDEO_CALL, false))
+			    // 音视频通话
+			    handleCallMessage(message, holder, position);
 			else
-				// 语音电话
-				handleVoiceCallMessage(message, holder, position);
+			    handleTextMessage(message, holder, position);
 			break;
 		case LOCATION: // 位置
 			handleLocationMessage(message, holder, position, convertView);
@@ -408,13 +417,14 @@ public class MessageAdapter extends BaseAdapter{
 			});
 
 		} else {
+			final String st = context.getResources().getString(R.string.Into_the_blacklist);
 			// 长按头像，移入黑名单
 			holder.head_iv.setOnLongClickListener(new OnLongClickListener() {
 
 				@Override
 				public boolean onLongClick(View v) {
 					Intent intent = new Intent(activity, AlertDialog.class);
-					intent.putExtra("msg", "移入到黑名单？");
+					intent.putExtra("msg", st);
 					intent.putExtra("cancel", true);
 					intent.putExtra("position", position);
 					activity.startActivityForResult(intent, ChatActivity.REQUEST_CODE_ADD_TO_BLACKLIST);
@@ -485,13 +495,13 @@ public class MessageAdapter extends BaseAdapter{
 	}
 
 	/**
-	 * 语音通话记录
+	 * 音视频通话记录
 	 * 
 	 * @param message
 	 * @param holder
 	 * @param position
 	 */
-	private void handleVoiceCallMessage(EMMessage message, ViewHolder holder, final int position) {
+	private void handleCallMessage(EMMessage message, ViewHolder holder, final int position) {
 		TextMessageBody txtBody = (TextMessageBody) message.getBody();
 		holder.tv.setText(txtBody.getMessage());
 
@@ -886,14 +896,15 @@ public class MessageAdapter extends BaseAdapter{
 				}
 			}
 		});
-
+		String st1 = context.getResources().getString(R.string.Have_downloaded);
+		String st2 = context.getResources().getString(R.string.Did_not_download);
 		if (message.direct == EMMessage.Direct.RECEIVE) { // 接收的消息
 			System.err.println("it is receive msg");
 			File file = new File(filePath);
 			if (file != null && file.exists()) {
-				holder.tv_file_download_state.setText("已下载");
+				holder.tv_file_download_state.setText(st1);
 			} else {
-				holder.tv_file_download_state.setText("未下载");
+				holder.tv_file_download_state.setText(st2);
 			}
 			return;
 		}

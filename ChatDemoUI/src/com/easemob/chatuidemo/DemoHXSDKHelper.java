@@ -30,7 +30,7 @@ import com.easemob.chat.OnNotificationClickListener;
 import com.easemob.chatuidemo.activity.ChatActivity;
 import com.easemob.chatuidemo.activity.MainActivity;
 import com.easemob.chatuidemo.domain.User;
-import com.easemob.chatuidemo.receiver.VoiceCallReceiver;
+import com.easemob.chatuidemo.receiver.CallReceiver;
 import com.easemob.chatuidemo.utils.CommonUtils;
 
 /**
@@ -127,8 +127,8 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     @Override
     protected void initListener(){
         super.initListener();
-        IntentFilter callFilter = new IntentFilter(EMChatManager.getInstance().getIncomingVoiceCallBroadcastAction());
-        appContext.registerReceiver(new VoiceCallReceiver(), callFilter);    
+        IntentFilter callFilter = new IntentFilter(EMChatManager.getInstance().getIncomingCallBroadcastAction());
+        appContext.registerReceiver(new CallReceiver(), callFilter);    
     }
 
     @Override
@@ -173,6 +173,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             public void onSuccess() {
                 // TODO Auto-generated method stub
                 setContactList(null);
+                endCall();
                 getModel().closeDB();
                 if(callback != null){
                     callback.onSuccess();
@@ -194,5 +195,13 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             }
             
         });
+    }
+    
+    void endCall(){
+        try {
+            EMChatManager.getInstance().endCall();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -42,6 +42,7 @@ import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.db.UserDao;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.utils.CommonUtils;
+import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.EMLog;
 import com.easemob.util.HanziToPinyin;
 import com.umeng.analytics.MobclickAgent;
@@ -113,17 +114,17 @@ public class LoginActivity extends BaseActivity {
 		currentPassword = passwordEditText.getText().toString().trim();
 		
 		if(TextUtils.isEmpty(currentUsername)){
-			Toast.makeText(this, "用户名不能为空！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.User_name_cannot_be_empty, Toast.LENGTH_SHORT).show();
 			return;
 		}
 		if(TextUtils.isEmpty(currentPassword)){
-			Toast.makeText(this, "密码不能为空！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, R.string.Password_cannot_be_empty, Toast.LENGTH_SHORT).show();
 			return;
 		}
 		Intent intent = new Intent(LoginActivity.this, com.easemob.chatuidemo.activity.AlertDialog.class);
 		intent.putExtra("editTextShow", true);
 		intent.putExtra("titleIsCancel", true);
-		intent.putExtra("msg", "请设置当前用户的昵称\n为了ios离线推送不是userid而是nick，详情见注释");
+		intent.putExtra("msg", getResources().getString(R.string.please_set_the_current));
 		intent.putExtra("edit_text", currentUsername);
 		startActivityForResult(intent, REQUEST_CODE_SETNICK);
 
@@ -146,7 +147,7 @@ public class LoginActivity extends BaseActivity {
 						progressShow = false;
 					}
 				});
-				pd.setMessage("正在登陆...");
+				pd.setMessage(getString(R.string.Is_landing));
 				pd.show();
 
 				final long start = System.currentTimeMillis();
@@ -166,7 +167,7 @@ public class LoginActivity extends BaseActivity {
 						DemoApplication.getInstance().setPassword(currentPassword);
 						runOnUiThread(new Runnable() {
 							public void run() {
-								pd.setMessage("正在获取好友和群聊列表...");
+								pd.setMessage(getString(R.string.list_is_for));
 							}
 						});
 						try {
@@ -175,47 +176,16 @@ public class LoginActivity extends BaseActivity {
 							// conversations in case we are auto login
 							EMGroupManager.getInstance().loadAllGroups();
 							EMChatManager.getInstance().loadAllConversations();
-
-							// demo中简单的处理成每次登陆都去获取好友username，开发者自己根据情况而定
-							List<String> usernames = EMContactManager.getInstance().getContactUserNames();
-							EMLog.d("roster", "contacts size: " + usernames.size());
-							Map<String, User> userlist = new HashMap<String, User>();
-							for (String username : usernames) {
-								User user = new User();
-								user.setUsername(username);
-								setUserHearder(username, user);
-								userlist.put(username, user);
-							}
-							// 添加user"申请与通知"
-							User newFriends = new User();
-							newFriends.setUsername(Constant.NEW_FRIENDS_USERNAME);
-							newFriends.setNick("申请与通知");
-							newFriends.setHeader("");
-							userlist.put(Constant.NEW_FRIENDS_USERNAME, newFriends);
-							// 添加"群聊"
-							User groupUser = new User();
-							groupUser.setUsername(Constant.GROUP_USERNAME);
-							groupUser.setNick("群聊");
-							groupUser.setHeader("");
-							userlist.put(Constant.GROUP_USERNAME, groupUser);
-
-							// 存入内存
-							DemoApplication.getInstance().setContactList(userlist);
-							// 存入db
-							UserDao dao = new UserDao(LoginActivity.this);
-							List<User> users = new ArrayList<User>(userlist.values());
-							dao.saveContactList(users);
-
-							// 获取群聊列表(群聊里只有groupid和groupname等简单信息，不包含members),sdk会把群组存入到内存和db中
-							EMGroupManager.getInstance().getGroupsFromServer();
+							//处理好友和群组
+							processContactsAndGroups();
 						} catch (Exception e) {
 							e.printStackTrace();
-							//取好友或者群聊失败，不让进入主页面，也可以不管这个exception继续进到主页面
+							//取好友或者群聊失败，不让进入主页面
 							runOnUiThread(new Runnable() {
                                 public void run() {
                                     pd.dismiss();
                                     DemoApplication.getInstance().logout(null);
-                                    Toast.makeText(getApplicationContext(), "登录失败: 获取好友或群聊失败", 1).show();
+                                    Toast.makeText(getApplicationContext(), R.string.login_failure_failed, 1).show();
                                 }
                             });
 							return;
@@ -232,6 +202,8 @@ public class LoginActivity extends BaseActivity {
 						finish();
 					}
 
+                   
+
 					@Override
 					public void onProgress(int progress, String status) {
 					}
@@ -245,7 +217,7 @@ public class LoginActivity extends BaseActivity {
 						runOnUiThread(new Runnable() {
 							public void run() {
 								pd.dismiss();
-								Toast.makeText(getApplicationContext(), "登录失败: " + message, Toast.LENGTH_SHORT).show();
+								Toast.makeText(getApplicationContext(), getString(R.string.Login_failed) + message, Toast.LENGTH_SHORT).show();
 							}
 						});
 					}
@@ -255,6 +227,49 @@ public class LoginActivity extends BaseActivity {
 		}
 	}
 
+	 private void processContactsAndGroups() throws EaseMobException {
+         // demo中简单的处理成每次登陆都去获取好友username，开发者自己根据情况而定
+         List<String> usernames = EMContactManager.getInstance().getContactUserNames();
+         System.out.println("----------------"+usernames.toString());
+         EMLog.d("roster", "contacts size: " + usernames.size());
+         Map<String, User> userlist = new HashMap<String, User>();
+         for (String username : usernames) {
+             User user = new User();
+             user.setUsername(username);
+             setUserHearder(username, user);
+             userlist.put(username, user);
+         }
+         // 添加user"申请与通知"
+         User newFriends = new User();
+         newFriends.setUsername(Constant.NEW_FRIENDS_USERNAME);
+         String strChat = getResources().getString(R.string.Application_and_notify);
+         newFriends.setNick(strChat);
+         
+         userlist.put(Constant.NEW_FRIENDS_USERNAME, newFriends);
+         // 添加"群聊"
+         User groupUser = new User();
+         String strGroup = getResources().getString(R.string.group_chat);
+         groupUser.setUsername(Constant.GROUP_USERNAME);
+         groupUser.setNick(strGroup);
+         groupUser.setHeader("");
+         userlist.put(Constant.GROUP_USERNAME, groupUser);
+
+         // 存入内存
+         DemoApplication.getInstance().setContactList(userlist);
+         // 存入db
+         UserDao dao = new UserDao(LoginActivity.this);
+         List<User> users = new ArrayList<User>(userlist.values());
+         dao.saveContactList(users);
+         
+         //获取黑名单列表
+         List<String> blackList = EMContactManager.getInstance().getBlackListUsernamesFromServer();
+         //保存黑名单
+         EMContactManager.getInstance().saveBlackList(blackList);
+
+         // 获取群聊列表(群聊里只有groupid和groupname等简单信息，不包含members),sdk会把群组存入到内存和db中
+         EMGroupManager.getInstance().getGroupsFromServer();
+     }
+	
 	/**
 	 * 注册
 	 * 

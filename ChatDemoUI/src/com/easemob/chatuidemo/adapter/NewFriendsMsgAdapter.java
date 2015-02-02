@@ -68,7 +68,14 @@ public class NewFriendsMsgAdapter extends ArrayAdapter<InviteMessage> {
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
-
+		
+		String str1 = context.getResources().getString(R.string.Has_agreed_to_your_friend_request);
+		String str2 = context.getResources().getString(R.string.agree);
+		
+		String str3 = context.getResources().getString(R.string.Request_to_add_you_as_a_friend);
+		String str4 = context.getResources().getString(R.string.Apply_to_the_group_of);
+		String str5 = context.getResources().getString(R.string.Has_agreed_to);
+		String str6 = context.getResources().getString(R.string.Has_refused_to);
 		final InviteMessage msg = getItem(position);
 		if (msg != null) {
 			if(msg.getGroupId() != null){ // 显示群聊提示
@@ -84,18 +91,20 @@ public class NewFriendsMsgAdapter extends ArrayAdapter<InviteMessage> {
 			// Date(msg.getTime())));
 			if (msg.getStatus() == InviteMesageStatus.BEAGREED) {
 				holder.status.setVisibility(View.INVISIBLE);
-				holder.reason.setText("已同意你的好友请求");
+				holder.reason.setText(str1);
 			} else if (msg.getStatus() == InviteMesageStatus.BEINVITEED || msg.getStatus() == InviteMesageStatus.BEAPPLYED) {
 				holder.status.setVisibility(View.VISIBLE);
-				holder.status.setText("同意");
+				holder.status.setEnabled(true);
+				holder.status.setBackgroundResource(android.R.drawable.btn_default);
+				holder.status.setText(str2);
 				if(msg.getStatus() == InviteMesageStatus.BEINVITEED){
 					if (msg.getReason() == null) {
 						// 如果没写理由
-						holder.reason.setText("请求加你为好友");
+						holder.reason.setText(str3);
 					}
 				}else{ //入群申请
 					if (TextUtils.isEmpty(msg.getReason())) {
-						holder.reason.setText("申请加入群：" + msg.getGroupName());
+						holder.reason.setText(str4 + msg.getGroupName());
 					}
 				}
 				// 设置点击事件
@@ -108,11 +117,11 @@ public class NewFriendsMsgAdapter extends ArrayAdapter<InviteMessage> {
 					}
 				});
 			} else if (msg.getStatus() == InviteMesageStatus.AGREED) {
-				holder.status.setText("已同意");
+				holder.status.setText(str5);
 				holder.status.setBackgroundDrawable(null);
 				holder.status.setEnabled(false);
 			} else if(msg.getStatus() == InviteMesageStatus.REFUSED){
-				holder.status.setText("已拒绝");
+				holder.status.setText(str6);
 				holder.status.setBackgroundDrawable(null);
 				holder.status.setEnabled(false);
 			}
@@ -131,7 +140,10 @@ public class NewFriendsMsgAdapter extends ArrayAdapter<InviteMessage> {
 	 */
 	private void acceptInvitation(final Button button, final InviteMessage msg) {
 		final ProgressDialog pd = new ProgressDialog(context);
-		pd.setMessage("正在同意...");
+		String str1 = context.getResources().getString(R.string.Are_agree_with);
+		final String str2 = context.getResources().getString(R.string.Has_agreed_to);
+		final String str3 = context.getResources().getString(R.string.Agree_with_failure);
+		pd.setMessage(str1);
 		pd.setCanceledOnTouchOutside(false);
 		pd.show();
 
@@ -148,7 +160,7 @@ public class NewFriendsMsgAdapter extends ArrayAdapter<InviteMessage> {
 						@Override
 						public void run() {
 							pd.dismiss();
-							button.setText("已同意");
+							button.setText(str2);
 							msg.setStatus(InviteMesageStatus.AGREED);
 							// 更新db
 							ContentValues values = new ContentValues();
@@ -165,7 +177,7 @@ public class NewFriendsMsgAdapter extends ArrayAdapter<InviteMessage> {
 						@Override
 						public void run() {
 							pd.dismiss();
-							Toast.makeText(context, "同意失败: " + e.getMessage(), 1).show();
+							Toast.makeText(context, str3 + e.getMessage(), 1).show();
 						}
 					});
 

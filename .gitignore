@@ -20,10 +20,9 @@ local.properties
 
 # Eclipse project files
 */.classpath
-*/.project
+#*/.project
 */.settings
-ChatDemoUI/project.properties
 
-ChatDemoUI/project.properties
 
-*.properties
+
+#*.properties

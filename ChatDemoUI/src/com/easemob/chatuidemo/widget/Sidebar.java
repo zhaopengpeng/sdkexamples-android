@@ -25,6 +25,7 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ContactAdapter;
 import com.easemob.util.DensityUtil;
@@ -47,15 +48,16 @@ public class Sidebar extends View{
 		init();
 	}
 
-	private String[] sections = new String[]{"搜","#","A","B","C","D","E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+	private String[] sections; 
 
 	private void init(){
+	    String st = context.getString(R.string.search_new);
+        sections= new String[]{st,"#","A","B","C","D","E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setColor(Color.DKGRAY);
 		paint.setTextAlign(Align.CENTER);
 		paint.setTextSize(DensityUtil.sp2px(context, 10));
 	}
-	
 	
 	@Override
 	protected void onDraw(Canvas canvas) {

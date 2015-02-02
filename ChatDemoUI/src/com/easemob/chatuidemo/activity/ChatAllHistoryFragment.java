@@ -34,10 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.easemob.chat.EMChatManager;
-import com.easemob.chat.EMContact;
 import com.easemob.chat.EMConversation;
-import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
@@ -59,8 +56,7 @@ public class ChatAllHistoryFragment extends Fragment {
 	public RelativeLayout errorItem;
 	public TextView errorText;
 	private boolean hidden;
-	private List<EMGroup> groups;
-	private List<EMConversation> conversationList;
+	private List<EMConversation> conversationList = new ArrayList<EMConversation>();
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -76,15 +72,14 @@ public class ChatAllHistoryFragment extends Fragment {
 		errorItem = (RelativeLayout) getView().findViewById(R.id.rl_error_item);
 		errorText = (TextView) errorItem.findViewById(R.id.tv_connect_errormsg);
 		
-		conversationList = loadConversationsWithRecentChat();
+		conversationList.addAll(loadConversationsWithRecentChat());
 		listView = (ListView) getView().findViewById(R.id.list);
 		adapter = new ChatAllHistoryAdapter(getActivity(), 1, conversationList);
 		// 设置adapter
 		listView.setAdapter(adapter);
 				
-		groups = EMGroupManager.getInstance().getAllGroups();
-
 		
+		final String st2 = getResources().getString(R.string.Cant_chat_with_yourself);
 		listView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -92,27 +87,19 @@ public class ChatAllHistoryFragment extends Fragment {
 				EMConversation conversation = adapter.getItem(position);
 				String username = conversation.getUserName();
 				if (username.equals(DemoApplication.getInstance().getUserName()))
-					Toast.makeText(getActivity(), "不能和自己聊天", 0).show();
+					Toast.makeText(getActivity(), st2, 0).show();
 				else {
-					// 进入聊天页面
-					Intent intent = new Intent(getActivity(), ChatActivity.class);
-					EMContact emContact = null;
-					groups = EMGroupManager.getInstance().getAllGroups();
-					for (EMGroup group : groups) {
-						if (group.getGroupId().equals(username)) {
-							emContact = group;
-							break;
-						}
-					}
-					if (emContact != null && emContact instanceof EMGroup) {
-						// it is group chat
-						intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
-						intent.putExtra("groupId", ((EMGroup) emContact).getGroupId());
-					} else {
-						// it is single chat
-						intent.putExtra("userId", username);
-					}
-					startActivity(intent);
+				    // 进入聊天页面
+				    Intent intent = new Intent(getActivity(), ChatActivity.class);
+				    if(conversation.isGroup()){
+				        // it is group chat
+                        intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+                        intent.putExtra("groupId", username);
+				    }else{
+				        // it is single chat
+                        intent.putExtra("userId", username);
+				    }
+				    startActivity(intent);
 				}
 			}
 		});
@@ -131,11 +118,12 @@ public class ChatAllHistoryFragment extends Fragment {
 		});
 		// 搜索框
 		query = (EditText) getView().findViewById(R.id.query);
+		String strSearch = getResources().getString(R.string.search);
+		query.setHint(strSearch);
 		// 搜索框中清除button
 		clearSearch = (ImageButton) getView().findViewById(R.id.search_clear);
 		query.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-
 				adapter.getFilter().filter(s);
 				if (s.length() > 0) {
 					clearSearch.setVisibility(View.VISIBLE);
@@ -200,7 +188,8 @@ public class ChatAllHistoryFragment extends Fragment {
 	public void refresh() {
 		conversationList.clear();
 		conversationList.addAll(loadConversationsWithRecentChat());
-		adapter.notifyDataSetChanged();
+		if(adapter != null)
+		    adapter.notifyDataSetChanged();
 	}
 
 	/**
@@ -208,7 +197,7 @@ public class ChatAllHistoryFragment extends Fragment {
 	 * 
 	 * @param context
 	 * @return
-	 */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        +	 */
 	private List<EMConversation> loadConversationsWithRecentChat() {
 		// 获取所有会话，包括陌生人
 		Hashtable<String, EMConversation> conversations = EMChatManager.getInstance().getAllConversations();

@@ -26,6 +26,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -40,6 +42,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -67,6 +71,8 @@ public class ContactlistFragment extends Fragment {
 	private Sidebar sidebar;
 	private InputMethodManager inputMethodManager;
 	private List<String> blackList;
+	ImageButton clearSearch;
+	EditText query;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -88,8 +94,38 @@ public class ContactlistFragment extends Fragment {
 		contactList = new ArrayList<User>();
 		// 获取设置contactlist
 		getContactList();
+		
+		//搜索框
+		query = (EditText) getView().findViewById(R.id.query);
+		String strSearch = getResources().getString(R.string.search);
+		query.setHint(strSearch);
+		clearSearch = (ImageButton) getView().findViewById(R.id.search_clear);
+		query.addTextChangedListener(new TextWatcher() {
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				adapter.getFilter().filter(s);
+				if (s.length() > 0) {
+					clearSearch.setVisibility(View.VISIBLE);
+				} else {
+					clearSearch.setVisibility(View.INVISIBLE);
+					
+				}
+			}
+
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+
+			public void afterTextChanged(Editable s) {
+			}
+		});
+		clearSearch.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				query.getText().clear();
+			}
+		});
+		
 		// 设置adapter
-		adapter = new ContactAdapter(getActivity(), R.layout.row_contact, contactList, sidebar);
+		adapter = new ContactAdapter(getActivity(), R.layout.row_contact, contactList);
 		listView.setAdapter(adapter);
 		listView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -187,8 +223,10 @@ public class ContactlistFragment extends Fragment {
 	 * @param toDeleteUser
 	 */
 	public void deleteContact(final User tobeDeleteUser) {
+		String st1 = getResources().getString(R.string.deleting);
+		final String st2 = getResources().getString(R.string.Delete_failed);
 		final ProgressDialog pd = new ProgressDialog(getActivity());
-		pd.setMessage("正在删除...");
+		pd.setMessage(st1);
 		pd.setCanceledOnTouchOutside(false);
 		pd.show();
 		new Thread(new Runnable() {
@@ -211,7 +249,7 @@ public class ContactlistFragment extends Fragment {
 					getActivity().runOnUiThread(new Runnable() {
 						public void run() {
 							pd.dismiss();
-							Toast.makeText(getActivity(), "删除失败: " + e.getMessage(), 1).show();
+							Toast.makeText(getActivity(), st2 + e.getMessage(), 1).show();
 						}
 					});
 
@@ -227,7 +265,10 @@ public class ContactlistFragment extends Fragment {
 	 */
 	private void moveToBlacklist(final String username){
 		final ProgressDialog pd = new ProgressDialog(getActivity());
-		pd.setMessage("正在移入黑名单...");
+		String st1 = getResources().getString(R.string.Is_moved_into_blacklist);
+		final String st2 = getResources().getString(R.string.Move_into_blacklist_success);
+		final String st3 = getResources().getString(R.string.Move_into_blacklist_failure);
+		pd.setMessage(st1);
 		pd.setCanceledOnTouchOutside(false);
 		pd.show();
 		new Thread(new Runnable() {
@@ -238,7 +279,7 @@ public class ContactlistFragment extends Fragment {
 					getActivity().runOnUiThread(new Runnable() {
 						public void run() {
 							pd.dismiss();
-							Toast.makeText(getActivity(), "移入黑名单成功", 0).show();
+							Toast.makeText(getActivity(), st2, 0).show();
 							refresh();
 						}
 					});
@@ -247,7 +288,7 @@ public class ContactlistFragment extends Fragment {
 					getActivity().runOnUiThread(new Runnable() {
 						public void run() {
 							pd.dismiss();
-							Toast.makeText(getActivity(), "移入黑名单失败", 0).show();
+							Toast.makeText(getActivity(), st3, 0).show();
 						}
 					});
 				}

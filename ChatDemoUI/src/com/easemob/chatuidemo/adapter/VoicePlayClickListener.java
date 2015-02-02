@@ -22,6 +22,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.view.View;
+import android.webkit.WebView.FindListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -163,6 +164,7 @@ public class VoicePlayClickListener implements View.OnClickListener {
 
 	@Override
 	public void onClick(View v) {
+		String st = activity.getResources().getString(R.string.Is_download_voice_click_later);
 		if (isPlaying) {
 			if (((ChatActivity) activity).playMsgId != null && ((ChatActivity) activity).playMsgId.equals(message.getMsgId())) {
 				currentPlayListener.stopPlayVoice();
@@ -183,9 +185,11 @@ public class VoicePlayClickListener implements View.OnClickListener {
 					System.err.println("file not exist");
 
 			} else if (message.status == EMMessage.Status.INPROGRESS) {
-				Toast.makeText(activity, "正在下载语音，稍后点击", Toast.LENGTH_SHORT).show();
+				String s=new String();
+				
+				Toast.makeText(activity, st, Toast.LENGTH_SHORT).show();
 			} else if (message.status == EMMessage.Status.FAIL) {
-				Toast.makeText(activity, "正在下载语音，稍后点击", Toast.LENGTH_SHORT).show();
+				Toast.makeText(activity, st, Toast.LENGTH_SHORT).show();
 				new AsyncTask<Void, Void, Void>() {
 
 					@Override

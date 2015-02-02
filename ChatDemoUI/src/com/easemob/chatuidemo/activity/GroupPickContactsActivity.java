@@ -117,7 +117,7 @@ public class GroupPickContactsActivity extends BaseActivity {
 		    return members;
 		int length = contactAdapter.isCheckedArray.length;
 		for (int i = 0; i < length; i++) {
-			String username = contactAdapter.getItem(i + 1).getUsername();
+			String username = contactAdapter.getItem(i).getUsername();
 			if (contactAdapter.isCheckedArray[i] && !exitingMembers.contains(username)) {
 				members.add(username);
 			}
@@ -134,14 +134,14 @@ public class GroupPickContactsActivity extends BaseActivity {
 		private boolean[] isCheckedArray;
 
 		public PickContactAdapter(Context context, int resource, List<User> users) {
-			super(context, resource, users, null);
+			super(context, resource, users);
 			isCheckedArray = new boolean[users.size()];
 		}
 
 		@Override
 		public View getView(final int position, View convertView, ViewGroup parent) {
 			View view = super.getView(position, convertView, parent);
-			if (position > 0) {
+//			if (position > 0) {
 				final String username = getItem(position).getUsername();
 				// 选择框checkbox
 				final CheckBox checkBox = (CheckBox) view.findViewById(R.id.checkbox);
@@ -161,11 +161,11 @@ public class GroupPickContactsActivity extends BaseActivity {
 									isChecked = true;
 									checkBox.setChecked(true);
 							}
-							isCheckedArray[position - 1] = isChecked;
+							isCheckedArray[position] = isChecked;
 							//如果是单选模式
 							if (isSignleChecked && isChecked) {
 								for (int i = 0; i < isCheckedArray.length; i++) {
-									if (i != position - 1) {
+									if (i != position) {
 										isCheckedArray[i] = false;
 									}
 								}
@@ -177,12 +177,12 @@ public class GroupPickContactsActivity extends BaseActivity {
 					// 群组中原来的成员一直设为选中状态
 					if (exitingMembers.contains(username)) {
 							checkBox.setChecked(true);
-							isCheckedArray[position - 1] = true;
+							isCheckedArray[position] = true;
 					} else {
-						checkBox.setChecked(isCheckedArray[position - 1]);
+						checkBox.setChecked(isCheckedArray[position]);
 					}
 				}
-			}
+//			}
 			return view;
 		}
 	}

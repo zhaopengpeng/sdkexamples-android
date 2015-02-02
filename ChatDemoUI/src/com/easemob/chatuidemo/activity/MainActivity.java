@@ -53,7 +53,6 @@ import com.easemob.chat.GroupChangeListener;
 import com.easemob.chat.TextMessageBody;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
-import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.db.InviteMessgeDao;
 import com.easemob.chatuidemo.db.UserDao;
@@ -81,7 +80,6 @@ public class MainActivity extends BaseActivity {
 	private SettingsFragment settingFragment;
 	private Fragment[] fragments;
 	private int index;
-	private RelativeLayout[] tab_containers;
 	// 当前fragment的index
 	private int currentTabIndex;
 	private NewMessageBroadcastReceiver msgReceiver;
@@ -118,6 +116,7 @@ public class MainActivity extends BaseActivity {
 		initView();
 		
 //		MobclickAgent.setDebugMode( true );
+		//--?--
 		MobclickAgent.updateOnlineConfig(this);
 		
 		if (getIntent().getBooleanExtra("conflict", false) && !isConflictDialogShow){
@@ -331,7 +330,7 @@ public class MainActivity extends BaseActivity {
 			// 注销广播接收者，否则在ChatActivity中会收到这个广播
 			abortBroadcast();
 			
-			notifyNewMessage(message);
+			notifyNewMessage(message);  
 
 			// 刷新bottom bar消息未读数
 			updateUnreadLabel();
@@ -400,7 +399,8 @@ public class MainActivity extends BaseActivity {
 			//获取扩展属性 此处省略
 //			message.getStringAttribute("");
 			EMLog.d(TAG, String.format("透传消息：action:%s,message:%s", action,message.toString()));
-			Toast.makeText(MainActivity.this, "收到透传：action："+action, Toast.LENGTH_SHORT).show();
+			String st9 = getResources().getString(R.string.receive_the_passthrough);
+			Toast.makeText(MainActivity.this, st9+action, Toast.LENGTH_SHORT).show();
 		}
 	};
 
@@ -469,8 +469,9 @@ public class MainActivity extends BaseActivity {
 			runOnUiThread(new Runnable() {
 				public void run() {
 					// 如果正在与此用户的聊天页面
+					String st10 = getResources().getString(R.string.have_you_removed);
 					if (ChatActivity.activityInstance != null && usernameList.contains(ChatActivity.activityInstance.getToChatUsername())) {
-						Toast.makeText(MainActivity.this, ChatActivity.activityInstance.getToChatUsername() + "已把你从他好友列表里移除", 1).show();
+						Toast.makeText(MainActivity.this, ChatActivity.activityInstance.getToChatUsername() + st10, 1).show();
 						ChatActivity.activityInstance.finish();
 					}
 					updateUnreadLabel();
@@ -612,11 +613,12 @@ public class MainActivity extends BaseActivity {
 
 		@Override
 		public void onDisconnected(final int error) {
+			final String st1 = getResources().getString(R.string.Less_than_chat_server_connection);
+			final String st2 = getResources().getString(R.string.the_current_network);
 			runOnUiThread(new Runnable() {
-
+				
 				@Override
 				public void run() {
-					
 					if(error == EMError.USER_REMOVED){
 						// 显示帐号已经被移除
 						showAccountRemovedDialog();
@@ -626,9 +628,9 @@ public class MainActivity extends BaseActivity {
 					} else {
 						chatHistoryFragment.errorItem.setVisibility(View.VISIBLE);
 						if (NetUtils.hasNetwork(MainActivity.this))
-							chatHistoryFragment.errorText.setText("连接不到聊天服务器");
+							chatHistoryFragment.errorText.setText(st1);
 						else
-							chatHistoryFragment.errorText.setText("当前网络不可用，请检查网络设置");
+							chatHistoryFragment.errorText.setText(st2);
 
 					}
 				}
@@ -645,22 +647,23 @@ public class MainActivity extends BaseActivity {
 		@Override
 		public void onInvitationReceived(String groupId, String groupName, String inviter, String reason) {
 			boolean hasGroup = false;
-			for (EMGroup group : EMGroupManager.getInstance().getAllGroups()) {
-				if (group.getGroupId().equals(groupId)) {
-					hasGroup = true;
-					break;
-				}
-			}
-			if (!hasGroup)
-				return;
+//			for (EMGroup group : EMGroupManager.getInstance().getAllGroups()) {
+//				if (group.getGroupId().equals(groupId)) {
+//					hasGroup = true;
+//					break;
+//				}
+//			}
+//			if (!hasGroup)
+//				return;
 
 			// 被邀请
+			String st3 = getResources().getString(R.string.Invite_you_to_join_a_group_chat);
 			EMMessage msg = EMMessage.createReceiveMessage(Type.TXT);
 			msg.setChatType(ChatType.GroupChat);
 			msg.setFrom(inviter);
 			msg.setTo(groupId);
 			msg.setMsgId(UUID.randomUUID().toString());
-			msg.addBody(new TextMessageBody(inviter + "邀请你加入了群聊"));
+			msg.addBody(new TextMessageBody(inviter + st3));
 			// 保存邀请消息
 			EMChatManager.getInstance().saveMessage(msg);
 			// 提醒新消息
@@ -706,7 +709,6 @@ public class MainActivity extends BaseActivity {
 					} catch (Exception e) {
 						EMLog.e(TAG, "refresh exception " + e.getMessage());
 					}
-
 				}
 			});
 		}
@@ -745,13 +747,14 @@ public class MainActivity extends BaseActivity {
 
 		@Override
 		public void onApplicationAccept(String groupId, String groupName, String accepter) {
+			String st4 = getResources().getString(R.string.Agreed_to_your_group_chat_application);
 			// 加群申请被同意
 			EMMessage msg = EMMessage.createReceiveMessage(Type.TXT);
 			msg.setChatType(ChatType.GroupChat);
 			msg.setFrom(accepter);
 			msg.setTo(groupId);
 			msg.setMsgId(UUID.randomUUID().toString());
-			msg.addBody(new TextMessageBody(accepter + "同意了你的群聊申请"));
+			msg.addBody(new TextMessageBody(accepter + st4));
 			// 保存同意消息
 			EMChatManager.getInstance().saveMessage(msg);
 			// 提醒新消息
@@ -815,13 +818,13 @@ public class MainActivity extends BaseActivity {
 	private void showConflictDialog() {
 		isConflictDialogShow = true;
 		DemoApplication.getInstance().logout(null);
-
+		String st = getResources().getString(R.string.Logoff_notification);
 		if (!MainActivity.this.isFinishing()) {
 			// clear up global variables
 			try {
 				if (conflictBuilder == null)
 					conflictBuilder = new android.app.AlertDialog.Builder(MainActivity.this);
-				conflictBuilder.setTitle("下线通知");
+				conflictBuilder.setTitle(st);
 				conflictBuilder.setMessage(R.string.connect_conflict);
 				conflictBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 
@@ -852,13 +855,13 @@ public class MainActivity extends BaseActivity {
 	private void showAccountRemovedDialog() {
 		isAccountRemovedDialogShow = true;
 		DemoApplication.getInstance().logout(null);
-
+		String st5 = getResources().getString(R.string.Remove_the_notification);
 		if (!MainActivity.this.isFinishing()) {
 			// clear up global variables
 			try {
 				if (accountRemovedBuilder == null)
 					accountRemovedBuilder = new android.app.AlertDialog.Builder(MainActivity.this);
-				accountRemovedBuilder.setTitle("移除通知");
+				accountRemovedBuilder.setTitle(st5);
 				accountRemovedBuilder.setMessage(R.string.em_user_remove);
 				accountRemovedBuilder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 

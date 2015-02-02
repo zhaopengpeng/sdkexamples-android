@@ -13,6 +13,8 @@
  */
 package com.easemob.applib.utils;
 
+import java.util.Locale;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -54,7 +56,7 @@ public class HXPreferenceUtils {
 		
 		return mPreferenceUtils;
 	}
-
+	
 	public void setSettingMsgNotification(boolean paramBoolean) {
 		editor.putBoolean(SHARED_KEY_SETTING_NOTIFICATION, paramBoolean);
 		editor.commit();

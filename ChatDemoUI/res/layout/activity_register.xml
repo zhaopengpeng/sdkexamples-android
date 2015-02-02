@@ -30,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="注册"
+            android:text="@string/register"
             android:textColor="#ffffff"
             android:textSize="20sp" />
     </RelativeLayout>
@@ -64,7 +64,7 @@
                 android:layout_toRightOf="@id/iv_username"
                 android:layout_marginLeft="11dp"
                 android:background="@null"
-                android:hint="用户名"
+                android:hint="@string/user_name"
                 android:singleLine="true"
                 android:textSize="18sp" />
 
@@ -96,7 +96,7 @@
                 android:layout_toRightOf="@id/iv_password"
                 android:layout_marginLeft="11dp"
                 android:background="@null"
-                android:hint="密码"
+                android:hint="@string/password"
                 android:inputType="textPassword"
                 android:singleLine="true"
                 android:textSize="18sp" />
@@ -129,7 +129,7 @@
                 android:layout_toRightOf="@id/iv_password2"
                 android:layout_marginLeft="11dp"
                 android:background="@null"
-                android:hint="确认密码"
+                android:hint="@string/confirmpassword"
                 android:inputType="textPassword"
                 android:singleLine="true"
                 android:textSize="18sp" />
@@ -159,7 +159,7 @@
                 android:onClick="register"
                 android:paddingBottom="7dp"
                 android:paddingTop="7dp"
-                android:text="注册"
+                android:text="@string/register"
                 android:textColor="@android:color/white"
                 android:textSize="20sp" />
         </LinearLayout>
