@@ -17,6 +17,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -110,6 +111,8 @@ public class MessageAdapter extends BaseAdapter{
 	private EMConversation conversation;
 
 	private Context context;
+	
+	private static final int pagesize = 20;
 
 	private Map<String, Timer> timers = new Hashtable<String, Timer>();
 
@@ -119,6 +122,14 @@ public class MessageAdapter extends BaseAdapter{
 		inflater = LayoutInflater.from(context);
 		activity = (Activity) context;
 		this.conversation = EMChatManager.getInstance().getConversation(username);
+		
+		List<EMMessage> messages = conversation.getAllMessages();
+		if (messages.size() < 20 && messages.size() >= 1) {
+			if (chatType == ChatActivity.CHATTYPE_SINGLE)
+				messages = conversation.loadMoreMsgFromDB(messages.get(0).getMsgId(), pagesize);
+			else
+				messages = conversation.loadMoreGroupMsgFromDB(messages.get(0).getMsgId(), pagesize);
+		}
 	}
 
 	// public void setUser(String user) {

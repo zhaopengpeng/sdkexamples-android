@@ -1212,6 +1212,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 		super.onDestroy();
 		activityInstance = null;
 		EMGroupManager.getInstance().removeGroupChangeListener(groupListener);
+		if (conversation != null) {
+			conversation.clear();
+		}
 		// 注销广播
 		try {
 			unregisterReceiver(receiver);
