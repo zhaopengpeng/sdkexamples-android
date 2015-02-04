@@ -38,6 +38,7 @@ import com.easemob.chat.TextMessageBody;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.utils.SmileUtils;
+import com.easemob.chatuidemo.utils.UserUtils;
 import com.easemob.util.DateUtils;
 
 /**
@@ -101,8 +102,7 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 			holder.avatar.setImageResource(R.drawable.group_icon);
 			holder.name.setText(contact.getNick() != null ? contact.getNick() : username);
 		} else {
-			// 本地或者服务器获取用户详情，以用来显示头像和nick
-			holder.avatar.setImageResource(R.drawable.default_avatar);
+		    UserUtils.setUserAvatar(getContext(), username, holder.avatar);
 			if (username.equals(Constant.GROUP_USERNAME)) {
 				holder.name.setText("群聊");
 

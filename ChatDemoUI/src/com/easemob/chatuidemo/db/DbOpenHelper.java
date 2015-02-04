@@ -21,12 +21,13 @@ import com.easemob.applib.controller.HXSDKHelper;
 
 public class DbOpenHelper extends SQLiteOpenHelper{
 
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 	private static DbOpenHelper instance;
 
 	private static final String USERNAME_TABLE_CREATE = "CREATE TABLE "
 			+ UserDao.TABLE_NAME + " ("
-			+ UserDao.COLUMN_NAME_NICK +" TEXT, "
+			+ UserDao.COLUMN_NAME_NICK + " TEXT, "
+			+ UserDao.COLUMN_NAME_AVATAR + " TEXT, "
 			+ UserDao.COLUMN_NAME_ID + " TEXT PRIMARY KEY);";
 	
 	private static final String INIVTE_MESSAGE_TABLE_CREATE = "CREATE TABLE "
@@ -66,7 +67,10 @@ public class DbOpenHelper extends SQLiteOpenHelper{
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		
+		if(oldVersion < 2){
+		    db.execSQL("ALTER TABLE "+ UserDao.TABLE_NAME +" ADD COLUMN "+ 
+		            UserDao.COLUMN_NAME_AVATAR + " TEXT ;");
+		}
 	}
 	
 	public void closeDB() {
