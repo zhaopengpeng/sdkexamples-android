@@ -25,7 +25,7 @@ public class UserUtils {
         if(user != null){
             //demo没有这些数据，临时填充
             user.setNick(username);
-            user.setAvatar("http://downloads.easemob.com/downloads/59.png");
+//            user.setAvatar("http://downloads.easemob.com/downloads/57.png");
         }
         return user;
     }

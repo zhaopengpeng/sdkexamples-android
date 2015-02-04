@@ -31,6 +31,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -40,6 +41,7 @@ import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.R;
+import com.easemob.chatuidemo.utils.UserUtils;
 import com.easemob.chatuidemo.widget.ExpandGridView;
 import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.EMLog;
@@ -520,15 +522,24 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 
 		@Override
 		public View getView(final int position, View convertView, final ViewGroup parent) {
+		    ViewHolder holder = null;
 			if (convertView == null) {
+			    holder = new ViewHolder();
 				convertView = LayoutInflater.from(getContext()).inflate(res, null);
+				holder.imageView = (ImageView) convertView.findViewById(R.id.iv_avatar);
+				holder.textView = (TextView) convertView.findViewById(R.id.tv_name);
+				holder.badgeDeleteView = (ImageView) convertView.findViewById(R.id.badge_delete);
+				convertView.setTag(holder);
+			}else{
+			    holder = (ViewHolder) convertView.getTag();
 			}
-			final Button button = (Button) convertView.findViewById(R.id.button_avatar);
+			final LinearLayout button = (LinearLayout) convertView.findViewById(R.id.button_avatar);
 			// 最后一个item，减人按钮
 			if (position == getCount() - 1) {
-				button.setText("");
+			    holder.textView.setText("");
 				// 设置成删除按钮
-				button.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.smiley_minus_btn, 0, 0);
+			    holder.imageView.setImageResource(R.drawable.smiley_minus_btn);
+//				button.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.smiley_minus_btn, 0, 0);
 				// 如果不是创建者或者没有相应权限，不提供加减人按钮
 				if (!group.getOwner().equals(EMChatManager.getInstance().getCurrentUser())) {
 					// if current user is not group admin, hide add/remove btn
@@ -553,8 +564,9 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 					});
 				}
 			} else if (position == getCount() - 2) { // 添加群组成员按钮
-				button.setText("");
-				button.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.smiley_add_btn, 0, 0);
+			    holder.textView.setText("");
+			    holder.imageView.setImageResource(R.drawable.smiley_add_btn);
+//				button.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.smiley_add_btn, 0, 0);
 				// 如果不是创建者或者没有相应权限
 				if (!group.isAllowInvites() && !group.getOwner().equals(EMChatManager.getInstance().getCurrentUser())) {
 					// if current user is not group admin, hide add/remove btn
@@ -581,12 +593,13 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 				}
 			} else { // 普通item，显示群组成员
 				final String username = getItem(position);
-				button.setText(username);
 				convertView.setVisibility(View.VISIBLE);
 				button.setVisibility(View.VISIBLE);
-				Drawable avatar = getResources().getDrawable(R.drawable.default_avatar);
-				avatar.setBounds(0, 0, referenceWidth, referenceHeight);
-				button.setCompoundDrawables(null, avatar, null, null);
+//				Drawable avatar = getResources().getDrawable(R.drawable.default_avatar);
+//				avatar.setBounds(0, 0, referenceWidth, referenceHeight);
+//				button.setCompoundDrawables(null, avatar, null, null);
+				holder.textView.setText(username);
+				UserUtils.setUserAvatar(getContext(), username, holder.imageView);
 				// demo群组成员的头像都用默认头像，需由开发者自己去设置头像
 				if (isInDeleteMode) {
 					// 如果是删除模式下，显示减人图标
@@ -752,6 +765,12 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	protected void onDestroy() {
 		super.onDestroy();
 		instance = null;
+	}
+	
+	private static class ViewHolder{
+	    ImageView imageView;
+	    TextView textView;
+	    ImageView badgeDeleteView;
 	}
 
 }
