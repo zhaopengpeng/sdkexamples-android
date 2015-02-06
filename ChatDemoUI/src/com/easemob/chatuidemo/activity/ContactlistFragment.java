@@ -177,7 +177,7 @@ public class ContactlistFragment extends Fragment {
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		// 长按前两个不弹menu
-		if (((AdapterContextMenuInfo) menuInfo).position > 2) {
+		if (((AdapterContextMenuInfo) menuInfo).position > 1) {
 			getActivity().getMenuInflater().inflate(R.menu.context_contact_list, menu);
 		}
 	}
