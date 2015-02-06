@@ -173,34 +173,28 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	}
 	
 	private class  MyFilter extends Filter{
-		List<User> mList=null;
+		List<User> mOriginalList = null;
 		
 		public MyFilter(List<User> myList) {
-			super();
-			this.mList = myList;
+			this.mOriginalList = myList;
 		}
 
 		@Override
 		protected synchronized FilterResults  performFiltering(CharSequence prefix) {
 			FilterResults results = new FilterResults();
-			if(mList==null){
-				mList = new ArrayList<User>();
+			if(mOriginalList==null){
+			    mOriginalList = new ArrayList<User>();
 			}
 			if(prefix==null || prefix.length()==0){
 				results.values = copyUserList;
 				results.count = copyUserList.size();
 			}else{
 				String prefixString = prefix.toString();
-				final int count = mList.size();
+				final int count = mOriginalList.size();
 				final ArrayList<User> newValues = new ArrayList<User>();
 				for(int i=0;i<count;i++){
-					final User user = mList.get(i);
+					final User user = mOriginalList.get(i);
 					String username = user.getUsername();
-					
-					EMConversation conversation = EMChatManager.getInstance().getConversation(username);
-					if(conversation != null){
-						username = conversation.getUserName();
-					}
 					
 					if(username.startsWith(prefixString)){
 						newValues.add(user);

@@ -97,8 +97,7 @@ public class ContactlistFragment extends Fragment {
 		
 		//搜索框
 		query = (EditText) getView().findViewById(R.id.query);
-		String strSearch = getResources().getString(R.string.search);
-		query.setHint(strSearch);
+		query.setHint(R.string.search);
 		clearSearch = (ImageButton) getView().findViewById(R.id.search_clear);
 		query.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
