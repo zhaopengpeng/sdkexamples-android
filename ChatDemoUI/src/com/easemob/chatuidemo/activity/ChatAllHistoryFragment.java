@@ -165,27 +165,21 @@ public class ChatAllHistoryFragment extends Fragment {
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		boolean handled = false;
-		boolean deleteMessage = false;
 		if (item.getItemId() == R.id.delete_message) {
-			deleteMessage = true;
-			handled = true;
-		} else if (item.getItemId() == R.id.delete_conversation) {
-			deleteMessage = false;
-			handled = true;
-		}
-		EMConversation tobeDeleteCons = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
-		// 删除此会话
-		EMChatManager.getInstance().deleteConversation(tobeDeleteCons.getUserName(), tobeDeleteCons.isGroup(), deleteMessage);
-		InviteMessgeDao inviteMessgeDao = new InviteMessgeDao(getActivity());
-		inviteMessgeDao.deleteMessage(tobeDeleteCons.getUserName());
-		adapter.remove(tobeDeleteCons);
-		adapter.notifyDataSetChanged();
+			EMConversation tobeDeleteCons = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
+			// 删除此会话
+			EMChatManager.getInstance().deleteConversation(tobeDeleteCons.getUserName(), tobeDeleteCons.isGroup());
+			InviteMessgeDao inviteMessgeDao = new InviteMessgeDao(getActivity());
+			inviteMessgeDao.deleteMessage(tobeDeleteCons.getUserName());
+			adapter.remove(tobeDeleteCons);
+			adapter.notifyDataSetChanged();
 
-		// 更新消息未读数
-		((MainActivity) getActivity()).updateUnreadLabel();
-		
-		return handled ? true : super.onContextItemSelected(item);
+			// 更新消息未读数
+			((MainActivity) getActivity()).updateUnreadLabel();
+
+			return true;
+		}
+		return super.onContextItemSelected(item);
 	}
 
 	/**
