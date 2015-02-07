@@ -51,6 +51,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	private SparseIntArray sectionOfPosition;
 	private int res;
 	private MyFilter myFilter;
+    private boolean notiyfyByFilter;
 
 	public ContactAdapter(Context context, int resource, List<User> objects) {
 		super(context, resource, objects);
@@ -187,6 +188,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 			    mOriginalList = new ArrayList<User>();
 			}
 			EMLog.d(TAG, "contacts original size: " + mOriginalList.size());
+			EMLog.d(TAG, "contacts copy size: " + copyUserList.size());
 			
 			if(prefix==null || prefix.length()==0){
 				results.values = copyUserList;
@@ -229,6 +231,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 			userList.addAll((List<User>)results.values);
 			EMLog.d(TAG, "publish contacts filter results size: " + results.count);
 			if (results.count > 0) {
+			    notiyfyByFilter = true;
 				notifyDataSetChanged();
 			} else {
 				notifyDataSetInvalidated();
@@ -237,7 +240,15 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	}
 	
 	
-	
+	@Override
+	public void notifyDataSetChanged() {
+	    super.notifyDataSetChanged();
+	    if(!notiyfyByFilter){
+	        copyUserList.clear();
+	        copyUserList.addAll(userList);
+	        notiyfyByFilter = false;
+	    }
+	}
 	
 
 }

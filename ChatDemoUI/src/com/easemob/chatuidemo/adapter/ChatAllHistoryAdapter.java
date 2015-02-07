@@ -51,6 +51,7 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 	private List<EMConversation> conversationList;
 	private List<EMConversation> copyConversationList;
 	private ConversationFilter conversationFilter;
+    private boolean notiyfyByFilter;
 
 	public ChatAllHistoryAdapter(Context context, int textViewResourceId, List<EMConversation> objects) {
 		super(context, textViewResourceId, objects);
@@ -282,6 +283,7 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 			conversationList.clear();
 			conversationList.addAll((List<EMConversation>) results.values);
 			if (results.count > 0) {
+			    notiyfyByFilter = true;
 				notifyDataSetChanged();
 			} else {
 				notifyDataSetInvalidated();
@@ -289,5 +291,15 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 
 		}
 
+	}
+	
+	@Override
+	public void notifyDataSetChanged() {
+	    super.notifyDataSetChanged();
+	    if(!notiyfyByFilter){
+            copyConversationList.clear();
+            copyConversationList.addAll(conversationList);
+            notiyfyByFilter = false;
+        }
 	}
 }
