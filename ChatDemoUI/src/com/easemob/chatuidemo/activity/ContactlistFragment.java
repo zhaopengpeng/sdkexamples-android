@@ -337,9 +337,11 @@ public class ContactlistFragment extends Fragment {
 		});
 
 		// 加入"申请与通知"和"群聊"
-		contactList.add(0, users.get(Constant.GROUP_USERNAME));
+		if(users.get(Constant.GROUP_USERNAME) != null)
+		    contactList.add(0, users.get(Constant.GROUP_USERNAME));
 		// 把"申请与通知"添加到首位
-		contactList.add(0, users.get(Constant.NEW_FRIENDS_USERNAME));
+		if(users.get(Constant.NEW_FRIENDS_USERNAME) != null)
+		    contactList.add(0, users.get(Constant.NEW_FRIENDS_USERNAME));
 	}
 	
 	void hideSoftKeyboard() {

@@ -227,7 +227,7 @@ public class RecorderVideoActivity extends BaseActivity implements
 			break;
 		case R.id.recorder_start:
 			// start recording
-		    if(startRecording())
+		    if(!startRecording())
 		        return;
 			Toast.makeText(this, R.string.The_video_to_start, Toast.LENGTH_SHORT).show();
 			btn_switch.setVisibility(View.INVISIBLE);
