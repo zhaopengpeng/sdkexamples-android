@@ -170,12 +170,6 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     
     @Override
     public void logout(final EMCallBack callback){
-        if(callReceiver != null){
-            try {
-                appContext.unregisterReceiver(callReceiver);
-            } catch (Exception e) {
-            }
-        }
         endCall();
         super.logout(new EMCallBack(){
 
