@@ -270,11 +270,7 @@ public abstract class HXSDKHelper {
      * @return
      */
     public boolean isLogined(){
-        if(hxModel.getHXId() != null && hxModel.getPwd() != null){
-            return true;
-        }
-        
-        return false;
+       return EMChat.getInstance().isLoggedIn();
     }
     
     /**
