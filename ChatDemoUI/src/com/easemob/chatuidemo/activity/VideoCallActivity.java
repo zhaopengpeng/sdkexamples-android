@@ -79,6 +79,10 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(savedInstanceState != null){
+        	finish();
+        	return;
+        }
         setContentView(R.layout.activity_video_call);
         
         getWindow().addFlags(
@@ -466,10 +470,13 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        callHelper.setSurfaceView(null);
-        cameraHelper.stopCapture();
-        oppositeSurface = null;
-        cameraHelper = null;
+        try {
+			callHelper.setSurfaceView(null);
+			cameraHelper.stopCapture();
+			oppositeSurface = null;
+			cameraHelper = null;
+		} catch (Exception e) {
+		}
     }
 
     @Override

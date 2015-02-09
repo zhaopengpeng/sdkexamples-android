@@ -69,6 +69,10 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if(savedInstanceState != null){
+        	finish();
+        	return;
+        }
 		setContentView(R.layout.activity_voice_call);
 
 		comingBtnContainer = (LinearLayout) findViewById(R.id.ll_coming_call);
