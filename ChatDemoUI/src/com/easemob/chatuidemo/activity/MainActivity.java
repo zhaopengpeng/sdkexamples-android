@@ -647,14 +647,14 @@ public class MainActivity extends BaseActivity {
 		@Override
 		public void onInvitationReceived(String groupId, String groupName, String inviter, String reason) {
 			boolean hasGroup = false;
-//			for (EMGroup group : EMGroupManager.getInstance().getAllGroups()) {
-//				if (group.getGroupId().equals(groupId)) {
-//					hasGroup = true;
-//					break;
-//				}
-//			}
-//			if (!hasGroup)
-//				return;
+			for (EMGroup group : EMGroupManager.getInstance().getAllGroups()) {
+				if (group.getGroupId().equals(groupId)) {
+					hasGroup = true;
+					break;
+				}
+			}
+			if (!hasGroup)
+				return;
 
 			// 被邀请
 			String st3 = getResources().getString(R.string.Invite_you_to_join_a_group_chat);

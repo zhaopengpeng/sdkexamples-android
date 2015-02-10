@@ -1,10 +1,8 @@
 package com.easemob.chatuidemo.utils;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.widget.ImageView;
 
-import com.easemob.chat.EMChatManager;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.domain.User;
@@ -39,7 +37,7 @@ public class UserUtils {
         if(user != null){
             Picasso.with(context).load(user.getAvatar()).placeholder(R.drawable.default_avatar).into(imageView);
         }else{
-            imageView.setImageResource(R.drawable.default_avatar);
+            Picasso.with(context).load(R.drawable.default_avatar).into(imageView);
         }
     }
     

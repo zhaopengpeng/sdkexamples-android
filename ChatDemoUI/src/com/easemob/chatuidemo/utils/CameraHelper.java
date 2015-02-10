@@ -106,6 +106,8 @@ public class CameraHelper implements PreviewCallback {
             Log.d(TAG, "camera start preview");
         } catch (Exception e) {
             e.printStackTrace();
+            if(mCamera != null)
+                mCamera.release();
         }
     }
 
