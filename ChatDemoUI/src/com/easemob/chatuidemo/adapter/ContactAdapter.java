@@ -35,13 +35,14 @@ import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.utils.UserUtils;
 import com.easemob.chatuidemo.widget.Sidebar;
+import com.easemob.util.EMLog;
 
 /**
  * 简单的好友Adapter实现
  *
  */
 public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexer{
-
+    private static final String TAG = "ContactAdapter";
 	List<String> list;
 	List<User> userList;
 	List<User> copyUserList;
@@ -49,12 +50,13 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	private SparseIntArray positionOfSection;
 	private SparseIntArray sectionOfPosition;
 	private int res;
-	public MyFilter myFilter;
+	private MyFilter myFilter;
+    private boolean notiyfyByFilter;
 
 	public ContactAdapter(Context context, int resource, List<User> objects) {
 		super(context, resource, objects);
 		this.res = resource;
-		this.userList=objects;
+		this.userList = objects;
 		copyUserList = new ArrayList<User>();
 		copyUserList.addAll(objects);
 		layoutInflater = LayoutInflater.from(context);
@@ -173,34 +175,31 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	}
 	
 	private class  MyFilter extends Filter{
-		List<User> mList=null;
+        List<User> mOriginalList = null;
 		
 		public MyFilter(List<User> myList) {
-			super();
-			this.mList = myList;
+			this.mOriginalList = myList;
 		}
 
 		@Override
-		protected synchronized FilterResults  performFiltering(CharSequence prefix) {
+		protected synchronized FilterResults performFiltering(CharSequence prefix) {
 			FilterResults results = new FilterResults();
-			if(mList==null){
-				mList = new ArrayList<User>();
+			if(mOriginalList==null){
+			    mOriginalList = new ArrayList<User>();
 			}
+			EMLog.d(TAG, "contacts original size: " + mOriginalList.size());
+			EMLog.d(TAG, "contacts copy size: " + copyUserList.size());
+			
 			if(prefix==null || prefix.length()==0){
 				results.values = copyUserList;
 				results.count = copyUserList.size();
 			}else{
 				String prefixString = prefix.toString();
-				final int count = mList.size();
+				final int count = mOriginalList.size();
 				final ArrayList<User> newValues = new ArrayList<User>();
 				for(int i=0;i<count;i++){
-					final User user = mList.get(i);
+					final User user = mOriginalList.get(i);
 					String username = user.getUsername();
-					
-					EMConversation conversation = EMChatManager.getInstance().getConversation(username);
-					if(conversation != null){
-						username = conversation.getUserName();
-					}
 					
 					if(username.startsWith(prefixString)){
 						newValues.add(user);
@@ -221,6 +220,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 				results.values=newValues;
 				results.count=newValues.size();
 			}
+			EMLog.d(TAG, "contacts filter results size: " + results.count);
 			return results;
 		}
 
@@ -229,7 +229,9 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 				FilterResults results) {
 			userList.clear();
 			userList.addAll((List<User>)results.values);
+			EMLog.d(TAG, "publish contacts filter results size: " + results.count);
 			if (results.count > 0) {
+			    notiyfyByFilter = true;
 				notifyDataSetChanged();
 			} else {
 				notifyDataSetInvalidated();
@@ -238,7 +240,15 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	}
 	
 	
-	
+	@Override
+	public void notifyDataSetChanged() {
+	    super.notifyDataSetChanged();
+	    if(!notiyfyByFilter){
+	        copyUserList.clear();
+	        copyUserList.addAll(userList);
+	        notiyfyByFilter = false;
+	    }
+	}
 	
 
 }

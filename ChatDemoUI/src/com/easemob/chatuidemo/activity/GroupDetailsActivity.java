@@ -682,6 +682,8 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 
 					@Override
 					public boolean onLongClick(View v) {
+					    if(EMChatManager.getInstance().getCurrentUser().equals(username))
+					        return true;
 						if (group.getOwner().equals(EMChatManager.getInstance().getCurrentUser())) {
 							Intent intent = new Intent(GroupDetailsActivity.this, AlertDialog.class);
 							intent.putExtra("msg", st15);

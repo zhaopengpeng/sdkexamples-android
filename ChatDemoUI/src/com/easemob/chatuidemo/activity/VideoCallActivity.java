@@ -209,8 +209,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                         // 通知cameraHelper可以写入数据
                         cameraHelper.setStartFlag(true);
                     } catch (EMServiceNotReadyException e) {
-                    	String st1 = getResources().getString(R.string.Is_not_yet_connected_to_the_server);
-                        Toast.makeText(VideoCallActivity.this, st1 , 1).show();
+                        Toast.makeText(VideoCallActivity.this, R.string.Is_not_yet_connected_to_the_server , 1).show();
                     }
                 }
 
@@ -240,8 +239,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
 
                         @Override
                         public void run() {
-                        	String st2 = getResources().getString(R.string.Are_connected_to_each_other);
-                            callStateTextView.setText(st2);
+                            callStateTextView.setText(R.string.Are_connected_to_each_other);
                         }
 
                     });
@@ -251,8 +249,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
 
                         @Override
                         public void run() {
-                        	String st3 = getResources().getString(R.string.have_connected_with);
-                            callStateTextView.setText(st3);
+                            callStateTextView.setText(R.string.have_connected_with);
                         }
 
                     });
@@ -276,8 +273,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                             // 开始记时
                             chronometer.start();
                             nickTextView.setVisibility(View.INVISIBLE);
-                            String st5 = getResources().getString(R.string.In_the_call);
-                            callStateTextView.setText(st5);
+                            callStateTextView.setText(R.string.In_the_call);
                             callingState = CallingState.NORMAL;
                         }
 
