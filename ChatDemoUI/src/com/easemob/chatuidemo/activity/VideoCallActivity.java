@@ -227,7 +227,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
      * 设置通话状态监听
      */
     void addCallStateListener() {
-        EMChatManager.getInstance().addVoiceCallStateChangeListener(new EMCallStateChangeListener() {
+        callStateListener = new EMCallStateChangeListener() {
 
             @Override
             public void onCallStateChanged(CallState callState, CallError error) {
@@ -360,7 +360,8 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                 }
 
             }
-        });
+        };
+        EMChatManager.getInstance().addVoiceCallStateChangeListener(callStateListener);
     }
 
     @Override
