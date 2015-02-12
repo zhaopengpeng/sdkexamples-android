@@ -1,5 +1,6 @@
 package com.easemob.chatuidemo.activity;
 
+import com.easemob.chat.EMCallStateChangeListener;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.TextMessageBody;
@@ -23,6 +24,7 @@ public class CallActivity extends BaseActivity {
     protected SoundPool soundPool;
     protected Ringtone ringtone;
     protected int outgoing;
+    protected EMCallStateChangeListener callStateListener;
     
     @Override
     protected void onCreate(Bundle arg0) {
@@ -39,6 +41,10 @@ public class CallActivity extends BaseActivity {
             ringtone.stop();
         audioManager.setMode(AudioManager.MODE_NORMAL);
         audioManager.setMicrophoneMute(false);
+        
+        if(callStateListener != null)
+            EMChatManager.getInstance().removeCallStateChangeListener(callStateListener);
+            
     }
     
     /**
