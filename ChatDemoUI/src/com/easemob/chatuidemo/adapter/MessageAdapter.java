@@ -1199,6 +1199,7 @@ public class MessageAdapter extends BaseAdapter{
 				if (message.getType() == EMMessage.Type.VIDEO) {
 					holder.tv.setVisibility(View.GONE);
 				}
+				System.out.println("message status : " + message.status);
 				if (message.status == EMMessage.Status.SUCCESS) {
 					// if (message.getType() == EMMessage.Type.FILE) {
 					// holder.pb.setVisibility(View.INVISIBLE);
