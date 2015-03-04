@@ -250,4 +250,5 @@
     <string name="Change_the_group_name">改变群名称</string>
     <string name="The_dissolution_of_chatting_new">解散群聊</string>
     
+    <string name="gorup_not_found">找不到这个群组</string>
 </resources>

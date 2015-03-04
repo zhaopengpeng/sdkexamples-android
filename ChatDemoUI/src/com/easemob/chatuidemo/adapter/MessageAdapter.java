@@ -1247,7 +1247,7 @@ public class MessageAdapter extends BaseAdapter{
 		if (bitmap != null) {
 			// thumbnail image is already loaded, reuse the drawable
 			iv.setImageBitmap(bitmap);
-			iv.setClickable(true);
+			iv.setClickable(true); 
 			iv.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
