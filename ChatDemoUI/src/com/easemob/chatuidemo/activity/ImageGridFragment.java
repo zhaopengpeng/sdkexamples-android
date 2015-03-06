@@ -313,7 +313,7 @@ public class ImageGridFragment extends Fragment implements OnItemClickListener {
 		ContentResolver mContentResolver=getActivity().getContentResolver();
 		Cursor cursor=mContentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, null, null, null,MediaStore.Video.DEFAULT_SORT_ORDER);
 		
-		if (cursor.moveToFirst()) {
+		if (cursor != null && cursor.moveToFirst()) {
 			do {
 
 				// ID:MediaStore.Audio.Media._ID

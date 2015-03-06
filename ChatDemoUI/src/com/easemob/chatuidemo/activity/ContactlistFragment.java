@@ -97,8 +97,7 @@ public class ContactlistFragment extends Fragment {
 		
 		//搜索框
 		query = (EditText) getView().findViewById(R.id.query);
-		String strSearch = getResources().getString(R.string.search);
-		query.setHint(strSearch);
+		query.setHint(R.string.search);
 		clearSearch = (ImageButton) getView().findViewById(R.id.search_clear);
 		query.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -121,6 +120,7 @@ public class ContactlistFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				query.getText().clear();
+				hideSoftKeyboard();
 			}
 		});
 		
@@ -177,7 +177,7 @@ public class ContactlistFragment extends Fragment {
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		// 长按前两个不弹menu
-		if (((AdapterContextMenuInfo) menuInfo).position > 2) {
+		if (((AdapterContextMenuInfo) menuInfo).position > 1) {
 			getActivity().getMenuInflater().inflate(R.menu.context_contact_list, menu);
 		}
 	}
@@ -337,10 +337,20 @@ public class ContactlistFragment extends Fragment {
 		});
 
 		// 加入"申请与通知"和"群聊"
-		contactList.add(0, users.get(Constant.GROUP_USERNAME));
+		if(users.get(Constant.GROUP_USERNAME) != null)
+		    contactList.add(0, users.get(Constant.GROUP_USERNAME));
 		// 把"申请与通知"添加到首位
-		contactList.add(0, users.get(Constant.NEW_FRIENDS_USERNAME));
+		if(users.get(Constant.NEW_FRIENDS_USERNAME) != null)
+		    contactList.add(0, users.get(Constant.NEW_FRIENDS_USERNAME));
 	}
+	
+	void hideSoftKeyboard() {
+        if (getActivity().getWindow().getAttributes().softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN) {
+            if (getActivity().getCurrentFocus() != null)
+                inputMethodManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+    }
 	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {

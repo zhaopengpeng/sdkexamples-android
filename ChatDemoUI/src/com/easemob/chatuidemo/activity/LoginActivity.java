@@ -101,7 +101,7 @@ public class LoginActivity extends BaseActivity {
 	}
 
 	/**
-	 * 登陆
+	 * 登录
 	 * 
 	 * @param view
 	 */

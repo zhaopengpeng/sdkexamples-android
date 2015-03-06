@@ -250,4 +250,5 @@
     <string name="Change_the_group_name">Change the group name</string>
     <string name="The_dissolution_of_chatting_new">The dissolution of chatting</string>
     
+    <string name="gorup_not_found">Can not find this group</string>
 </resources>

@@ -31,7 +31,7 @@ public class UserDao {
 	public static final String TABLE_NAME = "uers";
 	public static final String COLUMN_NAME_ID = "username";
 	public static final String COLUMN_NAME_NICK = "nick";
-	public static final String COLUMN_NAME_IS_STRANGER = "is_stranger";
+	public static final String COLUMN_NAME_AVATAR = "avatar";
 
 	private DbOpenHelper dbHelper;
 
@@ -53,6 +53,8 @@ public class UserDao {
 				values.put(COLUMN_NAME_ID, user.getUsername());
 				if(user.getNick() != null)
 					values.put(COLUMN_NAME_NICK, user.getNick());
+				if(user.getAvatar() != null)
+				    values.put(COLUMN_NAME_AVATAR, user.getAvatar());
 				db.replace(TABLE_NAME, null, values);
 			}
 		}
@@ -71,9 +73,11 @@ public class UserDao {
 			while (cursor.moveToNext()) {
 				String username = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_ID));
 				String nick = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_NICK));
+				String avatar = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_AVATAR));
 				User user = new User();
 				user.setUsername(username);
 				user.setNick(nick);
+				user.setAvatar(avatar);
 				String headerName = null;
 				if (!TextUtils.isEmpty(user.getNick())) {
 					headerName = user.getNick();
@@ -121,6 +125,8 @@ public class UserDao {
 		values.put(COLUMN_NAME_ID, user.getUsername());
 		if(user.getNick() != null)
 			values.put(COLUMN_NAME_NICK, user.getNick());
+		if(user.getAvatar() != null)
+		    values.put(COLUMN_NAME_AVATAR, user.getAvatar());
 		if(db.isOpen()){
 			db.replace(TABLE_NAME, null, values);
 		}

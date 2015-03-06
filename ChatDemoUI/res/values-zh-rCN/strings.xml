@@ -97,7 +97,7 @@
     <string name="Group_of_Lord">群主</string>
     <string name="Introduction">简介</string>
     <string name="To_join_the_chat">加入群聊</string>
-    <string name="login">登陆</string>
+    <string name="login">登录</string>
     <string name="user_name">用户名</string>
     <string name="password">密码</string>
     <string name="register">注册</string>
@@ -250,4 +250,5 @@
     <string name="Change_the_group_name">改变群名称</string>
     <string name="The_dissolution_of_chatting_new">解散群聊</string>
     
+    <string name="gorup_not_found">找不到这个群组</string>
 </resources>

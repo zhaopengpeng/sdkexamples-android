@@ -320,7 +320,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 			findViewById(R.id.container_video_call).setVisibility(View.GONE);
 			toChatUsername = getIntent().getStringExtra("groupId");
 			group = EMGroupManager.getInstance().getGroup(toChatUsername);
-			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
+			if(group != null)
+			    ((TextView) findViewById(R.id.name)).setText(group.getGroupName());
+			else
+			    ((TextView) findViewById(R.id.name)).setText(toChatUsername);
 			// conversation =
 			// EMChatManager.getInstance().getConversation(toChatUsername,true);
 		}
@@ -937,6 +940,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	 * @param view
 	 */
 	public void toGroupDetails(View view) {
+	    if(group == null){
+	        Toast.makeText(getApplicationContext(), R.string.gorup_not_found, 0).show();
+	        return;
+	    }
 		startActivityForResult((new Intent(this, GroupDetailsActivity.class).putExtra("groupId", toChatUsername)),
 				REQUEST_CODE_GROUP_DETAIL);
 	}

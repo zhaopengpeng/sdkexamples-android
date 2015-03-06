@@ -18,6 +18,13 @@ import com.easemob.chat.EMContact;
 public class User extends EMContact {
 	private int unreadMsgCount;
 	private String header;
+	private String avatar;
+	
+	public User(){}
+	
+	public User(String username){
+	    this.username = username;
+	}
 
 	public String getHeader() {
 		return header;
@@ -34,8 +41,18 @@ public class User extends EMContact {
 	public void setUnreadMsgCount(int unreadMsgCount) {
 		this.unreadMsgCount = unreadMsgCount;
 	}
+	
+	
 
-	@Override
+	public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    @Override
 	public int hashCode() {
 		return 17 * getUsername().hashCode();
 	}

@@ -17,8 +17,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -48,7 +50,9 @@ import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.VideoView;
+
 import com.easemob.chatuidemo.R;
+import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.chatuidemo.video.util.Utils;
 import com.easemob.util.EMLog;
 import com.easemob.util.PathUtil;
@@ -122,9 +126,9 @@ public class RecorderVideoActivity extends BaseActivity implements
 					CLASS_LABEL);
 			mWakeLock.acquire();
 		}
-		if (!initCamera()) {
-			showFailDialog();
-		}
+//		if (!initCamera()) {
+//			showFailDialog();
+//		}
 	}
 
 	@SuppressLint("NewApi")
@@ -218,16 +222,15 @@ public class RecorderVideoActivity extends BaseActivity implements
 
 	@Override
 	public void onClick(View view) {
-		String st1 = getResources().getString(R.string.The_video_to_start);
-		String st2 = getResources().getString(R.string.Whether_to_send);
 		switch (view.getId()) {
 		case R.id.switch_btn:
 			switchCamera();
 			break;
 		case R.id.recorder_start:
 			// start recording
-			startRecording();
-			Toast.makeText(this, st1, Toast.LENGTH_SHORT).show();
+		    if(!startRecording())
+		        return;
+			Toast.makeText(this, R.string.The_video_to_start, Toast.LENGTH_SHORT).show();
 			btn_switch.setVisibility(View.INVISIBLE);
 			btnStart.setVisibility(View.INVISIBLE);
 			btnStop.setVisibility(View.VISIBLE);
@@ -243,7 +246,7 @@ public class RecorderVideoActivity extends BaseActivity implements
 			btnStart.setVisibility(View.VISIBLE);
 			btnStop.setVisibility(View.INVISIBLE);
 			new AlertDialog.Builder(this)
-					.setMessage(st2)
+					.setMessage(R.string.Whether_to_send)
 					.setPositiveButton(R.string.ok,
 							new DialogInterface.OnClickListener() {
 
@@ -291,36 +294,51 @@ public class RecorderVideoActivity extends BaseActivity implements
 
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
-		if (mCamera == null)
-			initCamera();
+		if (mCamera == null){
+			if(!initCamera()){
+			    showFailDialog();
+			    return;
+			}
+			
+		}
 		try {
 			mCamera.setPreviewDisplay(mSurfaceHolder);
 			mCamera.startPreview();
 			handleSurfaceChanged();
-		} catch (IOException e1) {
+		} catch (Exception e1) {
 			EMLog.e("video", "start preview fail " + e1.getMessage());
+			showFailDialog();
 		}
 	}
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder arg0) {
-		EMLog.v("video", "surfaceDestroyed");
-		// surfaceDestroyed的时候同时对象设置为null
-		releaseCamera();
+		EMLog.v("video", "surfaceDestroyed");  
 	}
 
-	public void startRecording() {
-		if (mediaRecorder == null)
-			initRecorder();
+	public boolean startRecording(){
+		if (mediaRecorder == null){
+			if(!initRecorder())
+			    return false;
+		}
 		mediaRecorder.setOnInfoListener(this);
 		mediaRecorder.setOnErrorListener(this);
 		mediaRecorder.start();
+		return true;
 	}
 
 	@SuppressLint("NewApi")
-	private void initRecorder() {
+	private boolean initRecorder(){
+	    if(!CommonUtils.isExitsSdcard()){
+	        showNoSDCardDialog();
+	        return false;
+	    }
+	    
 		if (mCamera == null) {
-			initCamera();
+			if(!initCamera()){
+			    showFailDialog();
+			    return false;
+			}
 		}
 		mVideoView.setVisibility(View.VISIBLE);
 		// TODO init button
@@ -356,12 +374,15 @@ public class RecorderVideoActivity extends BaseActivity implements
 		mediaRecorder.setMaxDuration(30000);
 		mediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
 		try {
-			mediaRecorder.prepare();
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+            mediaRecorder.prepare();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+		return true;
 
 	}
 
@@ -441,29 +462,39 @@ public class RecorderVideoActivity extends BaseActivity implements
 	}
 
 	MediaScannerConnection msc = null;
+	ProgressDialog progressDialog = null;
 
 	public void sendVideo(View view) {
 		if (TextUtils.isEmpty(localPath)) {
 			EMLog.e("Recorder", "recorder fail please try again!");
 			return;
 		}
-
-		msc = new MediaScannerConnection(this,
-				new MediaScannerConnectionClient() {
-
-					@Override
-					public void onScanCompleted(String path, Uri uri) {
-						System.out.println("scanner completed");
-						msc.disconnect();
-						setResult(RESULT_OK, getIntent().putExtra("uri", uri));
-						finish();
-					}
-
-					@Override
-					public void onMediaScannerConnected() {
-						msc.scanFile(localPath, "video/*");
-					}
-				});
+		if(msc == null)
+    		msc = new MediaScannerConnection(this,
+    				new MediaScannerConnectionClient() {
+    
+    					@Override
+    					public void onScanCompleted(String path, Uri uri) {
+    						System.out.println("scanner completed");
+    						msc.disconnect();
+    						progressDialog.dismiss();
+    						setResult(RESULT_OK, getIntent().putExtra("uri", uri));
+    						finish();
+    					}
+    
+    					@Override
+    					public void onMediaScannerConnected() {
+    						msc.scanFile(localPath, "video/*");
+    					}
+    				});
+		
+		
+		if(progressDialog == null){
+		    progressDialog = new ProgressDialog(this);
+		    progressDialog.setMessage("processing...");
+		    progressDialog.setCancelable(false);
+		}
+		progressDialog.show();
 		msc.connect();
 
 	}
@@ -543,11 +574,9 @@ public class RecorderVideoActivity extends BaseActivity implements
 	}
 
 	private void showFailDialog() {
-		String st5 = getResources().getString(R.string.prompt);
-		String st6 = getResources().getString(R.string.Open_the_equipment_failure);
 		new AlertDialog.Builder(this)
-				.setTitle(st5)
-				.setMessage(st6)
+				.setTitle(R.string.prompt)
+				.setMessage(R.string.Open_the_equipment_failure)
 				.setPositiveButton(R.string.ok,
 						new DialogInterface.OnClickListener() {
 
@@ -559,6 +588,22 @@ public class RecorderVideoActivity extends BaseActivity implements
 							}
 						}).setCancelable(false).show();
 
+	}
+	
+	private void showNoSDCardDialog() {
+	    new AlertDialog.Builder(this)
+        .setTitle(R.string.prompt)
+        .setMessage("No sd card!")
+        .setPositiveButton(R.string.ok,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog,
+                            int which) {
+                        finish();
+
+                    }
+                }).setCancelable(false).show();
 	}
 
 }
