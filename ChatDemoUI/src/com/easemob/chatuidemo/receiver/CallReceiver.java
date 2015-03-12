@@ -21,6 +21,7 @@ import android.content.Intent;
 import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.activity.VideoCallActivity;
 import com.easemob.chatuidemo.activity.VoiceCallActivity;
+import com.easemob.util.EMLog;
 
 public class CallReceiver extends BroadcastReceiver{
 
@@ -41,6 +42,7 @@ public class CallReceiver extends BroadcastReceiver{
 		            putExtra("username", from).putExtra("isComingCall", true).
 		            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
 		}
+		EMLog.d("CallReceiver", "app received a incoming call");
 	}
 
 }
