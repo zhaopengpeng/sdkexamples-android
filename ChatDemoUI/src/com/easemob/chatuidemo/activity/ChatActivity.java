@@ -328,8 +328,24 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 			// EMChatManager.getInstance().getConversation(toChatUsername,true);
 		}
 		conversation = EMChatManager.getInstance().getConversation(toChatUsername);
-		// 把此会话的未读数置为0
+		// 把此会话的未读数置为0		
 		conversation.resetUnreadMsgCount();
+		
+		// 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
+		// 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
+		final List<EMMessage> msgs = conversation.getAllMessages();
+		int msgCount = msgs != null ? msgs.size() : 0;
+		if (msgCount == EMChatManager.getInstance().getChatOptions().getNumberOfMessagesLoaded() && msgCount < pagesize) {
+			String msgId = null;
+			if (msgs != null && msgs.size() > 0) {
+				msgId = msgs.get(0).getMsgId();
+			}
+			if (chatType == CHATTYPE_SINGLE) {
+				conversation.loadMoreMsgFromDB(msgId, pagesize);
+			} else {
+				conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
+			}
+		}
 		adapter = new MessageAdapter(this, toChatUsername, chatType);
 		// 显示消息
 		listView.setAdapter(adapter);
