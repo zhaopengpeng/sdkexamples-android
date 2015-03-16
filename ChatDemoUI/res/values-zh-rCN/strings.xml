@@ -126,6 +126,7 @@
     <string name="please_check">key 验证出错! 请在 AndroidManifest.xml 文件中检查 key 设置</string>
     <string name="expression">[表情]</string>
     <string name="Removed_from_the_failure">移出失败</string>
+    <string name="be_removing">正在移出...</string>
     <string name="call_duration">通话时长</string>
     <string name="Refused">已拒绝</string>
     <string name="The_other_party_has_refused_to">对方已拒绝</string>
