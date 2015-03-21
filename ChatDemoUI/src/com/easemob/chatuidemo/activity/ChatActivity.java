@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -1310,17 +1311,34 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	 * 
 	 * @param username
 	 */
-	private void addUserToBlacklist(String username) {
-		String st11 = getResources().getString(R.string.Move_into_blacklist_success);
-		String st12 = getResources().getString(R.string.Move_into_blacklist_failure);
-		try {
-			EMContactManager.getInstance().addUserToBlackList(username, false);
-			Toast.makeText(getApplicationContext(), st11, 0).show();
-		} catch (EaseMobException e) {
-			e.printStackTrace();
-			Toast.makeText(getApplicationContext(), st12, 0).show();
-		}
+	private void addUserToBlacklist(final String username) {
+	    final ProgressDialog pd = new ProgressDialog(this);
+        pd.setMessage(getString(R.string.Is_moved_into_blacklist));
+        pd.setCanceledOnTouchOutside(false);
+        pd.show();
+	    new Thread(new Runnable() {
+            public void run() {
+                try {
+                    EMContactManager.getInstance().addUserToBlackList(username, false);
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            pd.dismiss();
+                            Toast.makeText(getApplicationContext(), R.string.Move_into_blacklist_success, 0).show();
+                        }
+                    });
+                } catch (EaseMobException e) {
+                    e.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            pd.dismiss();
+                            Toast.makeText(getApplicationContext(), R.string.Move_into_blacklist_failure, 0).show();
+                        }
+                    });
+                }
+            }
+        }).start();
 	}
+	    
 
 	/**
 	 * 返回
