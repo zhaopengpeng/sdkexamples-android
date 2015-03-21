@@ -19,19 +19,30 @@ import java.util.List;
 import com.easemob.EMCallBack;
 import com.easemob.EMConnectionListener;
 import com.easemob.EMError;
+import com.easemob.EMEventListener;
+import com.easemob.EMNotifierEvent;
 import com.easemob.applib.model.DefaultHXSDKModel;
+import com.easemob.applib.model.HXNotifier;
+import com.easemob.applib.model.HXNotifier.NotificationListener;
 import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatConfig.EMEnvMode;
+import com.easemob.chatuidemo.R;
+import com.easemob.chatuidemo.activity.MainActivity;
+import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
+import com.easemob.chat.EMMessage;
 import com.easemob.chat.OnMessageNotifyListener;
 import com.easemob.chat.OnNotificationClickListener;
+import com.easemob.util.EMLog;
+import com.easemob.util.EasyUtils;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import android.widget.Toast;
 
 /**
  * The developer can derive from this class to talk with HuanXin SDK
@@ -228,9 +239,9 @@ public abstract class HXSDKHelper {
         options.setRequireAck(hxModel.getRequireReadAck());
         // 设置是否需要已送达回执
         options.setRequireDeliveryAck(hxModel.getRequireDeliveryAck());
-        // 设置notification消息点击时，跳转的intent为自定义的intent
-        options.setOnNotificationClickListener(getNotificationClickListener());
-        options.setNotifyText(getMessageNotifyListener());
+        
+        //设置通知栏事件监听(不是SDK的API)
+        HXNotifier.getInstance(appContext).setNotificationListener(getNotificationListener());
     }
     
     /**
@@ -273,18 +284,7 @@ public abstract class HXSDKHelper {
        return EMChat.getInstance().isLoggedIn();
     }
     
-    /**
-     * get the message notify listener
-     * @return
-     */
-    protected OnMessageNotifyListener getMessageNotifyListener(){
-        return null;
-    }
-    
-    /**
-     *get notification click listener
-     */
-    protected OnNotificationClickListener getNotificationClickListener(){
+    protected NotificationListener getNotificationListener(){
         return null;
     }
 
@@ -312,7 +312,53 @@ public abstract class HXSDKHelper {
                 onConnectionConnected();
             }
         };
+        //注册连接监听
         EMChatManager.getInstance().addConnectionListener(connectionListener);
+        
+        EMEventListener eventListener = new EMEventListener() {
+            
+            @Override
+            public void onEvent(EMNotifierEvent event) {
+                EMMessage message = (EMMessage)event.getData();
+                EMLog.d(TAG, "received a message, messge type : " + event.getType() + ",id : " + message.getMsgId());
+                switch (event.getType()) {
+                case TypeNormalMessage:
+                    //应用在后台，不需要刷新UI,通知栏提示新消息
+                    if(!EasyUtils.isAppRunningForeground(appContext)){
+                        HXNotifier.getInstance(appContext).notifyChatMsg(message);
+                    }else{
+                        //把事件向后传递
+                        HXNotifier.getInstance(appContext).notifyAllEventListeners(event);
+                    }
+                    break;
+                case TypeCMD:
+                    EMLog.d(TAG, "收到透传消息");
+                    //获取消息body
+                    CmdMessageBody cmdMsgBody = (CmdMessageBody) message.getBody();
+                    String action = cmdMsgBody.action;//获取自定义action
+                    
+                    //获取扩展属性 此处省略
+//                  message.getStringAttribute("");
+                    EMLog.d(TAG, String.format("透传消息：action:%s,message:%s", action,message.toString()));
+                    String str = appContext.getString(R.string.receive_the_passthrough);
+                    Toast.makeText(appContext, str+action, Toast.LENGTH_SHORT).show();
+                    break;
+                case TypeDeliveryAck:
+                    message.setDelivered(true);
+                    HXNotifier.getInstance(appContext).notifyAllEventListeners(event);
+                    break;
+                case TypeReadAck:
+                    message.setAcked(true);
+                    HXNotifier.getInstance(appContext).notifyAllEventListeners(event);
+                    break;
+
+                default:
+                    break;
+                }
+            }
+        };
+        //注册消息事件监听
+        EMChatManager.getInstance().addEventListener(eventListener);
     }
     
     /**

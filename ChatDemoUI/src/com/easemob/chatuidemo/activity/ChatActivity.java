@@ -24,7 +24,6 @@ import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -65,6 +64,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.easemob.EMError;
+import com.easemob.EMEventListener;
+import com.easemob.EMNotifierEvent;
+import com.easemob.applib.model.HXNotifier;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMConversation;
@@ -159,7 +161,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	private Drawable[] micImages;
 	private int chatType;
 	private EMConversation conversation;
-	private NewMessageBroadcastReceiver receiver;
 	public static ChatActivity activityInstance = null;
 	// 给谁发送消息
 	private String toChatUsername;
@@ -353,23 +354,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 				return false;
 			}
 		});
-		// 注册接收消息广播
-		receiver = new NewMessageBroadcastReceiver();
-		IntentFilter intentFilter = new IntentFilter(EMChatManager.getInstance().getNewMessageBroadcastAction());
-		// 设置广播的优先级别大于Mainacitivity,这样如果消息来的时候正好在chat页面，直接显示消息，而不是提示消息未读
-		intentFilter.setPriority(5);
-		registerReceiver(receiver, intentFilter);
 
-		// 注册一个ack回执消息的BroadcastReceiver
-		IntentFilter ackMessageIntentFilter = new IntentFilter(EMChatManager.getInstance().getAckMessageBroadcastAction());
-		ackMessageIntentFilter.setPriority(5);
-		registerReceiver(ackMessageReceiver, ackMessageIntentFilter);
-
-		// 注册一个消息送达的BroadcastReceiver
-		IntentFilter deliveryAckMessageIntentFilter = new IntentFilter(EMChatManager.getInstance().getDeliveryAckMessageBroadcastAction());
-		deliveryAckMessageIntentFilter.setPriority(5);
-		registerReceiver(deliveryAckMessageReceiver, deliveryAckMessageIntentFilter);
-
+		notifierEventListener = new NotifierEventListener();
+		HXNotifier.getInstance(getApplicationContext()).addNotifierEventListener(notifierEventListener);
+		
 		// 监听当前会话的群聊解散被T事件
 		groupListener = new GroupListener();
 		EMGroupManager.getInstance().addGroupChangeListener(groupListener);
@@ -575,6 +563,68 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
         }
 	}
 
+	
+	private class NotifierEventListener implements EMEventListener{
+
+        @Override
+        public void onEvent(EMNotifierEvent event) {
+            //获取到message
+            EMMessage message = (EMMessage) event.getData();
+            String from = message.getFrom();
+//            EMConversation conversation = EMChatManager.getInstance().getConversation(from);
+            switch (event.getType()) {
+            case TypeNormalMessage: 
+                //可能会存在消息来时，聊天页面在，main页面不在的情况
+                if (message.getChatType() == ChatType.GroupChat) { //群组消息
+                    if (!message.getTo().equals(getToChatUsername())){
+                        return;
+                    }
+                } else { //单聊消息
+                    if (!from.equals(getToChatUsername()))
+                        return;
+                }
+                //声音和震动提示有新消息
+                HXNotifier.getInstance(getApplicationContext()).notifyOnNewMsg();
+                refreshUIWithNewMessage();
+                break;
+            case TypeDeliveryAck:
+                if (message != null) {
+                    message.setDelivered(true);
+                }
+                refreshUI();
+                break;
+            case TypeReadAck:
+                // 把message设为已读
+                if (message != null) {
+                    message.setAcked(true);
+                }
+                refreshUI();
+                break;
+
+            default:
+                break;
+            }
+        }
+        
+    }
+	
+	private void refreshUIWithNewMessage(){
+	    runOnUiThread(new Runnable() {
+            public void run() {
+                adapter.refresh();
+                listView.setSelection(listView.getCount() -1);
+            }
+        });
+	}
+	
+	private void refreshUI(){
+	    runOnUiThread(new Runnable() {
+            public void run() {
+                adapter.refresh();
+            }
+        });
+	}
+	
 	/**
 	 * 照相获取图片
 	 */
@@ -990,84 +1040,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 
 	}
 
-	/**
-	 * 消息广播接收者
-	 * 
-	 */
-	private class NewMessageBroadcastReceiver extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			// 记得把广播给终结掉
-			abortBroadcast();
 
-			String username = intent.getStringExtra("from");
-			String msgid = intent.getStringExtra("msgid");
-			// 收到这个广播的时候，message已经在db和内存里了，可以通过id获取mesage对象
-			EMMessage message = EMChatManager.getInstance().getMessage(msgid);
-			// 如果是群聊消息，获取到group id
-			if (message.getChatType() == ChatType.GroupChat) {
-				username = message.getTo();
-			}
-			if (!username.equals(toChatUsername)) {
-				// 消息不是发给当前会话，return
-			    notifyNewMessage(message);
-				return;
-			}
-			// conversation =
-			// EMChatManager.getInstance().getConversation(toChatUsername);
-			// 通知adapter有新消息，更新ui
-			adapter.refresh();
-			listView.setSelection(listView.getCount() - 1);
-
-		}
-	}
-
-	/**
-	 * 消息回执BroadcastReceiver
-	 */
-	private BroadcastReceiver ackMessageReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			abortBroadcast();
-
-			String msgid = intent.getStringExtra("msgid");
-			String from = intent.getStringExtra("from");
-			EMConversation conversation = EMChatManager.getInstance().getConversation(from);
-			if (conversation != null) {
-				// 把message设为已读
-				EMMessage msg = conversation.getMessage(msgid);
-				if (msg != null) {
-					msg.isAcked = true;
-				}
-			}
-			adapter.notifyDataSetChanged();
-
-		}
-	};
-
-	/**
-	 * 消息送达BroadcastReceiver
-	 */
-	private BroadcastReceiver deliveryAckMessageReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			abortBroadcast();
-
-			String msgid = intent.getStringExtra("msgid");
-			String from = intent.getStringExtra("from");
-			EMConversation conversation = EMChatManager.getInstance().getConversation(from);
-			if (conversation != null) {
-				// 把message设为已读
-				EMMessage msg = conversation.getMessage(msgid);
-				if (msg != null) {
-					msg.isDelivered = true;
-				}
-			}
-
-			adapter.notifyDataSetChanged();
-		}
-	};
 	private PowerManager.WakeLock wakeLock;
+    private NotifierEventListener notifierEventListener;
 
 	/**
 	 * 按住说话listener
@@ -1236,20 +1211,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	protected void onDestroy() {
 		super.onDestroy();
 		activityInstance = null;
+		HXNotifier.getInstance(this).removeNotifierEventListener(notifierEventListener);
 		EMGroupManager.getInstance().removeGroupChangeListener(groupListener);
-		// 注销广播
-		try {
-			unregisterReceiver(receiver);
-			receiver = null;
-		} catch (Exception e) {
-		}
-		try {
-			unregisterReceiver(ackMessageReceiver);
-			ackMessageReceiver = null;
-			unregisterReceiver(deliveryAckMessageReceiver);
-			deliveryAckMessageReceiver = null;
-		} catch (Exception e) {
-		}
 	}
 
 	@Override

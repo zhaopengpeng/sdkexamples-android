@@ -21,6 +21,7 @@ import android.content.IntentFilter;
 import com.easemob.EMCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.applib.model.HXSDKModel;
+import com.easemob.applib.model.HXNotifier.NotificationListener;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
@@ -54,52 +55,47 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     }
 
     @Override
-    protected OnMessageNotifyListener getMessageNotifyListener(){
-        // 取消注释，app在后台，有新消息来时，状态栏的消息提示换成自己写的
-      return new OnMessageNotifyListener() {
-
-          @Override
-          public String onNewMessageNotify(EMMessage message) {
-              // 设置状态栏的消息提示，可以根据message的类型做相应提示
-              String ticker = CommonUtils.getMessageDigest(message, appContext);
-              if(message.getType() == Type.TXT)
-                  ticker = ticker.replaceAll("\\[.{2,3}\\]", "[表情]");
-              return message.getFrom() + ": " + ticker;
-          }
-
-          @Override
-          public String onLatestMessageNotify(EMMessage message, int fromUsersNum, int messageNum) {
-              return null;
-             // return fromUsersNum + "个基友，发来了" + messageNum + "条消息";
-          }
-
-          @Override
-          public String onSetNotificationTitle(EMMessage message) {
-              //修改标题,这里使用默认
-              return null;
-          }
-
-          @Override
-          public int onSetSmallIcon(EMMessage message) {
-              //设置小图标
-              return 0;
-          }
-      };
-    }
-    
-    @Override
-    protected OnNotificationClickListener getNotificationClickListener(){
-        return new OnNotificationClickListener() {
-
+    protected NotificationListener getNotificationListener() {
+        //可以覆盖默认的设置
+        return new NotificationListener() {
+            
             @Override
-            public Intent onNotificationClick(EMMessage message) {
+            public String setNotificationTitle(EMMessage message) {
+              //修改标题,这里使用默认
+                return null;
+            }
+            
+            @Override
+            public int setNotificationSmallIcon(EMMessage message) {
+              //设置小图标，这里为默认
+                return 0;
+            }
+            
+            @Override
+            public String setNotificationNotifyText(EMMessage message) {
+                // 设置状态栏的消息提示，可以根据message的类型做相应提示
+                String ticker = CommonUtils.getMessageDigest(message, appContext);
+                if(message.getType() == Type.TXT)
+                    ticker = ticker.replaceAll("\\[.{2,3}\\]", "[表情]");
+                return message.getFrom() + ": " + ticker;
+            }
+            
+            @Override
+            public String setNotificationLatestText(EMMessage message, int fromUsersNum, int messageNum) {
+                return null;
+                // return fromUsersNum + "个基友，发来了" + messageNum + "条消息";
+            }
+            
+            @Override
+            public Intent setNotificationClickLaunchIntent(EMMessage message) {
+                //设置点击通知栏跳转事件
                 Intent intent = new Intent(appContext, ChatActivity.class);
                 ChatType chatType = message.getChatType();
                 if (chatType == ChatType.Chat) { // 单聊信息
                     intent.putExtra("userId", message.getFrom());
                     intent.putExtra("chatType", ChatActivity.CHATTYPE_SINGLE);
                 } else { // 群聊信息
-                            // message.getTo()为群聊id
+                    // message.getTo()为群聊id
                     intent.putExtra("groupId", message.getTo());
                     intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
                 }
@@ -107,6 +103,8 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             }
         };
     }
+    
+    
     
     @Override
     protected void onConnectionConflict(){
