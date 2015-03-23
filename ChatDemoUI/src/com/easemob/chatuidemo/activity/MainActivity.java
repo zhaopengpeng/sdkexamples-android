@@ -62,7 +62,7 @@ import com.easemob.util.HanziToPinyin;
 import com.easemob.util.NetUtils;
 import com.umeng.analytics.MobclickAgent;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements EMEventListener{
 
 	protected static final String TAG = "MainActivity";
 	// 未读消息textview
@@ -84,7 +84,8 @@ public class MainActivity extends BaseActivity {
 	//账号被移除
 	private boolean isCurrentAccountRemoved = false;
 	
-	private NotifierEventListener notifierEventListener;
+	
+	public static MainActivity activityInstance;
 	
 	/**
 	 * 检查当前用户是否被删除
@@ -113,6 +114,8 @@ public class MainActivity extends BaseActivity {
 		setContentView(R.layout.activity_main);
 		initView();
 		
+		activityInstance = this;
+		
 //		MobclickAgent.setDebugMode( true );
 		//--?--
 		MobclickAgent.updateOnlineConfig(this);
@@ -136,8 +139,6 @@ public class MainActivity extends BaseActivity {
 		getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, chatHistoryFragment)
 				.add(R.id.fragment_container, contactListFragment).hide(contactListFragment).show(chatHistoryFragment).commit();
 
-		notifierEventListener = new NotifierEventListener();
-		HXNotifier.getInstance(getApplicationContext()).addNotifierEventListener(notifierEventListener);
 		// setContactListener监听联系人的变化等
 		EMContactManager.getInstance().setContactListener(new MyContactListener());
 		// 注册一个监听连接状态的listener
@@ -195,10 +196,42 @@ public class MainActivity extends BaseActivity {
 		currentTabIndex = index;
 	}
 
+	/**
+	 * DemoHXSDKHelper里把消息event过滤处理后，需要main里处理的事件回调此方法
+	 */
+	@Override
+    public void onEvent(EMNotifierEvent event) {
+	    switch (event.getType()) {
+        case TypeNormalMessage: //普通消息
+            EMMessage message = (EMMessage) event.getData();
+            //提示新消息
+            HXNotifier.getInstance(getApplicationContext()).notifyChatMsg(message);
+            
+//            notifyNewMessage(message);  
+
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    // 刷新bottom bar消息未读数
+                    updateUnreadLabel();
+                    if (currentTabIndex == 0) {
+                        // 当前页面如果为聊天历史页面，刷新此页面
+                        if (chatHistoryFragment != null) {
+                            chatHistoryFragment.refresh();
+                        }
+                    }
+                }
+            });
+            break;
+
+        default:
+            break;
+        }
+    }
+	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		HXNotifier.getInstance(this).removeNotifierEventListener(notifierEventListener);
+		activityInstance = null;
 
 		if (conflictBuilder != null) {
 			conflictBuilder.create().dismiss();
@@ -262,51 +295,6 @@ public class MainActivity extends BaseActivity {
 	}
 
 	
-	private class NotifierEventListener implements EMEventListener{
-
-        @Override
-        public void onEvent(EMNotifierEvent event) {
-            switch (event.getType()) {
-            case TypeNormalMessage: //普通消息
-             // 主页面收到消息后，主要为了提示未读，实际消息内容需要到chat页面查看
-
-                EMMessage message = (EMMessage) event.getData();
-                String from = message.getFrom();
-                // 收到消息时如果聊天页面存在，并且是当前会话人或者群组，return掉让ChatActivity去处理
-                if (ChatActivity.activityInstance != null) {
-                    if (message.getChatType() == ChatType.GroupChat) { //群组消息
-                        if (message.getTo().equals(ChatActivity.activityInstance.getToChatUsername()))
-                            return;
-                    } else { //单聊消息
-                        if (from.equals(ChatActivity.activityInstance.getToChatUsername()))
-                            return;
-                    }
-                }
-                HXNotifier.getInstance(getApplicationContext()).notifyChatMsg(message);
-                
-//                notifyNewMessage(message);  
-
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        // 刷新bottom bar消息未读数
-                        updateUnreadLabel();
-                        if (currentTabIndex == 0) {
-                            // 当前页面如果为聊天历史页面，刷新此页面
-                            if (chatHistoryFragment != null) {
-                                chatHistoryFragment.refresh();
-                            }
-                        }
-                    }
-                });
-               
-                break;
-
-            default:
-                break;
-            }
-        }
-        
-    }
 
 	private InviteMessgeDao inviteMessgeDao;
 	private UserDao userDao;

@@ -15,13 +15,19 @@ package com.easemob.chatuidemo;
 
 import java.util.Map;
 
+import u.aly.aa;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.widget.Toast;
 
 import com.easemob.EMCallBack;
+import com.easemob.EMEventListener;
+import com.easemob.EMNotifierEvent;
 import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.model.HXNotifier;
 import com.easemob.applib.model.HXSDKModel;
 import com.easemob.applib.model.HXNotifier.NotificationListener;
+import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
@@ -33,6 +39,8 @@ import com.easemob.chatuidemo.activity.MainActivity;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.receiver.CallReceiver;
 import com.easemob.chatuidemo.utils.CommonUtils;
+import com.easemob.util.EMLog;
+import com.easemob.util.EasyUtils;
 
 /**
  * Demo UI HX SDK helper class which subclass HXSDKHelper
@@ -41,6 +49,7 @@ import com.easemob.chatuidemo.utils.CommonUtils;
  */
 public class DemoHXSDKHelper extends HXSDKHelper{
 
+    private static final String TAG = "DemoHXSDKHelper";
     /**
      * contact list in cache
      */
@@ -53,7 +62,90 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         // you can also get EMChatOptions to set related SDK options
         // EMChatOptions options = EMChatManager.getInstance().getChatOptions();
     }
+    
 
+    @Override
+    protected void initListener(){
+        super.initListener();
+        IntentFilter callFilter = new IntentFilter(EMChatManager.getInstance().getIncomingCallBroadcastAction());
+        if(callReceiver == null)
+            callReceiver = new CallReceiver();
+        //注册通话广播接收者
+        appContext.registerReceiver(callReceiver, callFilter);    
+        
+    }
+    
+    @Override
+    protected EMEventListener getEventListener() {
+        return new EMEventListener() {
+            
+            @Override
+            public void onEvent(EMNotifierEvent event) {
+                EMMessage message = (EMMessage)event.getData();
+                EMLog.d(TAG, "收到消息, messge type : " + event.getType() + ",id : " + message.getMsgId());
+                switch (event.getType()) {
+                case TypeNormalMessage:
+                    //应用在后台，不需要刷新UI,通知栏提示新消息
+                    if(!EasyUtils.isAppRunningForeground(appContext)){
+                        HXNotifier.getInstance(appContext).notifyChatMsg(message);
+                    }else{
+                        if(ChatActivity.activityInstance != null){ //聊天页面在
+                            if(isCurrentConversationMessage(message)){
+                                //当前会话过来的消息
+                                ChatActivity.activityInstance.onEvent(event);
+                            }else{
+                                HXNotifier.getInstance(appContext).notifyChatMsg(message);
+                            }
+                        }else{
+                            //主页面在并且为top activity
+                            if(MainActivity.activityInstance != null && 
+                                    EasyUtils.getTopActivityName(appContext).equals(MainActivity.class.getName())){
+                                //调用mian的onEvent();
+                                MainActivity.activityInstance.onEvent(event);
+                            }else{
+                                HXNotifier.getInstance(appContext).notifyChatMsg(message);
+                            }
+                        }
+                        //把事件向后传递
+//                        HXNotifier.getInstance(appContext).notifyAllEventListeners(event);
+                    }
+                    break;
+                case TypeCMD:
+                    EMLog.d(TAG, "收到透传消息");
+                    //获取消息body
+                    CmdMessageBody cmdMsgBody = (CmdMessageBody) message.getBody();
+                    String action = cmdMsgBody.action;//获取自定义action
+                    
+                    //获取扩展属性 此处省略
+//                  message.getStringAttribute("");
+                    EMLog.d(TAG, String.format("透传消息：action:%s,message:%s", action,message.toString()));
+                    String str = appContext.getString(R.string.receive_the_passthrough);
+                    Toast.makeText(appContext, str+action, Toast.LENGTH_SHORT).show();
+                    break;
+                case TypeDeliveryAck:
+                    message.setDelivered(true);
+                    if(ChatActivity.activityInstance != null)
+                        ChatActivity.activityInstance.onEvent(event);
+//                    HXNotifier.getInstance(appContext).notifyAllEventListeners(event);
+                    break;
+                case TypeReadAck:
+                    message.setAcked(true);
+                    if(ChatActivity.activityInstance != null)
+                        ChatActivity.activityInstance.onEvent(event);
+//                    HXNotifier.getInstance(appContext).notifyAllEventListeners(event);
+                    break;
+
+                default:
+                    break;
+                }
+            }
+        };
+    }
+
+    /**
+     * 自定义通知栏提示内容
+     * @return
+     */
     @Override
     protected NotificationListener getNotificationListener() {
         //可以覆盖默认的设置
@@ -122,15 +214,6 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         appContext.startActivity(intent);
     }
     
-    
-    @Override
-    protected void initListener(){
-        super.initListener();
-        IntentFilter callFilter = new IntentFilter(EMChatManager.getInstance().getIncomingCallBroadcastAction());
-        if(callReceiver == null)
-            callReceiver = new CallReceiver();
-        appContext.registerReceiver(callReceiver, callFilter);    
-    }
 
     @Override
     protected HXSDKModel createModel() {
@@ -198,6 +281,24 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         });
     }
     
+    /**
+     * 是否为当前会话过来的消息
+     * @param message
+     * @return
+     */
+    private boolean isCurrentConversationMessage(EMMessage message){
+        if (message.getChatType() == ChatType.GroupChat) { //群组消息
+            if (message.getTo().equals(ChatActivity.activityInstance.getToChatUsername())){
+                return true;
+            }
+        } else { //单聊消息
+            if (message.getFrom().equals(ChatActivity.activityInstance.getToChatUsername()))
+                return true;
+        }
+        return false;
+    }
+    
+    
     void endCall(){
         try {
             EMChatManager.getInstance().endCall();
@@ -205,4 +306,5 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             e.printStackTrace();
         }
     }
+
 }

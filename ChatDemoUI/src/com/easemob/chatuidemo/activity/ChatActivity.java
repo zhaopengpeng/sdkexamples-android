@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -101,7 +100,7 @@ import com.easemob.util.VoiceRecorder;
  * 聊天页面
  * 
  */
-public class ChatActivity extends BaseActivity implements OnClickListener {
+public class ChatActivity extends BaseActivity implements OnClickListener, EMEventListener{
 
 	private static final int REQUEST_CODE_EMPTY_HISTORY = 2;
 	public static final int REQUEST_CODE_CONTEXT_MENU = 3;
@@ -355,8 +354,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 			}
 		});
 
-		notifierEventListener = new NotifierEventListener();
-		HXNotifier.getInstance(getApplicationContext()).addNotifierEventListener(notifierEventListener);
 		
 		// 监听当前会话的群聊解散被T事件
 		groupListener = new GroupListener();
@@ -564,49 +561,49 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	}
 
 	
-	private class NotifierEventListener implements EMEventListener{
-
-        @Override
-        public void onEvent(EMNotifierEvent event) {
-            //获取到message
-            EMMessage message = (EMMessage) event.getData();
-            String from = message.getFrom();
-//            EMConversation conversation = EMChatManager.getInstance().getConversation(from);
-            switch (event.getType()) {
-            case TypeNormalMessage: 
-                //可能会存在消息来时，聊天页面在，main页面不在的情况
-                if (message.getChatType() == ChatType.GroupChat) { //群组消息
-                    if (!message.getTo().equals(getToChatUsername())){
-                        return;
-                    }
-                } else { //单聊消息
-                    if (!from.equals(getToChatUsername()))
-                        return;
+	/**
+     * DemoHXSDKHelper里把消息event过滤处理后，需要main里处理的事件回调此方法
+     */
+    @Override
+    public void onEvent(EMNotifierEvent event) {
+        //获取到message
+        EMMessage message = (EMMessage) event.getData();
+        String from = message.getFrom();
+//        EMConversation conversation = EMChatManager.getInstance().getConversation(from);
+        switch (event.getType()) {
+        case TypeNormalMessage: 
+            //可能会存在消息来时，聊天页面在，main页面不在的情况
+            if (message.getChatType() == ChatType.GroupChat) { //群组消息
+                if (!message.getTo().equals(getToChatUsername())){
+                    return;
                 }
-                //声音和震动提示有新消息
-                HXNotifier.getInstance(getApplicationContext()).notifyOnNewMsg();
-                refreshUIWithNewMessage();
-                break;
-            case TypeDeliveryAck:
-                if (message != null) {
-                    message.setDelivered(true);
-                }
-                refreshUI();
-                break;
-            case TypeReadAck:
-                // 把message设为已读
-                if (message != null) {
-                    message.setAcked(true);
-                }
-                refreshUI();
-                break;
-
-            default:
-                break;
+            } else { //单聊消息
+                if (!from.equals(getToChatUsername()))
+                    return;
             }
+            //声音和震动提示有新消息
+            HXNotifier.getInstance(getApplicationContext()).notifyOnNewMsg(message);
+            refreshUIWithNewMessage();
+            break;
+        case TypeDeliveryAck:
+            if (message != null) {
+                message.setDelivered(true);
+            }
+            refreshUI();
+            break;
+        case TypeReadAck:
+            // 把message设为已读
+            if (message != null) {
+                message.setAcked(true);
+            }
+            refreshUI();
+            break;
+
+        default:
+            break;
         }
-        
     }
+	
 	
 	private void refreshUIWithNewMessage(){
 	    runOnUiThread(new Runnable() {
@@ -1042,7 +1039,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 
 
 	private PowerManager.WakeLock wakeLock;
-    private NotifierEventListener notifierEventListener;
 
 	/**
 	 * 按住说话listener
@@ -1211,7 +1207,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	protected void onDestroy() {
 		super.onDestroy();
 		activityInstance = null;
-		HXNotifier.getInstance(this).removeNotifierEventListener(notifierEventListener);
 		EMGroupManager.getInstance().removeGroupChangeListener(groupListener);
 	}
 
@@ -1449,5 +1444,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	public String getToChatUsername() {
 		return toChatUsername;
 	}
+
 
 }

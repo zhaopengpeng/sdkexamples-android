@@ -30,12 +30,11 @@ import android.os.Build;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 
-import com.baidu.lbsapi.auth.e;
 import com.easemob.EMEventListener;
-import com.easemob.EMNotifierEvent;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
+import com.easemob.chat.EMNotifier;
 import com.easemob.util.EMLog;
 import com.easemob.util.EasyUtils;
 
@@ -115,15 +114,9 @@ public class HXNotifier {
      * @param message
      */
     public synchronized void notifyChatMsg(final EMMessage message) {
-
-        // //ignore em_ignore_notification field message
-        // if(message.getBooleanAttribute("em_ignore_notification", false)){
-        // if(EasyUtils.isAppRunningForeground(appContext))
-        // sendBroadcast(message);
-        // //no need to send Broadcast in background
-        // return;
-        // }
-
+        if(isNoNeedNotifyMessage(message))
+            return;
+        
         String chatUsename = null;
         List<String> notNotifyIds = null;
         // 获取设置的不提示新消息的用户或者群组ids
@@ -144,7 +137,7 @@ public class HXNotifier {
                 sendNotification(message, true);
 
             }
-            notifyOnNewMsg();
+            notifyOnNewMsg(message);
         }
     }
 
@@ -254,8 +247,9 @@ public class HXNotifier {
     /**
      * 手机震动和声音提示
      */
-    public void notifyOnNewMsg() {
-
+    public void notifyOnNewMsg(EMMessage message) {
+        if(isNoNeedNotifyMessage(message))
+            return;
         if (!EMChatManager.getInstance().getChatOptions().getNotificationEnable()
                 || !EMChatManager.getInstance().getChatOptions().getNotifyBySoundAndVibrate()) {
             return;
@@ -319,28 +313,6 @@ public class HXNotifier {
         }
     }
 
-    
-    public void addNotifierEventListener(EMEventListener eventListener){
-        synchronized (eventListeners) {
-            if(eventListener != null && !eventListeners.contains(eventListener))
-                eventListeners.add(eventListener);
-        }
-    }
-    
-    public void removeNotifierEventListener(EMEventListener eventListener){
-        synchronized (eventListeners) {
-            if(eventListener != null && eventListeners.contains(eventListener))
-                eventListeners.remove(eventListener);
-        }
-    }
-    
-    public void notifyAllEventListeners(EMNotifierEvent event){
-        synchronized (eventListeners) {
-            for(EMEventListener listener : eventListeners){
-                listener.onEvent(event);
-            }
-        }
-    }
 
     /**
      * 设置通知栏相关事件listener
@@ -400,5 +372,13 @@ public class HXNotifier {
         Intent setNotificationClickLaunchIntent(EMMessage message);
     }
     
+    /**
+     * 是否为环信设置的免打扰消息
+     * @param message
+     * @return
+     */
+    public boolean isNoNeedNotifyMessage(EMMessage message){
+        return EMNotifier.getInstance(appContext).isNoNeedNotifyMessage(message);
+    }
 
 }

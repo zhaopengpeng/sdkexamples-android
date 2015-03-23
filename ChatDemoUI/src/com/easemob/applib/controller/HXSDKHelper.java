@@ -314,53 +314,17 @@ public abstract class HXSDKHelper {
         };
         //注册连接监听
         EMChatManager.getInstance().addConnectionListener(connectionListener);
-        
-        EMEventListener eventListener = new EMEventListener() {
-            
-            @Override
-            public void onEvent(EMNotifierEvent event) {
-                EMMessage message = (EMMessage)event.getData();
-                EMLog.d(TAG, "received a message, messge type : " + event.getType() + ",id : " + message.getMsgId());
-                switch (event.getType()) {
-                case TypeNormalMessage:
-                    //应用在后台，不需要刷新UI,通知栏提示新消息
-                    if(!EasyUtils.isAppRunningForeground(appContext)){
-                        HXNotifier.getInstance(appContext).notifyChatMsg(message);
-                    }else{
-                        //把事件向后传递
-                        HXNotifier.getInstance(appContext).notifyAllEventListeners(event);
-                    }
-                    break;
-                case TypeCMD:
-                    EMLog.d(TAG, "收到透传消息");
-                    //获取消息body
-                    CmdMessageBody cmdMsgBody = (CmdMessageBody) message.getBody();
-                    String action = cmdMsgBody.action;//获取自定义action
-                    
-                    //获取扩展属性 此处省略
-//                  message.getStringAttribute("");
-                    EMLog.d(TAG, String.format("透传消息：action:%s,message:%s", action,message.toString()));
-                    String str = appContext.getString(R.string.receive_the_passthrough);
-                    Toast.makeText(appContext, str+action, Toast.LENGTH_SHORT).show();
-                    break;
-                case TypeDeliveryAck:
-                    message.setDelivered(true);
-                    HXNotifier.getInstance(appContext).notifyAllEventListeners(event);
-                    break;
-                case TypeReadAck:
-                    message.setAcked(true);
-                    HXNotifier.getInstance(appContext).notifyAllEventListeners(event);
-                    break;
-
-                default:
-                    break;
-                }
-            }
-        };
-        //注册消息事件监听
-        EMChatManager.getInstance().addEventListener(eventListener);
+        //注册一个全局的消息事件监听
+        EMChatManager.getInstance().addEventListener(getEventListener());
+       
     }
     
+    /**
+     * 设置全局消息监听listener
+     * @return
+     */
+    protected abstract EMEventListener getEventListener();
+
     /**
      * the developer can override this function to handle connection conflict error
      */
