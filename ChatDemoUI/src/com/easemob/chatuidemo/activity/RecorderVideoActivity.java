@@ -20,6 +20,7 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -461,29 +462,39 @@ public class RecorderVideoActivity extends BaseActivity implements
 	}
 
 	MediaScannerConnection msc = null;
+	ProgressDialog progressDialog = null;
 
 	public void sendVideo(View view) {
 		if (TextUtils.isEmpty(localPath)) {
 			EMLog.e("Recorder", "recorder fail please try again!");
 			return;
 		}
-
-		msc = new MediaScannerConnection(this,
-				new MediaScannerConnectionClient() {
-
-					@Override
-					public void onScanCompleted(String path, Uri uri) {
-						System.out.println("scanner completed");
-						msc.disconnect();
-						setResult(RESULT_OK, getIntent().putExtra("uri", uri));
-						finish();
-					}
-
-					@Override
-					public void onMediaScannerConnected() {
-						msc.scanFile(localPath, "video/*");
-					}
-				});
+		if(msc == null)
+    		msc = new MediaScannerConnection(this,
+    				new MediaScannerConnectionClient() {
+    
+    					@Override
+    					public void onScanCompleted(String path, Uri uri) {
+    						System.out.println("scanner completed");
+    						msc.disconnect();
+    						progressDialog.dismiss();
+    						setResult(RESULT_OK, getIntent().putExtra("uri", uri));
+    						finish();
+    					}
+    
+    					@Override
+    					public void onMediaScannerConnected() {
+    						msc.scanFile(localPath, "video/*");
+    					}
+    				});
+		
+		
+		if(progressDialog == null){
+		    progressDialog = new ProgressDialog(this);
+		    progressDialog.setMessage("processing...");
+		    progressDialog.setCancelable(false);
+		}
+		progressDialog.show();
 		msc.connect();
 
 	}

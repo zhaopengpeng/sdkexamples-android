@@ -239,6 +239,8 @@ public abstract class HXSDKHelper {
         options.setRequireAck(hxModel.getRequireReadAck());
         // 设置是否需要已送达回执
         options.setRequireDeliveryAck(hxModel.getRequireDeliveryAck());
+        // 设置从db初始化加载时, 每个conversation需要加载msg的个数
+        options.setNumberOfMessagesLoaded(1);
         
         //设置通知栏事件监听(不是SDK的API)
         HXNotifier.getInstance(appContext).setNotificationListener(getNotificationListener());

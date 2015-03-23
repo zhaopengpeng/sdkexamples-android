@@ -233,6 +233,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 			if (results.count > 0) {
 			    notiyfyByFilter = true;
 				notifyDataSetChanged();
+				notiyfyByFilter = false;
 			} else {
 				notifyDataSetInvalidated();
 			}
@@ -246,7 +247,6 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	    if(!notiyfyByFilter){
 	        copyUserList.clear();
 	        copyUserList.addAll(userList);
-	        notiyfyByFilter = false;
 	    }
 	}
 	
