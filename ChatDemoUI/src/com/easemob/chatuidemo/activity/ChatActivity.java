@@ -335,7 +335,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 		// 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
 		final List<EMMessage> msgs = conversation.getAllMessages();
 		int msgCount = msgs != null ? msgs.size() : 0;
-		if (msgCount == EMChatManager.getInstance().getChatOptions().getNumberOfMessagesLoaded() && msgCount < pagesize) {
+		if (msgCount < conversation.getDBMsgCount() && msgCount < pagesize) {
 			String msgId = null;
 			if (msgs != null && msgs.size() > 0) {
 				msgId = msgs.get(0).getMsgId();
