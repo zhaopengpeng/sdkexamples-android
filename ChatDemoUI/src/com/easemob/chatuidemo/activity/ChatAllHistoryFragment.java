@@ -216,9 +216,11 @@ public class ChatAllHistoryFragment extends Fragment {
 		 * 避免并发问题
 		 */
 		List<Pair<Long, EMConversation>> sortList = new ArrayList<Pair<Long, EMConversation>>();
-		for (EMConversation conversation : conversations.values()) {
-			if (conversation.getAllMessages().size() != 0) {
-				sortList.add(new Pair<Long, EMConversation>(conversation.getLastMessage().getMsgTime(), conversation));
+		synchronized (conversations) {
+			for (EMConversation conversation : conversations.values()) {
+				if (conversation.getAllMessages().size() != 0) {
+					sortList.add(new Pair<Long, EMConversation>(conversation.getLastMessage().getMsgTime(), conversation));
+				}
 			}
 		}
 		sortConversationByLastChatTime(sortList);
