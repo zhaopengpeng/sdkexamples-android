@@ -87,7 +87,7 @@ public class CameraHelper implements PreviewCallback {
                 mCamera.setDisplayOrientation(90);
             }
             mParameters.setPreviewSize(mwidth, mheight);
-            mParameters.setPreviewFrameRate(25);
+            mParameters.setPreviewFrameRate(15);
             mCamera.setParameters(mParameters);
             int mformat = mParameters.getPreviewFormat();
             int bitsperpixel = ImageFormat.getBitsPerPixel(mformat);
