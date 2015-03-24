@@ -1,5 +1,6 @@
 package com.easemob.chatuidemo.activity;
 
+import java.lang.Exception;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -223,7 +224,12 @@ public class ChatAllHistoryFragment extends Fragment {
 				}
 			}
 		}
-		sortConversationByLastChatTime(sortList);
+		try {
+			// Internal is TimSort algorithm, has bug
+			sortConversationByLastChatTime(sortList);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		List<EMConversation> list = new ArrayList<EMConversation>();
 		for (Pair<Long, EMConversation> sortItem : sortList) {
 			list.add(sortItem.second);
