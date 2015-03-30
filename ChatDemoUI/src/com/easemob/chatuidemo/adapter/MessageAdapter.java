@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
+import android.os.Handler;
 import android.text.Spannable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -66,10 +67,8 @@ import com.easemob.chatuidemo.activity.ContextMenu;
 import com.easemob.chatuidemo.activity.ShowBigImage;
 import com.easemob.chatuidemo.activity.ShowNormalFileActivity;
 import com.easemob.chatuidemo.activity.ShowVideoActivity;
-import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.task.LoadImageTask;
 import com.easemob.chatuidemo.task.LoadVideoImageTask;
-import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.chatuidemo.utils.ImageCache;
 import com.easemob.chatuidemo.utils.ImageUtils;
 import com.easemob.chatuidemo.utils.SmileUtils;
@@ -110,9 +109,12 @@ public class MessageAdapter extends BaseAdapter{
 	private String username;
 	private LayoutInflater inflater;
 	private Activity activity;
+	
+	private static final int HANDLER_MESSAGE_REFRESH_LIST = 0;
 
 	// reference to conversation object in chatsdk
 	private EMConversation conversation;
+	EMMessage[] messages = null;
 
 	private Context context;
 
@@ -125,24 +127,42 @@ public class MessageAdapter extends BaseAdapter{
 		activity = (Activity) context;
 		this.conversation = EMChatManager.getInstance().getConversation(username);
 	}
+	
+	Handler handler = new Handler() {
+		
+		@Override
+		public void handleMessage(android.os.Message message) {
+			// UI线程不能直接使用conversation.getAllMessages()
+			// 否则在UI刷新过程中，如果收到新的消息，会导致并发问题
+			messages = (EMMessage[]) conversation.getAllMessages().toArray(new EMMessage[conversation.getAllMessages().size()]);
+			notifyDataSetChanged();
+		}
+	};
 
 
 	/**
 	 * 获取item数
 	 */
 	public int getCount() {
-		return conversation.getMsgCount();
+		return messages == null ? 0 : messages.length;
 	}
 
 	/**
 	 * 刷新页面
 	 */
 	public void refresh() {
-		notifyDataSetChanged();
+		if (handler.hasMessages(HANDLER_MESSAGE_REFRESH_LIST)) {
+			return;
+		}
+		android.os.Message msg = handler.obtainMessage(HANDLER_MESSAGE_REFRESH_LIST);
+		handler.sendMessage(msg);
 	}
 
 	public EMMessage getItem(int position) {
-		return conversation.getMessage(position);
+		if (messages != null && position < messages.length) {
+			return messages[position];
+		}
+		return null;
 	}
 
 	public long getItemId(int position) {
@@ -160,7 +180,10 @@ public class MessageAdapter extends BaseAdapter{
 	 * 获取item类型
 	 */
 	public int getItemViewType(int position) {
-		EMMessage message = conversation.getMessage(position);
+		EMMessage message = getItem(position); 
+		if (message == null) {
+			return -1;
+		}
 		if (message.getType() == EMMessage.Type.TXT) {
 			if (message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL, false))
 			    return message.direct == EMMessage.Direct.RECEIVE ? MESSAGE_TYPE_RECV_VOICE_CALL : MESSAGE_TYPE_SENT_VOICE_CALL;
@@ -448,7 +471,8 @@ public class MessageAdapter extends BaseAdapter{
 			timestamp.setVisibility(View.VISIBLE);
 		} else {
 			// 两条消息时间离得如果稍长，显示时间
-			if (DateUtils.isCloseEnough(message.getMsgTime(), conversation.getMessage(position - 1).getMsgTime())) {
+			EMMessage prevMessage = getItem(position - 1);
+			if (prevMessage != null && DateUtils.isCloseEnough(message.getMsgTime(), prevMessage.getMsgTime())) {
 				timestamp.setVisibility(View.GONE);
 			} else {
 				timestamp.setText(DateUtils.getTimestampString(new Date(message.getMsgTime())));
