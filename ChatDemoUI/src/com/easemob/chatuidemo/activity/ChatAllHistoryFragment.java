@@ -1,5 +1,6 @@
 package com.easemob.chatuidemo.activity;
 
+import java.lang.Exception;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -159,27 +161,33 @@ public class ChatAllHistoryFragment extends Fragment {
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		// if(((AdapterContextMenuInfo)menuInfo).position > 0){ m,
-		getActivity().getMenuInflater().inflate(R.menu.delete_message, menu);
+		getActivity().getMenuInflater().inflate(R.menu.delete_message, menu); 
 		// }
 	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
+		boolean handled = false;
+		boolean deleteMessage = false;
 		if (item.getItemId() == R.id.delete_message) {
-			EMConversation tobeDeleteCons = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
-			// 删除此会话
-			EMChatManager.getInstance().deleteConversation(tobeDeleteCons.getUserName(), tobeDeleteCons.isGroup());
-			InviteMessgeDao inviteMessgeDao = new InviteMessgeDao(getActivity());
-			inviteMessgeDao.deleteMessage(tobeDeleteCons.getUserName());
-			adapter.remove(tobeDeleteCons);
-			adapter.notifyDataSetChanged();
-
-			// 更新消息未读数
-			((MainActivity) getActivity()).updateUnreadLabel();
-
-			return true;
+			deleteMessage = true;
+			handled = true;
+		} else if (item.getItemId() == R.id.delete_conversation) {
+			deleteMessage = false;
+			handled = true;
 		}
-		return super.onContextItemSelected(item);
+		EMConversation tobeDeleteCons = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
+		// 删除此会话
+		EMChatManager.getInstance().deleteConversation(tobeDeleteCons.getUserName(), tobeDeleteCons.isGroup(), deleteMessage);
+		InviteMessgeDao inviteMessgeDao = new InviteMessgeDao(getActivity());
+		inviteMessgeDao.deleteMessage(tobeDeleteCons.getUserName());
+		adapter.remove(tobeDeleteCons);
+		adapter.notifyDataSetChanged();
+
+		// 更新消息未读数
+		((MainActivity) getActivity()).updateUnreadLabel();
+		
+		return handled ? true : super.onContextItemSelected(item);
 	}
 
 	/**
@@ -201,14 +209,31 @@ public class ChatAllHistoryFragment extends Fragment {
 	private List<EMConversation> loadConversationsWithRecentChat() {
 		// 获取所有会话，包括陌生人
 		Hashtable<String, EMConversation> conversations = EMChatManager.getInstance().getAllConversations();
-		List<EMConversation> list = new ArrayList<EMConversation>();
-		// 过滤掉messages seize为0的conversation
-		for (EMConversation conversation : conversations.values()) {
-			if (conversation.getAllMessages().size() != 0)
-				list.add(conversation);
+		// 过滤掉messages size为0的conversation
+		/**
+		 * 如果在排序过程中有新消息收到，lastMsgTime会发生变化
+		 * 影响排序过程，Collection.sort会产生异常
+		 * 保证Conversation在Sort过程中最后一条消息的时间不变 
+		 * 避免并发问题
+		 */
+		List<Pair<Long, EMConversation>> sortList = new ArrayList<Pair<Long, EMConversation>>();
+		synchronized (conversations) {
+			for (EMConversation conversation : conversations.values()) {
+				if (conversation.getAllMessages().size() != 0) {
+					sortList.add(new Pair<Long, EMConversation>(conversation.getLastMessage().getMsgTime(), conversation));
+				}
+			}
 		}
-		// 排序
-		sortConversationByLastChatTime(list);
+		try {
+			// Internal is TimSort algorithm, has bug
+			sortConversationByLastChatTime(sortList);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		List<EMConversation> list = new ArrayList<EMConversation>();
+		for (Pair<Long, EMConversation> sortItem : sortList) {
+			list.add(sortItem.second);
+		}
 		return list;
 	}
 
@@ -217,16 +242,14 @@ public class ChatAllHistoryFragment extends Fragment {
 	 * 
 	 * @param usernames
 	 */
-	private void sortConversationByLastChatTime(List<EMConversation> conversationList) {
-		Collections.sort(conversationList, new Comparator<EMConversation>() {
+	private void sortConversationByLastChatTime(List<Pair<Long, EMConversation>> conversationList) {
+		Collections.sort(conversationList, new Comparator<Pair<Long, EMConversation>>() {
 			@Override
-			public int compare(final EMConversation con1, final EMConversation con2) {
+			public int compare(final Pair<Long, EMConversation> con1, final Pair<Long, EMConversation> con2) {
 
-				EMMessage con2LastMessage = con2.getLastMessage();
-				EMMessage con1LastMessage = con1.getLastMessage();
-				if (con2LastMessage.getMsgTime() == con1LastMessage.getMsgTime()) {
+				if (con1.first == con2.first) {
 					return 0;
-				} else if (con2LastMessage.getMsgTime() > con1LastMessage.getMsgTime()) {
+				} else if (con2.first > con1.first) {
 					return 1;
 				} else {
 					return -1;
@@ -262,5 +285,4 @@ public class ChatAllHistoryFragment extends Fragment {
         	outState.putBoolean(Constant.ACCOUNT_REMOVED, true);
         }
     }
-
 }

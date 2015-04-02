@@ -44,6 +44,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
      * contact list in cache
      */
     private Map<String, User> contactList;
+    private CallReceiver callReceiver;
     
     @Override
     protected void initHXOptions(){
@@ -128,7 +129,9 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     protected void initListener(){
         super.initListener();
         IntentFilter callFilter = new IntentFilter(EMChatManager.getInstance().getIncomingCallBroadcastAction());
-        appContext.registerReceiver(new CallReceiver(), callFilter);    
+        if(callReceiver == null)
+            callReceiver = new CallReceiver();
+        appContext.registerReceiver(callReceiver, callFilter);    
     }
 
     @Override
@@ -167,13 +170,13 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     
     @Override
     public void logout(final EMCallBack callback){
+        endCall();
         super.logout(new EMCallBack(){
 
             @Override
             public void onSuccess() {
                 // TODO Auto-generated method stub
                 setContactList(null);
-                endCall();
                 getModel().closeDB();
                 if(callback != null){
                     callback.onSuccess();

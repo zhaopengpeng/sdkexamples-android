@@ -58,36 +58,36 @@ public class CameraHelper implements PreviewCallback {
      * 开启相机拍摄
      */
     public void startCapture(){
-        if (mCamera == null) {
-            // mCamera = Camera.open();
-            camera_count = Camera.getNumberOfCameras();
-            Log.e(TAG, "camera count:" + camera_count);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-                for (int i = 0; i < camera_count; i++) {
-                    CameraInfo info = new CameraInfo();
-                    Camera.getCameraInfo(i, info);
-                    // find front camera
-                    if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
-                        Log.e(TAG, "to open front camera");
-                        mCamera = Camera.open(i);
+        try {
+            if (mCamera == null) {
+                // mCamera = Camera.open();
+                camera_count = Camera.getNumberOfCameras();
+                Log.e(TAG, "camera count:" + camera_count);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+                    for (int i = 0; i < camera_count; i++) {
+                        CameraInfo info = new CameraInfo();
+                        Camera.getCameraInfo(i, info);
+                        // find front camera
+                        if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
+                            Log.e(TAG, "to open front camera");
+                            mCamera = Camera.open(i);
+                        }
                     }
                 }
-            }
-            if (mCamera == null) {
-                Log.e(TAG, "AAAAA OPEN camera");
-                mCamera = Camera.open();
-            }
+                if (mCamera == null) {
+                    Log.e(TAG, "AAAAA OPEN camera");
+                    mCamera = Camera.open();
+                }
 
-        }
-
-        try {
+            }
+            
             mCamera.stopPreview();
             mParameters = mCamera.getParameters();
             if (isScreenOriatationPortrait()) {
                 mCamera.setDisplayOrientation(90);
             }
             mParameters.setPreviewSize(mwidth, mheight);
-            mParameters.setPreviewFrameRate(25);
+            mParameters.setPreviewFrameRate(15);
             mCamera.setParameters(mParameters);
             int mformat = mParameters.getPreviewFormat();
             int bitsperpixel = ImageFormat.getBitsPerPixel(mformat);
@@ -106,6 +106,8 @@ public class CameraHelper implements PreviewCallback {
             Log.d(TAG, "camera start preview");
         } catch (Exception e) {
             e.printStackTrace();
+            if(mCamera != null)
+                mCamera.release();
         }
     }
 

@@ -101,7 +101,7 @@ public class LoginActivity extends BaseActivity {
 	}
 
 	/**
-	 * 登陆
+	 * 登录
 	 * 
 	 * @param view
 	 */
@@ -230,7 +230,6 @@ public class LoginActivity extends BaseActivity {
 	 private void processContactsAndGroups() throws EaseMobException {
          // demo中简单的处理成每次登陆都去获取好友username，开发者自己根据情况而定
          List<String> usernames = EMContactManager.getInstance().getContactUserNames();
-         System.out.println("----------------"+usernames.toString());
          EMLog.d("roster", "contacts size: " + usernames.size());
          Map<String, User> userlist = new HashMap<String, User>();
          for (String username : usernames) {
@@ -256,6 +255,7 @@ public class LoginActivity extends BaseActivity {
 
          // 存入内存
          DemoApplication.getInstance().setContactList(userlist);
+         System.out.println("----------------"+userlist.values().toString());
          // 存入db
          UserDao dao = new UserDao(LoginActivity.this);
          List<User> users = new ArrayList<User>(userlist.values());

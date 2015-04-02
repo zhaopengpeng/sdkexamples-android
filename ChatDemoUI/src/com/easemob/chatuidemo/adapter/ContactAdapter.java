@@ -33,14 +33,16 @@ import com.easemob.chat.EMConversation;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.domain.User;
+import com.easemob.chatuidemo.utils.UserUtils;
 import com.easemob.chatuidemo.widget.Sidebar;
+import com.easemob.util.EMLog;
 
 /**
  * 简单的好友Adapter实现
  *
  */
 public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexer{
-
+    private static final String TAG = "ContactAdapter";
 	List<String> list;
 	List<User> userList;
 	List<User> copyUserList;
@@ -48,28 +50,39 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	private SparseIntArray positionOfSection;
 	private SparseIntArray sectionOfPosition;
 	private int res;
-	public MyFilter myFilter;
+	private MyFilter myFilter;
+    private boolean notiyfyByFilter;
 
 	public ContactAdapter(Context context, int resource, List<User> objects) {
 		super(context, resource, objects);
 		this.res = resource;
-		this.userList=objects;
+		this.userList = objects;
 		copyUserList = new ArrayList<User>();
 		copyUserList.addAll(objects);
 		layoutInflater = LayoutInflater.from(context);
 	}
 	
-	
+	private static class ViewHolder {
+	    ImageView avatar;
+	    TextView unreadMsgView;
+	    TextView nameTextview;
+	    TextView tvHeader;
+    }
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		if(convertView == null){
+	    ViewHolder holder;
+ 		if(convertView == null){
+ 		    holder = new ViewHolder();
 			convertView = layoutInflater.inflate(res, null);
+			holder.avatar = (ImageView) convertView.findViewById(R.id.avatar);
+			holder.unreadMsgView = (TextView) convertView.findViewById(R.id.unread_msg_number);
+			holder.nameTextview = (TextView) convertView.findViewById(R.id.name);
+			holder.tvHeader = (TextView) convertView.findViewById(R.id.header);
+			convertView.setTag(holder);
+		}else{
+		    holder = (ViewHolder) convertView.getTag();
 		}
 		
-		ImageView avatar = (ImageView) convertView.findViewById(R.id.avatar);
-		TextView unreadMsgView = (TextView) convertView.findViewById(R.id.unread_msg_number);
-		TextView nameTextview = (TextView) convertView.findViewById(R.id.name);
-		TextView tvHeader = (TextView) convertView.findViewById(R.id.header);
 		User user = getItem(position);
 		if(user == null)
 			Log.d("ContactAdapter", position + "");
@@ -78,33 +91,34 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 		String header = user.getHeader();
 		if (position == 0 || header != null && !header.equals(getItem(position - 1).getHeader())) {
 			if ("".equals(header)) {
-				tvHeader.setVisibility(View.GONE);
+			    holder.tvHeader.setVisibility(View.GONE);
 			} else {
-				tvHeader.setVisibility(View.VISIBLE);
-				tvHeader.setText(header);
+			    holder.tvHeader.setVisibility(View.VISIBLE);
+			    holder.tvHeader.setText(header);
 			}
 		} else {
-			tvHeader.setVisibility(View.GONE);
+		    holder.tvHeader.setVisibility(View.GONE);
 		}
 		//显示申请与通知item
 		if(username.equals(Constant.NEW_FRIENDS_USERNAME)){
-			nameTextview.setText(user.getNick());
-			avatar.setImageResource(R.drawable.new_friends_icon);
+		    holder.nameTextview.setText(user.getNick());
+		    holder.avatar.setImageResource(R.drawable.new_friends_icon);
 			if(user.getUnreadMsgCount() > 0){
-				unreadMsgView.setVisibility(View.VISIBLE);
-				unreadMsgView.setText(user.getUnreadMsgCount()+"");
+			    holder.unreadMsgView.setVisibility(View.VISIBLE);
+			    holder.unreadMsgView.setText(user.getUnreadMsgCount()+"");
 			}else{
-				unreadMsgView.setVisibility(View.INVISIBLE);
+			    holder.unreadMsgView.setVisibility(View.INVISIBLE);
 			}
 		}else if(username.equals(Constant.GROUP_USERNAME)){
 			//群聊item
-			nameTextview.setText(user.getNick());
-			avatar.setImageResource(R.drawable.groups_icon);
+		    holder.nameTextview.setText(user.getNick());
+		    holder.avatar.setImageResource(R.drawable.groups_icon);
 		}else{
-			nameTextview.setText(username);
-			if(unreadMsgView != null)
-				unreadMsgView.setVisibility(View.INVISIBLE);
-			avatar.setImageResource(R.drawable.default_avatar);
+		    holder.nameTextview.setText(username);
+		    //设置用户头像
+			UserUtils.setUserAvatar(getContext(), username, holder.avatar);
+			if(holder.unreadMsgView != null)
+			    holder.unreadMsgView.setVisibility(View.INVISIBLE);
 		}
 		
 		return convertView;
@@ -161,34 +175,31 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	}
 	
 	private class  MyFilter extends Filter{
-		List<User> mList=null;
+        List<User> mOriginalList = null;
 		
 		public MyFilter(List<User> myList) {
-			super();
-			this.mList = myList;
+			this.mOriginalList = myList;
 		}
 
 		@Override
-		protected synchronized FilterResults  performFiltering(CharSequence prefix) {
+		protected synchronized FilterResults performFiltering(CharSequence prefix) {
 			FilterResults results = new FilterResults();
-			if(mList==null){
-				mList = new ArrayList<User>();
+			if(mOriginalList==null){
+			    mOriginalList = new ArrayList<User>();
 			}
+			EMLog.d(TAG, "contacts original size: " + mOriginalList.size());
+			EMLog.d(TAG, "contacts copy size: " + copyUserList.size());
+			
 			if(prefix==null || prefix.length()==0){
 				results.values = copyUserList;
 				results.count = copyUserList.size();
 			}else{
 				String prefixString = prefix.toString();
-				final int count = mList.size();
+				final int count = mOriginalList.size();
 				final ArrayList<User> newValues = new ArrayList<User>();
 				for(int i=0;i<count;i++){
-					final User user = mList.get(i);
+					final User user = mOriginalList.get(i);
 					String username = user.getUsername();
-					
-					EMConversation conversation = EMChatManager.getInstance().getConversation(username);
-					if(conversation != null){
-						username = conversation.getUserName();
-					}
 					
 					if(username.startsWith(prefixString)){
 						newValues.add(user);
@@ -209,6 +220,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 				results.values=newValues;
 				results.count=newValues.size();
 			}
+			EMLog.d(TAG, "contacts filter results size: " + results.count);
 			return results;
 		}
 
@@ -217,8 +229,11 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 				FilterResults results) {
 			userList.clear();
 			userList.addAll((List<User>)results.values);
+			EMLog.d(TAG, "publish contacts filter results size: " + results.count);
 			if (results.count > 0) {
+			    notiyfyByFilter = true;
 				notifyDataSetChanged();
+				notiyfyByFilter = false;
 			} else {
 				notifyDataSetInvalidated();
 			}
@@ -226,7 +241,14 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 	}
 	
 	
-	
+	@Override
+	public void notifyDataSetChanged() {
+	    super.notifyDataSetChanged();
+	    if(!notiyfyByFilter){
+	        copyUserList.clear();
+	        copyUserList.addAll(userList);
+	    }
+	}
 	
 
 }

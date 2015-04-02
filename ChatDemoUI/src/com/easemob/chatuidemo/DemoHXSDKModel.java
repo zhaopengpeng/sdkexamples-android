@@ -26,13 +26,11 @@ public class DemoHXSDKModel extends DefaultHXSDKModel{
 
     public DemoHXSDKModel(Context ctx) {
         super(ctx);
-        // TODO Auto-generated constructor stub
     }
 
-    // demo will use HuanXin roster
+    // demo will not use HuanXin roster
     public boolean getUseHXRoster() {
-        // TODO Auto-generated method stub
-        return true;
+        return false;
     }
     
     // demo will switch on debug mode
@@ -41,26 +39,22 @@ public class DemoHXSDKModel extends DefaultHXSDKModel{
     }
     
     public boolean saveContactList(List<User> contactList) {
-        // TODO Auto-generated method stub
         UserDao dao = new UserDao(context);
         dao.saveContactList(contactList);
         return true;
     }
 
     public Map<String, User> getContactList() {
-        // TODO Auto-generated method stub
         UserDao dao = new UserDao(context);
         return dao.getContactList();
     }
 
     public void closeDB() {
-        // TODO Auto-generated method stub
         DbOpenHelper.getInstance(context).closeDB();
     }
     
     @Override
     public String getAppProcessName() {
-        // TODO Auto-generated method stub
-        return "com.easemob.chatuidemo";
+        return context.getPackageName();
     }
 }

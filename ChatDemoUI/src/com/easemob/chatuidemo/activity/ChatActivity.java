@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -320,13 +321,32 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 			findViewById(R.id.container_video_call).setVisibility(View.GONE);
 			toChatUsername = getIntent().getStringExtra("groupId");
 			group = EMGroupManager.getInstance().getGroup(toChatUsername);
-			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
+			if(group != null)
+			    ((TextView) findViewById(R.id.name)).setText(group.getGroupName());
+			else
+			    ((TextView) findViewById(R.id.name)).setText(toChatUsername);
 			// conversation =
 			// EMChatManager.getInstance().getConversation(toChatUsername,true);
 		}
 		conversation = EMChatManager.getInstance().getConversation(toChatUsername);
-		// 把此会话的未读数置为0
+		// 把此会话的未读数置为0		
 		conversation.resetUnreadMsgCount();
+		
+		// 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
+		// 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
+		final List<EMMessage> msgs = conversation.getAllMessages();
+		int msgCount = msgs != null ? msgs.size() : 0;
+		if (msgCount < conversation.getAllMsgCount() && msgCount < pagesize) {
+			String msgId = null;
+			if (msgs != null && msgs.size() > 0) {
+				msgId = msgs.get(0).getMsgId();
+			}
+			if (chatType == CHATTYPE_SINGLE) {
+				conversation.loadMoreMsgFromDB(msgId, pagesize);
+			} else {
+				conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
+			}
+		}
 		adapter = new MessageAdapter(this, toChatUsername, chatType);
 		// 显示消息
 		listView.setAdapter(adapter);
@@ -937,6 +957,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	 * @param view
 	 */
 	public void toGroupDetails(View view) {
+	    if(group == null){
+	        Toast.makeText(getApplicationContext(), R.string.gorup_not_found, 0).show();
+	        return;
+	    }
 		startActivityForResult((new Intent(this, GroupDetailsActivity.class).putExtra("groupId", toChatUsername)),
 				REQUEST_CODE_GROUP_DETAIL);
 	}
@@ -1287,17 +1311,34 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	 * 
 	 * @param username
 	 */
-	private void addUserToBlacklist(String username) {
-		String st11 = getResources().getString(R.string.Move_into_blacklist_success);
-		String st12 = getResources().getString(R.string.Move_into_blacklist_failure);
-		try {
-			EMContactManager.getInstance().addUserToBlackList(username, false);
-			Toast.makeText(getApplicationContext(), st11, 0).show();
-		} catch (EaseMobException e) {
-			e.printStackTrace();
-			Toast.makeText(getApplicationContext(), st12, 0).show();
-		}
+	private void addUserToBlacklist(final String username) {
+	    final ProgressDialog pd = new ProgressDialog(this);
+        pd.setMessage(getString(R.string.Is_moved_into_blacklist));
+        pd.setCanceledOnTouchOutside(false);
+        pd.show();
+	    new Thread(new Runnable() {
+            public void run() {
+                try {
+                    EMContactManager.getInstance().addUserToBlackList(username, false);
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            pd.dismiss();
+                            Toast.makeText(getApplicationContext(), R.string.Move_into_blacklist_success, 0).show();
+                        }
+                    });
+                } catch (EaseMobException e) {
+                    e.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            pd.dismiss();
+                            Toast.makeText(getApplicationContext(), R.string.Move_into_blacklist_failure, 0).show();
+                        }
+                    });
+                }
+            }
+        }).start();
 	}
+	    
 
 	/**
 	 * 返回

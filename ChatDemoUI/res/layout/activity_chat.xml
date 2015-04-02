@@ -3,6 +3,7 @@
     android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:background="#f2f0eb" >
 
     <RelativeLayout
@@ -438,7 +439,7 @@
                                 android:layout_width="56dp"
                                 android:layout_height="56dp"
                                 android:layout_centerInParent="true"
-                                android:background="@drawable/chat_video_call_normal"
+                                android:background="@drawable/chat_video_call_selector"
                                 android:clickable="true"
                                 android:onClick="onClick"
                                 android:scaleType="fitCenter" />

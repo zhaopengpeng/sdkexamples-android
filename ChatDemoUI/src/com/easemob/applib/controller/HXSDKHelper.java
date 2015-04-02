@@ -231,18 +231,20 @@ public abstract class HXSDKHelper {
         // 设置notification消息点击时，跳转的intent为自定义的intent
         options.setOnNotificationClickListener(getNotificationClickListener());
         options.setNotifyText(getMessageNotifyListener());
+        // 设置从db初始化加载时, 每个conversation需要加载msg的个数
+        options.setNumberOfMessagesLoaded(1);
     }
     
     /**
      * logout HuanXin SDK
      */
     public void logout(final EMCallBack callback){
+        setPassword(null);
         EMChatManager.getInstance().logout(new EMCallBack(){
 
             @Override
             public void onSuccess() {
                 // TODO Auto-generated method stub
-                setPassword(null);
                 if(callback != null){
                     callback.onSuccess();
                 }
@@ -270,11 +272,7 @@ public abstract class HXSDKHelper {
      * @return
      */
     public boolean isLogined(){
-        if(hxModel.getHXId() != null && hxModel.getPwd() != null){
-            return true;
-        }
-        
-        return false;
+       return EMChat.getInstance().isLoggedIn();
     }
     
     /**

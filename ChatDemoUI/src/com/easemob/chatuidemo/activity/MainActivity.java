@@ -316,6 +316,13 @@ public class MainActivity extends BaseActivity {
 			// 消息id
 			String msgId = intent.getStringExtra("msgid");
 			EMMessage message = EMChatManager.getInstance().getMessage(msgId);
+			
+			// fix: logout crash， 如果正在接收大量消息
+			// 因为此时已经logout，消息队列已经被清空， broadcast延时收到，所以会出现message为空的情况
+			if (message == null) {
+				return;
+			}
+			
 			// 2014-10-22 修复在某些机器上，在聊天页面对方发消息过来时不立即显示内容的bug
 			if (ChatActivity.activityInstance != null) {
 				if (message.getChatType() == ChatType.GroupChat) {
@@ -647,14 +654,14 @@ public class MainActivity extends BaseActivity {
 		@Override
 		public void onInvitationReceived(String groupId, String groupName, String inviter, String reason) {
 			boolean hasGroup = false;
-//			for (EMGroup group : EMGroupManager.getInstance().getAllGroups()) {
-//				if (group.getGroupId().equals(groupId)) {
-//					hasGroup = true;
-//					break;
-//				}
-//			}
-//			if (!hasGroup)
-//				return;
+			for (EMGroup group : EMGroupManager.getInstance().getAllGroups()) {
+				if (group.getGroupId().equals(groupId)) {
+					hasGroup = true;
+					break;
+				}
+			}
+			if (!hasGroup)
+				return;
 
 			// 被邀请
 			String st3 = getResources().getString(R.string.Invite_you_to_join_a_group_chat);

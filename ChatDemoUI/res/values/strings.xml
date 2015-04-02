@@ -20,6 +20,7 @@
     <string name="release_to_cancel">release finger to cancel sending</string>
     <string name="send_fail">send failed</string>
     <string name="delete_message">delete message</string>
+    <string name="delete_conversation">delete conversation</string>
     <string name="copy_message">copy message</string>
     <string name="delete_voice">delete voice</string>
     <string name="delete_video">delete video</string>
@@ -125,7 +126,8 @@
     <string name="Making_sure_your_location">Making sure your location...</string>
     <string name="please_check">key validation error!Please on AndroidManifest.xml file check the key set</string>
     <string name="expression">[expression]</string>
-    <string name="Removed_from_the_failure">Removed from the failure</string>
+    <string name="Removed_from_the_failure">Removed fail</string>
+    <string name="be_removing">Be removing</string>
     <string name="call_duration">call duration</string>
     <string name="Refused">Refused</string>
     <string name="The_other_party_has_refused_to">The other party has refused to</string>
@@ -250,4 +252,5 @@
     <string name="Change_the_group_name">Change the group name</string>
     <string name="The_dissolution_of_chatting_new">The dissolution of chatting</string>
     
+    <string name="gorup_not_found">Can not find this group</string>
 </resources>
