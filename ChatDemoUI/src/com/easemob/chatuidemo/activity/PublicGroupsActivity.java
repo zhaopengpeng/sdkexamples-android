@@ -14,6 +14,7 @@
 
 package com.easemob.chatuidemo.activity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -26,19 +27,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.easemob.chat.EMGroupInfo;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
+import com.easemob.util.NetUtils;
 
 public class PublicGroupsActivity extends BaseActivity {
 	private ProgressBar pb;
@@ -46,81 +52,149 @@ public class PublicGroupsActivity extends BaseActivity {
 	private EditText query;
 	private ImageButton clearSearch;
 	private GroupsAdapter adapter;
+	
+	private List<EMGroupInfo> groupsList;
+	private boolean isLoading;
+	private boolean isFirstLoading = true;
+	private boolean hasMoreData = true;
+	private String cursor;
+	private final int pagesize = 15;
+    private LinearLayout footLoadingLayout;
+    private ProgressBar footLoadingPB;
+    private TextView footLoadingText;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_public_groups);
 
+		// 搜索框
+        query = (EditText) findViewById(R.id.query);
+        // 搜索框中清除button
+        clearSearch = (ImageButton) findViewById(R.id.search_clear);
 		pb = (ProgressBar) findViewById(R.id.progressBar);
 		listView = (ListView) findViewById(R.id.list);
+		groupsList = new ArrayList<EMGroupInfo>();
+		
+		View footView = getLayoutInflater().inflate(R.layout.listview_footer_view, null);
+        footLoadingLayout = (LinearLayout) footView.findViewById(R.id.loading_layout);
+        footLoadingPB = (ProgressBar)footView.findViewById(R.id.loading_bar);
+        footLoadingText = (TextView) footView.findViewById(R.id.loading_text);
+        listView.addFooterView(footView, null, false);
+        footLoadingLayout.setVisibility(View.GONE);
+        
+        //获取及显示数据
+        loadAndShowData();
+        
+        //设置item点击事件
+        listView.setOnItemClickListener(new OnItemClickListener() {
 
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					// 从服务器获取所用公开的群聊
-					final List<EMGroupInfo> groupsList = EMGroupManager.getInstance().getAllPublicGroupsFromServer();
-					runOnUiThread(new Runnable() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                startActivity(new Intent(PublicGroupsActivity.this, GroupSimpleDetailActivity.class).
+                        putExtra("groupinfo", adapter.getItem(position)));
+            }
+        });
+        listView.setOnScrollListener(new OnScrollListener() {
+            
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if(scrollState == OnScrollListener.SCROLL_STATE_IDLE){
+                    if(listView.getCount() != 0){
+                        int lasPos = view.getLastVisiblePosition();
+                        if(hasMoreData && lasPos == listView.getCount()-1){
+                            loadAndShowData();
+                        }
+                    }
+                }
+            }
+            
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                
+            }
+        });
+        
+        query.addTextChangedListener(new TextWatcher() {
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                
+                adapter.getFilter().filter(s);
+                if (s.length() > 0) {
+                    clearSearch.setVisibility(View.VISIBLE);
+                } else {
+                    clearSearch.setVisibility(View.INVISIBLE);
+                }
+            }
 
-						public void run() {
-							pb.setVisibility(View.INVISIBLE);
-							adapter = new GroupsAdapter(PublicGroupsActivity.this, 1, groupsList);
-							listView.setAdapter(adapter);
-							
-							//设置item点击事件
-							listView.setOnItemClickListener(new OnItemClickListener() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
-								@Override
-								public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-									startActivity(new Intent(PublicGroupsActivity.this, GroupSimpleDetailActivity.class).
-											putExtra("groupinfo", adapter.getItem(position)));
-								}
-							});
-							
-							// 搜索框
-							query = (EditText) findViewById(R.id.query);
-							// 搜索框中清除button
-							clearSearch = (ImageButton) findViewById(R.id.search_clear);
-							query.addTextChangedListener(new TextWatcher() {
-								public void onTextChanged(CharSequence s, int start, int before, int count) {
-									
-									adapter.getFilter().filter(s);
-									if (s.length() > 0) {
-										clearSearch.setVisibility(View.VISIBLE);
-									} else {
-										clearSearch.setVisibility(View.INVISIBLE);
-									}
-								}
+            public void afterTextChanged(Editable s) {
+            }
+        });
+        clearSearch.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                query.getText().clear();
 
-								public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-								}
+            }
+        });
 
-								public void afterTextChanged(Editable s) {
-								}
-							});
-							clearSearch.setOnClickListener(new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									query.getText().clear();
-
-								}
-							});
-						}
-					});
-				} catch (EaseMobException e) {
-					e.printStackTrace();
-					runOnUiThread(new Runnable() {
-						public void run() {
-							pb.setVisibility(View.INVISIBLE);
-
-						}
-					});
-				}
-			}
-		}).start();
+		
 
 	}
+	
+	private void loadAndShowData(){
+	    new Thread(new Runnable() {
 
+            public void run() {
+                try {
+                    isLoading = true;
+                    final List<EMGroupInfo> returnGroups = EMGroupManager.getInstance().getPublicGroupsFromServer(pagesize, cursor);
+                    runOnUiThread(new Runnable() {
+
+                        public void run() {
+                            groupsList.addAll(returnGroups);
+                            if(returnGroups.size() != 0){
+                                cursor = returnGroups.get(returnGroups.size()-1).getCursor();
+                                if(returnGroups.size() == pagesize)
+                                    footLoadingLayout.setVisibility(View.VISIBLE);
+                            }
+                            if(isFirstLoading){
+                                pb.setVisibility(View.INVISIBLE);
+                                isFirstLoading = false;
+                                //设置adapter
+                                adapter = new GroupsAdapter(PublicGroupsActivity.this, 1, groupsList);
+                                listView.setAdapter(adapter);
+                            }else{
+                                if(returnGroups.size() < pagesize){
+                                    hasMoreData = false;
+                                    footLoadingLayout.setVisibility(View.VISIBLE);
+                                    footLoadingPB.setVisibility(View.GONE);
+                                    footLoadingText.setText("No more data");
+                                }
+                                adapter.notifyDataSetChanged();
+                            }
+                            isLoading = false;
+                        }
+                    });
+                } catch (EaseMobException e) {
+                    e.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            pb.setVisibility(View.INVISIBLE);
+                            footLoadingLayout.setVisibility(View.GONE);
+                            Toast.makeText(PublicGroupsActivity.this, "加载数据失败，请检查网络或稍后重试", 0).show();
+                        }
+                    });
+                }
+            }
+        }).start();
+	}
+	/**
+	 * adapter
+	 *
+	 */
 	private class GroupsAdapter extends ArrayAdapter<EMGroupInfo> {
 
 		private LayoutInflater inflater;

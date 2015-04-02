@@ -80,7 +80,7 @@ public abstract class HXSDKModel {
      * 建议开发者开发时设置此模式
      */
     public boolean isSandboxMode(){
-        return false;
+        return true;
     }
     
     /**
