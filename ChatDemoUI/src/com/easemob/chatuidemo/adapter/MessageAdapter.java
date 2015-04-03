@@ -39,6 +39,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.BufferType;
@@ -132,10 +133,23 @@ public class MessageAdapter extends BaseAdapter{
 		
 		@Override
 		public void handleMessage(android.os.Message message) {
-			// UI线程不能直接使用conversation.getAllMessages()
-			// 否则在UI刷新过程中，如果收到新的消息，会导致并发问题
-			messages = (EMMessage[]) conversation.getAllMessages().toArray(new EMMessage[conversation.getAllMessages().size()]);
-			notifyDataSetChanged();
+			switch (message.what) {
+			case HANDLER_MESSAGE_REFRESH_LIST:
+				// UI线程不能直接使用conversation.getAllMessages()
+				// 否则在UI刷新过程中，如果收到新的消息，会导致并发问题
+				messages = (EMMessage[]) conversation.getAllMessages().toArray(new EMMessage[conversation.getAllMessages().size()]);
+				for (int i = 0; i < messages.length; i++) {
+					// getMessage will set message as read status
+					conversation.getMessage(i);
+				}
+				notifyDataSetChanged();
+				if (activity instanceof ChatActivity) {
+					ListView listView = ((ChatActivity)activity).getListView();
+					listView.setSelection(listView.getCount() - 1);
+				}
+				break;
+			default:
+			}
 		}
 	};
 
