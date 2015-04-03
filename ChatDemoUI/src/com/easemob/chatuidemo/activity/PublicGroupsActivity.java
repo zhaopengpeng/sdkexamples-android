@@ -40,6 +40,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.chat.EMDataList;
 import com.easemob.chat.EMGroupInfo;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.R;
@@ -102,7 +103,7 @@ public class PublicGroupsActivity extends BaseActivity {
                 if(scrollState == OnScrollListener.SCROLL_STATE_IDLE){
                     if(listView.getCount() != 0){
                         int lasPos = view.getLastVisiblePosition();
-                        if(hasMoreData && lasPos == listView.getCount()-1){
+                        if(hasMoreData && !isLoading && lasPos == listView.getCount()-1){
                             loadAndShowData();
                         }
                     }
@@ -150,13 +151,16 @@ public class PublicGroupsActivity extends BaseActivity {
             public void run() {
                 try {
                     isLoading = true;
-                    final List<EMGroupInfo> returnGroups = EMGroupManager.getInstance().getPublicGroupsFromServer(pagesize, cursor);
+                    final EMDataList<EMGroupInfo> data = EMGroupManager.getInstance().getPublicGroupsFromServer(pagesize, cursor);
+                    //获取group list
+                    final List<EMGroupInfo> returnGroups = data.getList();
                     runOnUiThread(new Runnable() {
 
                         public void run() {
                             groupsList.addAll(returnGroups);
                             if(returnGroups.size() != 0){
-                                cursor = returnGroups.get(returnGroups.size()-1).getCursor();
+                                //获取cursor
+                                cursor = data.getCursor();
                                 if(returnGroups.size() == pagesize)
                                     footLoadingLayout.setVisibility(View.VISIBLE);
                             }
@@ -182,6 +186,7 @@ public class PublicGroupsActivity extends BaseActivity {
                     e.printStackTrace();
                     runOnUiThread(new Runnable() {
                         public void run() {
+                            isLoading = false;
                             pb.setVisibility(View.INVISIBLE);
                             footLoadingLayout.setVisibility(View.GONE);
                             Toast.makeText(PublicGroupsActivity.this, "加载数据失败，请检查网络或稍后重试", 0).show();
