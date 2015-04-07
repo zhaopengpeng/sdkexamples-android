@@ -53,5 +53,4 @@ public class BaseActivity extends FragmentActivity {
     public void back(View view) {
         finish();
     }
-
 }

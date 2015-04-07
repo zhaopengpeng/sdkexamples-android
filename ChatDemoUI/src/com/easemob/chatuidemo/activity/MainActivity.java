@@ -58,6 +58,7 @@ import com.easemob.chatuidemo.domain.InviteMessage.InviteMesageStatus;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.util.EMLog;
+import com.easemob.util.EasyUtils;
 import com.easemob.util.HanziToPinyin;
 import com.easemob.util.NetUtils;
 import com.umeng.analytics.MobclickAgent;
@@ -147,7 +148,10 @@ public class MainActivity extends BaseActivity implements EMEventListener{
 		EMGroupManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
 		// 通知sdk，UI 已经初始化完毕，注册了相应的receiver和listener, 可以接受broadcast了
 		EMChat.getInstance().setAppInited();
-
+		// 注册消息监听，demo现在仅对普通消息进行处理，EMNotifierEvent.EventType.TypeNormalMessage
+		// 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，消息将不会进一步传递。
+		// 后加入的事件监听会先收到事件的通知
+		EMChatManager.getInstance().registerEventListener(this,new EMNotifierEvent.EventType[]{EMNotifierEvent.EventType.TypeNormalMessage});
 	}
 
 	/**
@@ -197,17 +201,24 @@ public class MainActivity extends BaseActivity implements EMEventListener{
 	}
 
 	/**
-	 * DemoHXSDKHelper里把消息event过滤处理后，需要main里处理的事件回调此方法
-	 */
+     * 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，消息将不会进一步传递。
+     * 后加入的事件监听会先收到事件的通知
+     * 
+     * 如果收到的事件，能够被处理并且不需要其他的监听再处理，可以返回true，否则返回false
+     */
 	@Override
-    public void onEvent(EMNotifierEvent event) {
+    public boolean onEvent(EMNotifierEvent event) {
 	    switch (event.getType()) {
         case TypeNormalMessage: //普通消息
             EMMessage message = (EMMessage) event.getData();
+
+            // we pass this message to global listener, since we are in background
+            if(!EasyUtils.isAppRunningForeground(this)){
+                return false;
+            }
+            
             //提示新消息
             HXNotifier.getInstance(getApplicationContext()).notifyChatMsg(message);
-            
-//            notifyNewMessage(message);  
 
             runOnUiThread(new Runnable() {
                 public void run() {
@@ -221,16 +232,26 @@ public class MainActivity extends BaseActivity implements EMEventListener{
                     }
                 }
             });
-            break;
+            
+            return true;
 
         default:
-            break;
+            return false;
         }
     }
 	
+   @Override
+    public void back(View view) {
+        EMChatManager.getInstance().unregisterEventListener(this);
+        
+        super.back(view);
+    }
+	   
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		EMChatManager.getInstance().unregisterEventListener(this);
+		
 		activityInstance = null;
 
 		if (conflictBuilder != null) {

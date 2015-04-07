@@ -75,6 +75,11 @@ public abstract class HXSDKHelper {
     protected EMConnectionListener connectionListener = null;
     
     /**
+     * EMEventListener
+     */
+    protected EMEventListener eventListener = null;
+    
+    /**
      * HuanXin ID in cache
      */
     protected String hxId = null;
@@ -317,7 +322,7 @@ public abstract class HXSDKHelper {
         //注册连接监听
         EMChatManager.getInstance().addConnectionListener(connectionListener);
         //注册一个全局的消息事件监听
-        EMChatManager.getInstance().addEventListener(getEventListener());
+        EMChatManager.getInstance().registerEventListener(getEventListener());
        
     }
     
