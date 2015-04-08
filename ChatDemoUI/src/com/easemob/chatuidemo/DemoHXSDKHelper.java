@@ -13,6 +13,7 @@
  */
 package com.easemob.chatuidemo;
 
+import java.util.List;
 import java.util.Map;
 
 import android.content.Intent;
@@ -25,7 +26,7 @@ import com.easemob.EMNotifierEvent;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.applib.model.HXNotifier;
 import com.easemob.applib.model.HXSDKModel;
-import com.easemob.applib.model.HXNotifier.NotificationListener;
+import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
 import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
@@ -46,7 +47,13 @@ import com.easemob.util.EasyUtils;
  */
 public class DemoHXSDKHelper extends HXSDKHelper{
 
-    private static final String TAG = "DemoHXSDKHelper";    
+    private static final String TAG = "DemoHXSDKHelper";
+    
+    /**
+     * EMEventListener
+     */
+    protected EMEventListener eventListener = null;
+
     /**
      * contact list in cache
      */
@@ -56,20 +63,22 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     @Override
     protected void initHXOptions(){
         super.initHXOptions();
+
         // you can also get EMChatOptions to set related SDK options
         // EMChatOptions options = EMChatManager.getInstance().getChatOptions();
     }
-    
 
     @Override
     protected void initListener(){
         super.initListener();
         IntentFilter callFilter = new IntentFilter(EMChatManager.getInstance().getIncomingCallBroadcastAction());
-        if(callReceiver == null)
+        if(callReceiver == null){
             callReceiver = new CallReceiver();
+        }
+
         //注册通话广播接收者
         appContext.registerReceiver(callReceiver, callFilter);    
-        
+        initEventListener();
     }
     
     /**
@@ -80,8 +89,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
      * 
      * 由于这个是全局的监听，可以处理其他监听漏过来的事件。
      */
-    @Override
-    protected EMEventListener getEventListener() {
+    protected void initEventListener() {
         eventListener = new EMEventListener() {
             
             @Override
@@ -93,7 +101,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 case TypeNormalMessage:
                     //应用在后台，不需要刷新UI,通知栏提示新消息
                     if(!EasyUtils.isAppRunningForeground(appContext)){
-                        HXNotifier.getInstance(appContext).notifyChatMsg(message);
+                        HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
                     }
                     break;
                 case TypeCMD:
@@ -123,7 +131,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             }
         };
         
-        return eventListener;
+        EMChatManager.getInstance().registerEventListener(eventListener);
     }
 
     /**
@@ -131,39 +139,41 @@ public class DemoHXSDKHelper extends HXSDKHelper{
      * @return
      */
     @Override
-    protected NotificationListener getNotificationListener() {
+    protected HXNotificationInfoProvider getNotificationListener() {
         //可以覆盖默认的设置
-        return new NotificationListener() {
+        return new HXNotificationInfoProvider() {
             
             @Override
-            public String setNotificationTitle(EMMessage message) {
+            public String getTitle(EMMessage message) {
               //修改标题,这里使用默认
                 return null;
             }
             
             @Override
-            public int setNotificationSmallIcon(EMMessage message) {
+            public int getSmallIcon(EMMessage message) {
               //设置小图标，这里为默认
                 return 0;
             }
             
             @Override
-            public String setNotificationNotifyText(EMMessage message) {
+            public String getDisplayedText(EMMessage message) {
                 // 设置状态栏的消息提示，可以根据message的类型做相应提示
                 String ticker = CommonUtils.getMessageDigest(message, appContext);
-                if(message.getType() == Type.TXT)
+                if(message.getType() == Type.TXT){
                     ticker = ticker.replaceAll("\\[.{2,3}\\]", "[表情]");
+                }
+                
                 return message.getFrom() + ": " + ticker;
             }
             
             @Override
-            public String setNotificationLatestText(EMMessage message, int fromUsersNum, int messageNum) {
+            public String getLatestText(EMMessage message, int fromUsersNum, int messageNum) {
                 return null;
                 // return fromUsersNum + "个基友，发来了" + messageNum + "条消息";
             }
             
             @Override
-            public Intent setNotificationClickLaunchIntent(EMMessage message) {
+            public Intent getLaunchIntent(EMMessage message) {
                 //设置点击通知栏跳转事件
                 Intent intent = new Intent(appContext, ChatActivity.class);
                 ChatType chatType = message.getChatType();
@@ -202,6 +212,41 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     @Override
     protected HXSDKModel createModel() {
         return new DemoHXSDKModel(appContext);
+    }
+    
+    @Override
+    public HXNotifier createNotifier(){
+        return new HXNotifier(){
+            public synchronized void onNewMsg(final EMMessage message) {
+                if(EMChatManager.getInstance().isSlientMessage(message)){
+                    return;
+                }
+                
+                String chatUsename = null;
+                List<String> notNotifyIds = null;
+                // 获取设置的不提示新消息的用户或者群组ids
+                if (message.getChatType() == ChatType.Chat) {
+                    chatUsename = message.getFrom();
+                    notNotifyIds = ((DemoHXSDKModel) hxModel).getDisabledGroups();
+                } else {
+                    chatUsename = message.getTo();
+                    notNotifyIds = ((DemoHXSDKModel) hxModel).getDisabledIds();
+                }
+
+                if (notNotifyIds == null || !notNotifyIds.contains(chatUsename)) {
+                    // 判断app是否在后台
+                    if (!EasyUtils.isAppRunningForeground(appContext)) {
+                        EMLog.d(TAG, "app is running in backgroud");
+                        sendNotification(message, false);
+                    } else {
+                        sendNotification(message, true);
+
+                    }
+                    
+                    viberateAndPlayTone(message);
+                }
+            }
+        };
     }
     
     /**

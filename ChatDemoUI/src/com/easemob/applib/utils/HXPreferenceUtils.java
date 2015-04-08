@@ -13,7 +13,12 @@
  */
 package com.easemob.applib.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+
+import org.json.JSONArray;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -31,6 +36,8 @@ public class HXPreferenceUtils {
 	private String SHARED_KEY_SETTING_SOUND = "shared_key_setting_sound";
 	private String SHARED_KEY_SETTING_VIBRATE = "shared_key_setting_vibrate";
 	private String SHARED_KEY_SETTING_SPEAKER = "shared_key_setting_speaker";
+	private String SHARED_KEY_SETTING_DISABLED_GROUPS =  "shared_key__setting_disabled_groups";
+	private String SHARED_KEY_SETTING_DISABLED_IDS =  "shared_key_setting_disabled_ids";
 
 	private HXPreferenceUtils(Context cxt) {
 		mSharedPreferences = cxt.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
@@ -94,4 +101,49 @@ public class HXPreferenceUtils {
 		return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_SPEAKER, true);
 	}
 
+	public void setDisabledGroups(List<String> groups){
+	    setList(SHARED_KEY_SETTING_DISABLED_GROUPS, groups);
+	}
+	
+	public List<String>  getDisabledGroups(){	    
+	    return getList(SHARED_KEY_SETTING_DISABLED_GROUPS);
+	}
+	
+	public void setDisabledIds(List<String> ids){
+	    setList(SHARED_KEY_SETTING_DISABLED_IDS, ids);
+	}
+	
+	public List<String> getDisabledIds(){
+	    return getList(SHARED_KEY_SETTING_DISABLED_IDS);
+	}
+	
+	private void setList(String key, List<String> strList){
+        StringBuilder strBuilder = new StringBuilder();
+        
+        for(String id:strList){
+            strBuilder.append(id).append("$");
+        }
+        
+        editor.putString(key, strBuilder.toString());
+	}
+	
+	private List<String> getList(String key){
+	    String strVal = mSharedPreferences.getString(key, "");
+        if(strVal.equals("")){
+            return null;
+        }
+        
+        String[] array = strVal.split("$");
+        
+        if(array != null && array.length > 0){
+            List<String> list = new ArrayList<String>();
+            for(String str:array){
+                list.add(str);
+            }
+            
+            return list;
+        }
+        
+        return null;
+	}
 }

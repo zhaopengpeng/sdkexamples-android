@@ -11,9 +11,7 @@
  */
 package com.easemob.applib.model;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 
 import android.app.Notification;
@@ -30,48 +28,56 @@ import android.os.Build;
 import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 
-import com.easemob.EMEventListener;
+import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
-import com.easemob.chat.EMMessage.ChatType;
-import com.easemob.chat.EMNotifier;
 import com.easemob.util.EMLog;
 import com.easemob.util.EasyUtils;
 
 /**
  * 新消息提醒class，<br/>
  * 2.1.7把新消息提示相关的api移除出sdk，方便开发者自由修改
+ * 开发者也可以继承此类实现相关的接口
+ * 
+ * this class is subject to be inherited and implement the relative APIs
  */
 public class HXNotifier {
     private final static String TAG = "notify";
-    static Ringtone ringtone = null;
+    Ringtone ringtone = null;
 
-    private final static String[] msg_eng = { "sent a message", "sent a picture", "sent a voice",
-            "sent location message", "sent a video", "sent a file", "%1 contacts sent %2 messages" };
-    private final static String[] msg_ch = { "发来一条消息", "发来一张图片", "发来一段语音", "发来位置信息", "发来一个视频", "发来一个文件",
-            "%1个联系人发来%2条消息" };
+    protected final static String[] msg_eng = { "sent a message", "sent a picture", "sent a voice",
+                                                "sent location message", "sent a video", "sent a file", "%1 contacts sent %2 messages"
+                                              };
+    protected final static String[] msg_ch = { "发来一条消息", "发来一张图片", "发来一段语音", "发来位置信息", "发来一个视频", "发来一个文件",
+                                               "%1个联系人发来%2条消息"
+                                             };
 
-    private static int notifyID = 0525; // start notification id
-    private static int foregroundNotifyID = 0555;
+    protected static int notifyID = 0525; // start notification id
+    protected static int foregroundNotifyID = 0555;
 
-    private NotificationManager notificationManager = null;
+    protected NotificationManager notificationManager = null;
 
-    private HashSet<String> fromUsers = new HashSet<String>();
-    private int notificationNum = 0;
+    protected HashSet<String> fromUsers = new HashSet<String>();
+    protected int notificationNum = 0;
 
-    private Context appContext;
-    private String packageName;
-    private String[] msgs;
-    private long lastNotifiyTime;
+    protected Context appContext;
+    protected String packageName;
+    protected String[] msgs;
+    protected long lastNotifiyTime;
+    protected AudioManager audioManager;
+    protected Vibrator vibrator;
+    protected HXNotificationInfoProvider notificationInfoProvider;
 
-    private static HXNotifier instance;
-
-    private AudioManager audioManager;
-    private Vibrator vibrator;
-    private NotificationListener notificationListener;
-    private List<EMEventListener> eventListeners = new ArrayList<EMEventListener>();
-
-    private HXNotifier(Context context) {
+    public HXNotifier() {
+    }
+    
+    /**
+     * 开发者可以重载此函数
+     * this function can be override
+     * @param context
+     * @return
+     */
+    public HXNotifier init(Context context){
         appContext = context;
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -84,17 +90,15 @@ public class HXNotifier {
 
         audioManager = (AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE);
         vibrator = (Vibrator) appContext.getSystemService(Context.VIBRATOR_SERVICE);
-    }
-
-    public static synchronized HXNotifier getInstance(Context context) {
-        if (instance == null) {
-            instance = new HXNotifier(context);
-            return instance;
-        }
-        return instance;
+        
+        return this;
     }
     
-    public void activityResumed(){
+    /**
+     * 开发者可以重载此函数
+     * this function can be override
+     */
+    public void reset(){
         resetNotificationCount();
         cancelNotificaton();
     }
@@ -110,44 +114,36 @@ public class HXNotifier {
     }
 
     /**
-     * 提示新消息
+     * 处理新收到的消息，然后发送通知
+     * 
+     * 开发者可以重载此函数
+     * this function can be override
+     * 
      * @param message
      */
-    public synchronized void notifyChatMsg(final EMMessage message) {
-        if(isNoNeedNotifyMessage(message))
+    public synchronized void onNewMsg(final EMMessage message) {
+        if(EMChatManager.getInstance().isSlientMessage(message)){
             return;
+        }
         
-        String chatUsename = null;
-        List<String> notNotifyIds = null;
-        // 获取设置的不提示新消息的用户或者群组ids
-        if (message.getChatType() == ChatType.Chat) {
-            chatUsename = message.getFrom();
-            notNotifyIds = EMChatManager.getInstance().getChatOptions().getUsersOfNotificationDisabled();
+        // 判断app是否在后台
+        if (!EasyUtils.isAppRunningForeground(appContext)) {
+            EMLog.d(TAG, "app is running in backgroud");
+            sendNotification(message, false);
         } else {
-            chatUsename = message.getTo();
-            notNotifyIds = EMChatManager.getInstance().getChatOptions().getGroupsOfNotificationDisabled();
-        }
+            sendNotification(message, true);
 
-        if (notNotifyIds == null || !notNotifyIds.contains(chatUsename)) {
-            // 判断app是否在后台
-            if (!EasyUtils.isAppRunningForeground(appContext)) {
-                EMLog.d(TAG, "app is running in backgroud");
-                sendNotification(message, false);
-            } else {
-                sendNotification(message, true);
-
-            }
-            notifyOnNewMsg(message);
         }
+        
+        viberateAndPlayTone(message);
     }
 
     /**
      * 发送通知栏提示
-     * 
+     * This can be override by subclass to provide customer implementation
      * @param message
      */
-    @SuppressWarnings("deprecation")
-    private void sendNotification(EMMessage message, boolean isForeground) {
+    protected void sendNotification(EMMessage message, boolean isForeground) {
         String username = message.getFrom();
         try {
             String notifyText = username + " ";
@@ -172,53 +168,59 @@ public class HXNotifier {
                 notifyText += msgs[5];
                 break;
             }
+            
             PackageManager packageManager = appContext.getPackageManager();
             String appname = (String) packageManager.getApplicationLabel(appContext.getApplicationInfo());
+            
             // notification titile
             String contentTitle = appname;
-            if (notificationListener != null) {
-                String customNotifyText = notificationListener.setNotificationNotifyText(message);
-                String customCotentTitle = notificationListener.setNotificationTitle(message);
-                if (customNotifyText != null)
+            if (notificationInfoProvider != null) {
+                String customNotifyText = notificationInfoProvider.getDisplayedText(message);
+                String customCotentTitle = notificationInfoProvider.getTitle(message);
+                if (customNotifyText != null){
                     // 设置自定义的状态栏提示内容
                     notifyText = customNotifyText;
-                if (customCotentTitle != null)
+                }
+                    
+                if (customCotentTitle != null){
                     // 设置自定义的通知栏标题
                     contentTitle = customCotentTitle;
+                }   
             }
 
             // create and send notificaiton
             NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(appContext)
-                    .setSmallIcon(appContext.getApplicationInfo().icon).setWhen(System.currentTimeMillis())
-                    .setAutoCancel(true);
+                                                                        .setSmallIcon(appContext.getApplicationInfo().icon)
+                                                                        .setWhen(System.currentTimeMillis())
+                                                                        .setAutoCancel(true);
 
             Intent msgIntent = appContext.getPackageManager().getLaunchIntentForPackage(packageName);
-            if (notificationListener != null) {
+            if (notificationInfoProvider != null) {
                 // 设置自定义的notification点击跳转intent
-                msgIntent = notificationListener.setNotificationClickLaunchIntent(message);
+                msgIntent = notificationInfoProvider.getLaunchIntent(message);
             }
 
-            PendingIntent pendingIntent = PendingIntent.getActivity(appContext, notifyID, msgIntent,
-                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivity(appContext, notifyID, msgIntent,Intent.FLAG_ACTIVITY_NEW_TASK);
 
             // prepare latest event info section
             notificationNum++;
-            // if(message.getChatType() == )
             fromUsers.add(message.getFrom());
 
             int fromUsersNum = fromUsers.size();
-            String summaryBody = msgs[6].replaceFirst("%1", Integer.toString(fromUsersNum)).replaceFirst("%2",
-                    Integer.toString(notificationNum));
-            if (notificationListener != null) {
+            String summaryBody = msgs[6].replaceFirst("%1", Integer.toString(fromUsersNum)).replaceFirst("%2",Integer.toString(notificationNum));
+            
+            if (notificationInfoProvider != null) {
                 // lastest text
-                String customSummaryBody = notificationListener.setNotificationLatestText(message, fromUsersNum,
-                        notificationNum);
-                if (customSummaryBody != null)
+                String customSummaryBody = notificationInfoProvider.getLatestText(message, fromUsersNum,notificationNum);
+                if (customSummaryBody != null){
                     summaryBody = customSummaryBody;
+                }
+                
                 // small icon
-                int smallIcon = notificationListener.setNotificationSmallIcon(message);
-                if (smallIcon != 0)
+                int smallIcon = notificationInfoProvider.getSmallIcon(message);
+                if (smallIcon != 0){
                     mBuilder.setSmallIcon(smallIcon);
+                }
             }
 
             mBuilder.setContentTitle(contentTitle);
@@ -247,45 +249,49 @@ public class HXNotifier {
     /**
      * 手机震动和声音提示
      */
-    public void notifyOnNewMsg(EMMessage message) {
-        if(isNoNeedNotifyMessage(message))
-            return;
-        if (!EMChatManager.getInstance().getChatOptions().getNotificationEnable()
-                || !EMChatManager.getInstance().getChatOptions().getNotifyBySoundAndVibrate()) {
+    public void viberateAndPlayTone(EMMessage message) {
+        if(EMChatManager.getInstance().isSlientMessage(message)){
             return;
         }
+        
+        HXSDKModel model = HXSDKHelper.getInstance().getModel();
+        if(!model.getSettingMsgNotification()){
+            return;
+        }
+        
+        if (System.currentTimeMillis() - lastNotifiyTime < 1000) {
+            // received new messages within 2 seconds, skip play ringtone
+            return;
+        }
+        
         try {
-            if (System.currentTimeMillis() - lastNotifiyTime < 1000) {
-                // received new messages within 2 seconds, skip play ringtone
-                return;
-            }
             lastNotifiyTime = System.currentTimeMillis();
+            
             // 判断是否处于静音模式
             if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT) {
                 EMLog.e(TAG, "in slient mode now");
                 return;
             }
-            if (EMChatManager.getInstance().getChatOptions().getNoticedByVibrate()) {
+            
+            if(model.getSettingMsgVibrate()){
                 long[] pattern = new long[] { 0, 180, 80, 120 };
                 vibrator.vibrate(pattern, -1);
-                // vibrator.vibrate(350);
             }
 
-            if (EMChatManager.getInstance().getChatOptions().getNoticedBySound()) {
-                String vendor = Build.MANUFACTURER;
-                // if(vendor != null &&
-                // vendor.toLowerCase().contains("xiaomi")){
-                // }
+            if(model.getSettingMsgSound()){
                 if (ringtone == null) {
                     Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                    ;
+
                     ringtone = RingtoneManager.getRingtone(appContext, notificationUri);
                     if (ringtone == null) {
                         EMLog.d(TAG, "cant find ringtone at:" + notificationUri.getPath());
                         return;
                     }
                 }
+                
                 if (!ringtone.isPlaying()) {
+                    String vendor = Build.MANUFACTURER;
+                    
                     ringtone.play();
                     // for samsung S3, we meet a bug that the phone will
                     // continue ringtone without stop
@@ -306,7 +312,6 @@ public class HXNotifier {
                         ctlThread.run();
                     }
                 }
-
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -319,11 +324,11 @@ public class HXNotifier {
      * 
      * @param listener
      */
-    public void setNotificationListener(NotificationListener listener) {
-        notificationListener = listener;
+    public void setNotificationInfoProvider(HXNotificationInfoProvider provider) {
+        notificationInfoProvider = provider;
     }
 
-    public interface NotificationListener {
+    public interface HXNotificationInfoProvider {
         /**
          * 设置发送notification时状态栏提示新消息的内容(比如Xxx发来了一条图片消息)
          * 
@@ -331,7 +336,7 @@ public class HXNotifier {
          *            接收到的消息
          * @return null为使用默认
          */
-        String setNotificationNotifyText(EMMessage message);
+        String getDisplayedText(EMMessage message);
 
         /**
          * 设置notification持续显示的新消息提示(比如2个联系人发来了5条消息)
@@ -344,7 +349,7 @@ public class HXNotifier {
          *            消息数量
          * @return null为使用默认
          */
-        String setNotificationLatestText(EMMessage message, int fromUsersNum, int messageNum);
+        String getLatestText(EMMessage message, int fromUsersNum, int messageNum);
 
         /**
          * 设置notification标题
@@ -352,7 +357,7 @@ public class HXNotifier {
          * @param message
          * @return null为使用默认
          */
-        String setNotificationTitle(EMMessage message);
+        String getTitle(EMMessage message);
 
         /**
          * 设置小图标
@@ -360,7 +365,7 @@ public class HXNotifier {
          * @param message
          * @return 0使用默认图标
          */
-        int setNotificationSmallIcon(EMMessage message);
+        int getSmallIcon(EMMessage message);
 
         /**
          * 设置notification点击时的跳转intent
@@ -369,16 +374,6 @@ public class HXNotifier {
          *            显示在notification上最近的一条消息
          * @return null为使用默认
          */
-        Intent setNotificationClickLaunchIntent(EMMessage message);
+        Intent getLaunchIntent(EMMessage message);
     }
-    
-    /**
-     * 是否为环信设置的免打扰消息
-     * @param message
-     * @return
-     */
-    public boolean isNoNeedNotifyMessage(EMMessage message){
-        return EMNotifier.getInstance(appContext).isNoNeedNotifyMessage(message);
-    }
-
 }

@@ -35,6 +35,7 @@ import com.easemob.EMConnectionListener;
 import com.easemob.EMError;
 import com.easemob.EMEventListener;
 import com.easemob.EMNotifierEvent;
+import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.applib.model.HXNotifier;
 import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatManager;
@@ -218,7 +219,7 @@ public class MainActivity extends BaseActivity implements EMEventListener{
             }
             
             //提示新消息
-            HXNotifier.getInstance(getApplicationContext()).notifyChatMsg(message);
+            HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
 
             runOnUiThread(new Runnable() {
                 public void run() {

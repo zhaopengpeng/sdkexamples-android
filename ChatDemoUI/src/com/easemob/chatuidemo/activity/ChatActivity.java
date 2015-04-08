@@ -65,6 +65,7 @@ import android.widget.Toast;
 import com.easemob.EMError;
 import com.easemob.EMEventListener;
 import com.easemob.EMNotifierEvent;
+import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.applib.model.HXNotifier;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactManager;
@@ -615,7 +616,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
             }
             
             //声音和震动提示有新消息
-            HXNotifier.getInstance(getApplicationContext()).notifyOnNewMsg(message);
+            HXSDKHelper.getInstance().getNotifier().viberateAndPlayTone(message);
 
             break;
         case TypeDeliveryAck:
