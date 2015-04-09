@@ -1088,15 +1088,12 @@ public class MessageAdapter extends BaseAdapter{
 
 			@Override
 			public void onSuccess() {
-				//umeng自定义事件， 
-				sendEvent2Umeng(message, start);
 				
 				updateSendedView(message, holder);
 			}
 
 			@Override
 			public void onError(int code, String error) {
-				sendEvent2Umeng(message, start);
 				
 				updateSendedView(message, holder);
 			}
@@ -1182,7 +1179,6 @@ public class MessageAdapter extends BaseAdapter{
 				@Override
 				public void onSuccess() {
 					Log.d(TAG, "send image message successfully");
-					sendEvent2Umeng(message, start);
 					activity.runOnUiThread(new Runnable() {
 						public void run() {
 							// send success
@@ -1194,7 +1190,6 @@ public class MessageAdapter extends BaseAdapter{
 
 				@Override
 				public void onError(int code, String error) {
-					sendEvent2Umeng(message, start);
 					
 					activity.runOnUiThread(new Runnable() {
 						public void run() {
@@ -1421,46 +1416,5 @@ public class MessageAdapter extends BaseAdapter{
 		}
 
 	}
-
-	/**
-	 * umeng自定义事件统计
-	 * @param message
-	 */
-	private void sendEvent2Umeng(final EMMessage message,final long start){
-		activity.runOnUiThread(new Runnable() {
-			public void run() {
-				long costTime = System.currentTimeMillis() - start;
-				Map<String, String> params = new HashMap<String, String>();
-				if(message.status == EMMessage.Status.SUCCESS)
-					params.put("status", "success");
-				else
-					params.put("status", "failure");
-					
-				switch (message.getType()) {
-				case TXT:
-				case LOCATION:
-					MobclickAgent.onEventValue(activity, "text_msg", params, (int) costTime);
-					MobclickAgent.onEventDuration(activity, "text_msg", (int) costTime);
-					break;
-				case IMAGE:
-					MobclickAgent.onEventValue(activity, "img_msg", params, (int) costTime);
-					MobclickAgent.onEventDuration(activity, "img_msg", (int) costTime);
-					break;
-				case VOICE:
-					MobclickAgent.onEventValue(activity, "voice_msg", params, (int) costTime);
-					MobclickAgent.onEventDuration(activity, "voice_msg", (int) costTime);
-					break;
-				case VIDEO:
-					MobclickAgent.onEventValue(activity, "video_msg", params, (int) costTime);
-					MobclickAgent.onEventDuration(activity, "video_msg", (int) costTime);
-					break;
-				default:
-					break;
-				}
-				
-			}
-		});
-	}
- 
 
 }
