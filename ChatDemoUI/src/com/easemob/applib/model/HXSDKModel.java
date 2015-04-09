@@ -20,15 +20,27 @@ package com.easemob.applib.model;
  */
 public abstract class HXSDKModel {
     public abstract void setSettingMsgNotification(boolean paramBoolean);
+    
+    // 震动和声音总开关，来消息时，是否允许此开关打开
+    // the vibrate and sound notification are allowed or not?
     public abstract boolean getSettingMsgNotification();
 
     public abstract void setSettingMsgSound(boolean paramBoolean);
+    
+    // 是否打开声音
+    // sound notification is switched on or not?
     public abstract boolean getSettingMsgSound();
 
     public abstract void setSettingMsgVibrate(boolean paramBoolean);
+    
+    // 是否打开震动
+    // vibrate notification is switched on or not?
     public abstract boolean getSettingMsgVibrate();
 
     public abstract void setSettingMsgSpeaker(boolean paramBoolean);
+    
+    // 是否打开扬声器
+    // the speaker is switched on or not?
     public abstract boolean getSettingMsgSpeaker();
    
     public abstract boolean saveHXId(String hxId);
