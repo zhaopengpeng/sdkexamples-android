@@ -40,6 +40,8 @@ import com.easemob.EMError;
 import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMChatRoom;
+import com.easemob.chat.EMChatRoomManager;
 import com.easemob.chat.EMContactListener;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMConversation;
@@ -60,6 +62,7 @@ import com.easemob.chatuidemo.domain.InviteMessage;
 import com.easemob.chatuidemo.domain.InviteMessage.InviteMesageStatus;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.utils.CommonUtils;
+import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.EMLog;
 import com.easemob.util.HanziToPinyin;
 import com.easemob.util.NetUtils;
@@ -789,8 +792,8 @@ public class MainActivity extends BaseActivity {
 
 	@Override
 	protected void onResume() {
-		super.onResume();
-		if (!isConflict||!isCurrentAccountRemoved) {
+		super.onResume(); 
+		if (!isConflict && !isCurrentAccountRemoved) {
 			updateUnreadLabel();
 			updateUnreadAddressLable();
 			EMChatManager.getInstance().activityResumed();
