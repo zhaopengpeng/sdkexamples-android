@@ -320,9 +320,9 @@ public class HXNotifier {
 
 
     /**
-     * 设置通知栏相关事件listener
+     * 设置NotificationInfoProvider
      * 
-     * @param listener
+     * @param provider
      */
     public void setNotificationInfoProvider(HXNotificationInfoProvider provider) {
         notificationInfoProvider = provider;

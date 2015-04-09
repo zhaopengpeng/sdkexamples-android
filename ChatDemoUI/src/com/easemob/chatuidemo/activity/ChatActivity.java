@@ -602,6 +602,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
                 return false;
             }
 
+            //声音和震动提示有新消息
+            HXSDKHelper.getInstance().getNotifier().viberateAndPlayTone(message);
             //可能会存在消息来时，聊天页面在，main页面不在的情况
             if (message.getChatType() == ChatType.GroupChat) { //群组消息
                 if (message.getTo().equals(getToChatUsername())){
@@ -615,8 +617,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
                 }
             }
             
-            //声音和震动提示有新消息
-            HXSDKHelper.getInstance().getNotifier().viberateAndPlayTone(message);
 
             break;
         case TypeDeliveryAck:

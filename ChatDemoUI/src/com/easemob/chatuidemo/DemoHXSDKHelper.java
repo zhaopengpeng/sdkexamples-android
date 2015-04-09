@@ -67,6 +67,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
 
         // you can also get EMChatOptions to set related SDK options
         // EMChatOptions options = EMChatManager.getInstance().getChatOptions();
+        
     }
 
     @Override
@@ -79,6 +80,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
 
         //注册通话广播接收者
         appContext.registerReceiver(callReceiver, callFilter);    
+        //注册消息事件监听
         initEventListener();
     }
     
