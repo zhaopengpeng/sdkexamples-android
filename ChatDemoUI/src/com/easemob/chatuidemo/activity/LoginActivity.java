@@ -168,17 +168,6 @@ public class LoginActivity extends BaseActivity {
 						DemoApplication.getInstance().setUserName(currentUsername);
 						DemoApplication.getInstance().setPassword(currentPassword);
 						
-						DemoHXSDKModel model = (DemoHXSDKModel) HXSDKHelper.getInstance().getModel();
-						
-						List<String> groups = new ArrayList<String>();
-						groups.add("ssss");
-						groups.add("ddd");
-						groups.add("kkk");
-						
-						model.setDisabledGroups(groups);
-						
-						groups = model.getDisabledGroups();
-						
 						runOnUiThread(new Runnable() {
 							public void run() {
 								pd.setMessage(getString(R.string.list_is_for));
