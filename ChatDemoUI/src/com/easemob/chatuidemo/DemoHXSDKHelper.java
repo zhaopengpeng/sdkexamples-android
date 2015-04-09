@@ -16,6 +16,7 @@ package com.easemob.chatuidemo;
 import java.util.List;
 import java.util.Map;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.widget.Toast;
@@ -59,7 +60,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
      */
     private Map<String, User> contactList;
     private CallReceiver callReceiver;
-
+    
     @Override
     protected void initHXOptions(){
         super.initHXOptions();

@@ -32,12 +32,14 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.easemob.EMCallBack;
+import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.DemoHXSDKHelper;
+import com.easemob.chatuidemo.DemoHXSDKModel;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.db.UserDao;
 import com.easemob.chatuidemo.domain.User;
@@ -165,6 +167,18 @@ public class LoginActivity extends BaseActivity {
 						// 登陆成功，保存用户名密码
 						DemoApplication.getInstance().setUserName(currentUsername);
 						DemoApplication.getInstance().setPassword(currentPassword);
+						
+						DemoHXSDKModel model = (DemoHXSDKModel) HXSDKHelper.getInstance().getModel();
+						
+						List<String> groups = new ArrayList<String>();
+						groups.add("ssss");
+						groups.add("ddd");
+						groups.add("kkk");
+						
+						model.setDisabledGroups(groups);
+						
+						groups = model.getDisabledGroups();
+						
 						runOnUiThread(new Runnable() {
 							public void run() {
 								pd.setMessage(getString(R.string.list_is_for));

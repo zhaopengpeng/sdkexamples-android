@@ -13,6 +13,7 @@
  */
 package com.easemob.chatuidemo.db;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,10 @@ public class UserDao {
 	public static final String COLUMN_NAME_ID = "username";
 	public static final String COLUMN_NAME_NICK = "nick";
 	public static final String COLUMN_NAME_AVATAR = "avatar";
+	
+	public static final String PREF_TABLE_NAME = "pref";
+	public static final String COLUMN_NAME_DISABLED_GROUPS = "disabled_groups";
+	public static final String COLUMN_NAME_DISABLED_IDS = "disabled_ids";
 
 	private DbOpenHelper dbHelper;
 
@@ -131,4 +136,65 @@ public class UserDao {
 			db.replace(TABLE_NAME, null, values);
 		}
 	}
+	
+	public void setDisabledGroups(List<String> groups){
+        setList(COLUMN_NAME_DISABLED_GROUPS, groups);
+    }
+    
+    public List<String>  getDisabledGroups(){       
+        return getList(COLUMN_NAME_DISABLED_GROUPS);
+    }
+    
+    public void setDisabledIds(List<String> ids){
+        setList(COLUMN_NAME_DISABLED_IDS, ids);
+    }
+    
+    public List<String> getDisabledIds(){
+        return getList(COLUMN_NAME_DISABLED_IDS);
+    }
+    
+    private void setList(String column, List<String> strList){
+        StringBuilder strBuilder = new StringBuilder();
+        
+        for(String hxid:strList){
+            strBuilder.append(hxid).append("$");
+        }
+        
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        if (db.isOpen()) {
+            ContentValues values = new ContentValues();
+            values.put(column, strBuilder.toString());
+
+            db.update(PREF_TABLE_NAME, values, null,null);
+        }
+    }
+    
+    private List<String> getList(String column){
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("select " + column + " from " + PREF_TABLE_NAME,null);
+        if (!cursor.moveToFirst()) {
+            cursor.close();
+            return null;
+        }
+
+        String strVal = cursor.getString(0);
+        if (strVal == null || strVal.equals("")) {
+            return null;
+        }
+        
+        cursor.close();
+        
+        String[] array = strVal.split("$");
+        
+        if(array != null && array.length > 0){
+            List<String> list = new ArrayList<String>();
+            for(String str:array){
+                list.add(str);
+            }
+            
+            return list;
+        }
+        
+        return null;
+    }
 }

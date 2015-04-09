@@ -152,15 +152,23 @@ public class DefaultHXSDKModel extends HXSDKModel{
     }
     
     public void setDisabledGroups(List<String> groups){
-        HXPreferenceUtils.getInstance().setDisabledGroups(groups);
+        if(dao == null){
+            dao = new UserDao(context);
+        }
+        
+        dao.setDisabledGroups(groups);
         valueCache.put(Key.DisabledGroups, groups);
     }
     
     public List<String> getDisabledGroups(){
         Object val = valueCache.get(Key.DisabledGroups);
 
+        if(dao == null){
+            dao = new UserDao(context);
+        }
+        
         if(val == null){
-            val = HXPreferenceUtils.getInstance().getDisabledGroups();
+            val = dao.getDisabledGroups();
             valueCache.put(Key.DisabledGroups, val);
         }
        
@@ -168,15 +176,23 @@ public class DefaultHXSDKModel extends HXSDKModel{
     }
     
     public void setDisabledIds(List<String> ids){
-        HXPreferenceUtils.getInstance().setDisabledIds(ids);
+        if(dao == null){
+            dao = new UserDao(context);
+        }
+        
+        dao.setDisabledIds(ids);
         valueCache.put(Key.DisabledIds, ids);
     }
     
     public List<String> getDisabledIds(){
         Object val = valueCache.get(Key.DisabledIds);
+        
+        if(dao == null){
+            dao = new UserDao(context);
+        }
 
         if(val == null){
-            val = HXPreferenceUtils.getInstance().getDisabledIds();
+            val = dao.getDisabledIds();
             valueCache.put(Key.DisabledIds, val);
         }
        
