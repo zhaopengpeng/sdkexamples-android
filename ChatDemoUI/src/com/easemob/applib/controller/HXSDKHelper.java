@@ -19,30 +19,18 @@ import java.util.List;
 import com.easemob.EMCallBack;
 import com.easemob.EMConnectionListener;
 import com.easemob.EMError;
-import com.easemob.EMEventListener;
-import com.easemob.EMNotifierEvent;
 import com.easemob.applib.model.DefaultHXSDKModel;
 import com.easemob.applib.model.HXNotifier;
-import com.easemob.applib.model.HXNotifier.NotificationListener;
+import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
 import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatConfig.EMEnvMode;
-import com.easemob.chatuidemo.R;
-import com.easemob.chatuidemo.activity.MainActivity;
-import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
-import com.easemob.chat.EMMessage;
-import com.easemob.chat.OnMessageNotifyListener;
-import com.easemob.chat.OnNotificationClickListener;
-import com.easemob.util.EMLog;
-import com.easemob.util.EasyUtils;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
-import android.widget.Toast;
 
 /**
  * The developer can derive from this class to talk with HuanXin SDK
@@ -93,6 +81,11 @@ public abstract class HXSDKHelper {
      * the global HXSDKHelper instance
      */
     private static HXSDKHelper me = null;
+    
+    /**
+     * the notifier
+     */
+    protected HXNotifier notifier = null;
     
     public HXSDKHelper(){
         me = this;
@@ -161,7 +154,7 @@ public abstract class HXSDKHelper {
         }
 
         Log.d(TAG, "initialize EMChat SDK");
-        
+                
         initHXOptions();
         initListener();
         sdkInited = true;
@@ -227,14 +220,6 @@ public abstract class HXSDKHelper {
         options.setAcceptInvitationAlways(hxModel.getAcceptInvitationAlways());
         // 默认环信是不维护好友关系列表的，如果app依赖环信的好友关系，把这个属性设置为true
         options.setUseRoster(hxModel.getUseHXRoster());
-        // 设置收到消息是否有新消息通知(声音和震动提示)，默认为true
-        options.setNotifyBySoundAndVibrate(hxModel.getSettingMsgNotification());
-        // 设置收到消息是否有声音提示，默认为true
-        options.setNoticeBySound(hxModel.getSettingMsgSound());
-        // 设置收到消息是否震动 默认为true
-        options.setNoticedByVibrate(hxModel.getSettingMsgVibrate());
-        // 设置语音消息播放是否设置为扬声器播放 默认为true
-        options.setUseSpeaker(hxModel.getSettingMsgSpeaker());
         // 设置是否需要已读回执
         options.setRequireAck(hxModel.getRequireReadAck());
         // 设置是否需要已送达回执
@@ -242,8 +227,21 @@ public abstract class HXSDKHelper {
         // 设置从db初始化加载时, 每个conversation需要加载msg的个数
         options.setNumberOfMessagesLoaded(1);
         
-        //设置通知栏事件监听(不是SDK的API)
-        HXNotifier.getInstance(appContext).setNotificationListener(getNotificationListener());
+        notifier = createNotifier();
+        notifier.init(appContext);
+    }
+    
+    /**
+     * subclass can override this api to return the customer notifier
+     * 
+     * @return
+     */
+    protected HXNotifier createNotifier(){
+        return new HXNotifier();
+    }
+    
+    public HXNotifier getNotifier(){
+        return notifier;
     }
     
     /**
@@ -286,7 +284,7 @@ public abstract class HXSDKHelper {
        return EMChat.getInstance().isLoggedIn();
     }
     
-    protected NotificationListener getNotificationListener(){
+    protected HXNotificationInfoProvider getNotificationListener(){
         return null;
     }
 
@@ -314,18 +312,10 @@ public abstract class HXSDKHelper {
                 onConnectionConnected();
             }
         };
+        
         //注册连接监听
-        EMChatManager.getInstance().addConnectionListener(connectionListener);
-        //注册一个全局的消息事件监听
-        EMChatManager.getInstance().addEventListener(getEventListener());
-       
+        EMChatManager.getInstance().addConnectionListener(connectionListener);       
     }
-    
-    /**
-     * 设置全局消息监听listener
-     * @return
-     */
-    protected abstract EMEventListener getEventListener();
 
     /**
      * the developer can override this function to handle connection conflict error
