@@ -316,8 +316,6 @@ public class MainActivity extends BaseActivity implements EMEventListener{
 		return unreadMsgCountTotal;
 	}
 
-	
-
 	private InviteMessgeDao inviteMessgeDao;
 	private UserDao userDao;
 
