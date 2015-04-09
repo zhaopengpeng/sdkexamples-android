@@ -13,25 +13,33 @@
  */
 package com.easemob.chatuidemo;
 
+import java.util.List;
 import java.util.Map;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.widget.Toast;
 
 import com.easemob.EMCallBack;
+import com.easemob.EMEventListener;
+import com.easemob.EMNotifierEvent;
 import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.model.HXNotifier;
 import com.easemob.applib.model.HXSDKModel;
+import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
+import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
-import com.easemob.chat.OnMessageNotifyListener;
-import com.easemob.chat.OnNotificationClickListener;
 import com.easemob.chatuidemo.activity.ChatActivity;
 import com.easemob.chatuidemo.activity.MainActivity;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.receiver.CallReceiver;
 import com.easemob.chatuidemo.utils.CommonUtils;
+import com.easemob.util.EMLog;
+import com.easemob.util.EasyUtils;
 
 /**
  * Demo UI HX SDK helper class which subclass HXSDKHelper
@@ -39,6 +47,13 @@ import com.easemob.chatuidemo.utils.CommonUtils;
  *
  */
 public class DemoHXSDKHelper extends HXSDKHelper{
+
+    private static final String TAG = "DemoHXSDKHelper";
+    
+    /**
+     * EMEventListener
+     */
+    protected EMEventListener eventListener = null;
 
     /**
      * contact list in cache
@@ -49,57 +64,125 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     @Override
     protected void initHXOptions(){
         super.initHXOptions();
+
         // you can also get EMChatOptions to set related SDK options
         // EMChatOptions options = EMChatManager.getInstance().getChatOptions();
     }
 
     @Override
-    protected OnMessageNotifyListener getMessageNotifyListener(){
-        // 取消注释，app在后台，有新消息来时，状态栏的消息提示换成自己写的
-      return new OnMessageNotifyListener() {
+    protected void initListener(){
+        super.initListener();
+        IntentFilter callFilter = new IntentFilter(EMChatManager.getInstance().getIncomingCallBroadcastAction());
+        if(callReceiver == null){
+            callReceiver = new CallReceiver();
+        }
 
-          @Override
-          public String onNewMessageNotify(EMMessage message) {
-              // 设置状态栏的消息提示，可以根据message的类型做相应提示
-              String ticker = CommonUtils.getMessageDigest(message, appContext);
-              if(message.getType() == Type.TXT)
-                  ticker = ticker.replaceAll("\\[.{2,3}\\]", "[表情]");
-              return message.getFrom() + ": " + ticker;
-          }
-
-          @Override
-          public String onLatestMessageNotify(EMMessage message, int fromUsersNum, int messageNum) {
-              return null;
-             // return fromUsersNum + "个基友，发来了" + messageNum + "条消息";
-          }
-
-          @Override
-          public String onSetNotificationTitle(EMMessage message) {
-              //修改标题,这里使用默认
-              return null;
-          }
-
-          @Override
-          public int onSetSmallIcon(EMMessage message) {
-              //设置小图标
-              return 0;
-          }
-      };
+        //注册通话广播接收者
+        appContext.registerReceiver(callReceiver, callFilter);    
+        initEventListener();
     }
     
-    @Override
-    protected OnNotificationClickListener getNotificationClickListener(){
-        return new OnNotificationClickListener() {
-
+    /**
+     * 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，消息将不会进一步传递。
+     * 后加入的事件监听会先收到事件的通知
+     * 
+     * 如果收到的事件，能够被处理并且不需要其他的监听再处理，可以返回true，否则返回false
+     * 
+     * 由于这个是全局的监听，可以处理其他监听漏过来的事件。
+     */
+    protected void initEventListener() {
+        eventListener = new EMEventListener() {
+            
             @Override
-            public Intent onNotificationClick(EMMessage message) {
+            public boolean onEvent(EMNotifierEvent event) {
+                EMMessage message = (EMMessage)event.getData();
+                EMLog.d(TAG, "收到消息, messge type : " + event.getType() + ",id : " + message.getMsgId());
+                
+                switch (event.getType()) {
+                case TypeNormalMessage:
+                    //应用在后台，不需要刷新UI,通知栏提示新消息
+                    if(!EasyUtils.isAppRunningForeground(appContext)){
+                        HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
+                    }
+                    break;
+                case TypeCMD:
+                    EMLog.d(TAG, "收到透传消息");
+                    //获取消息body
+                    CmdMessageBody cmdMsgBody = (CmdMessageBody) message.getBody();
+                    String action = cmdMsgBody.action;//获取自定义action
+                    
+                    //获取扩展属性 此处省略
+                    //message.getStringAttribute("");
+                    EMLog.d(TAG, String.format("透传消息：action:%s,message:%s", action,message.toString()));
+                    String str = appContext.getString(R.string.receive_the_passthrough);
+                    Toast.makeText(appContext, str+action, Toast.LENGTH_SHORT).show();
+                    break;
+                case TypeDeliveryAck:
+                    message.setDelivered(true);
+                    break;
+                case TypeReadAck:
+                    message.setAcked(true);
+                    break;
+
+                default:
+                    break;
+                }
+                
+                return false;
+            }
+        };
+        
+        EMChatManager.getInstance().registerEventListener(eventListener);
+    }
+
+    /**
+     * 自定义通知栏提示内容
+     * @return
+     */
+    @Override
+    protected HXNotificationInfoProvider getNotificationListener() {
+        //可以覆盖默认的设置
+        return new HXNotificationInfoProvider() {
+            
+            @Override
+            public String getTitle(EMMessage message) {
+              //修改标题,这里使用默认
+                return null;
+            }
+            
+            @Override
+            public int getSmallIcon(EMMessage message) {
+              //设置小图标，这里为默认
+                return 0;
+            }
+            
+            @Override
+            public String getDisplayedText(EMMessage message) {
+                // 设置状态栏的消息提示，可以根据message的类型做相应提示
+                String ticker = CommonUtils.getMessageDigest(message, appContext);
+                if(message.getType() == Type.TXT){
+                    ticker = ticker.replaceAll("\\[.{2,3}\\]", "[表情]");
+                }
+                
+                return message.getFrom() + ": " + ticker;
+            }
+            
+            @Override
+            public String getLatestText(EMMessage message, int fromUsersNum, int messageNum) {
+                return null;
+                // return fromUsersNum + "个基友，发来了" + messageNum + "条消息";
+            }
+            
+            @Override
+            public Intent getLaunchIntent(EMMessage message) {
+                //设置点击通知栏跳转事件
                 Intent intent = new Intent(appContext, ChatActivity.class);
                 ChatType chatType = message.getChatType();
                 if (chatType == ChatType.Chat) { // 单聊信息
                     intent.putExtra("userId", message.getFrom());
                     intent.putExtra("chatType", ChatActivity.CHATTYPE_SINGLE);
                 } else { // 群聊信息
-                            // message.getTo()为群聊id
+                    // message.getTo()为群聊id
                     intent.putExtra("groupId", message.getTo());
                     intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
                 }
@@ -107,6 +190,8 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             }
         };
     }
+    
+    
     
     @Override
     protected void onConnectionConflict(){
@@ -124,19 +209,45 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         appContext.startActivity(intent);
     }
     
-    
-    @Override
-    protected void initListener(){
-        super.initListener();
-        IntentFilter callFilter = new IntentFilter(EMChatManager.getInstance().getIncomingCallBroadcastAction());
-        if(callReceiver == null)
-            callReceiver = new CallReceiver();
-        appContext.registerReceiver(callReceiver, callFilter);    
-    }
 
     @Override
     protected HXSDKModel createModel() {
         return new DemoHXSDKModel(appContext);
+    }
+    
+    @Override
+    public HXNotifier createNotifier(){
+        return new HXNotifier(){
+            public synchronized void onNewMsg(final EMMessage message) {
+                if(EMChatManager.getInstance().isSlientMessage(message)){
+                    return;
+                }
+                
+                String chatUsename = null;
+                List<String> notNotifyIds = null;
+                // 获取设置的不提示新消息的用户或者群组ids
+                if (message.getChatType() == ChatType.Chat) {
+                    chatUsename = message.getFrom();
+                    notNotifyIds = ((DemoHXSDKModel) hxModel).getDisabledGroups();
+                } else {
+                    chatUsename = message.getTo();
+                    notNotifyIds = ((DemoHXSDKModel) hxModel).getDisabledIds();
+                }
+
+                if (notNotifyIds == null || !notNotifyIds.contains(chatUsename)) {
+                    // 判断app是否在后台
+                    if (!EasyUtils.isAppRunningForeground(appContext)) {
+                        EMLog.d(TAG, "app is running in backgroud");
+                        sendNotification(message, false);
+                    } else {
+                        sendNotification(message, true);
+
+                    }
+                    
+                    viberateAndPlayTone(message);
+                }
+            }
+        };
     }
     
     /**
@@ -198,7 +309,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             }
             
         });
-    }
+    }   
     
     void endCall(){
         try {
@@ -207,4 +318,5 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             e.printStackTrace();
         }
     }
+
 }

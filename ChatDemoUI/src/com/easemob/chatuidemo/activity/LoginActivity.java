@@ -32,12 +32,14 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.easemob.EMCallBack;
+import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.DemoHXSDKHelper;
+import com.easemob.chatuidemo.DemoHXSDKModel;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.db.UserDao;
 import com.easemob.chatuidemo.domain.User;
@@ -165,6 +167,7 @@ public class LoginActivity extends BaseActivity {
 						// 登陆成功，保存用户名密码
 						DemoApplication.getInstance().setUserName(currentUsername);
 						DemoApplication.getInstance().setPassword(currentPassword);
+						
 						runOnUiThread(new Runnable() {
 							public void run() {
 								pd.setMessage(getString(R.string.list_is_for));
@@ -286,7 +289,7 @@ public class LoginActivity extends BaseActivity {
 			return;
 		}
 	}
-
+	
 	/**
 	 * 设置hearder属性，方便通讯中对联系人按header分类显示，以及通过右侧ABCD...字母栏快速定位联系人
 	 * 

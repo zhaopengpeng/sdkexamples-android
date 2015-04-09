@@ -30,6 +30,7 @@ import android.widget.TextView;
 
 import com.easemob.EMCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
 import com.easemob.chatuidemo.Constant;
@@ -153,22 +154,34 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 		rl_switch_speaker.setOnClickListener(this);
 		logoutBtn.setOnClickListener(this);
 		llDiagnose.setOnClickListener(this);
+		
 		chatOptions = EMChatManager.getInstance().getChatOptions();
-		if (chatOptions.getNotificationEnable()) {
+		
+		HXSDKModel model = HXSDKHelper.getInstance().getModel();
+		
+		// 震动和声音总开关，来消息时，是否允许此开关打开
+		// the vibrate and sound notification are allowed or not?
+		if (model.getSettingMsgNotification()) {
 			iv_switch_open_notification.setVisibility(View.VISIBLE);
 			iv_switch_close_notification.setVisibility(View.INVISIBLE);
 		} else {
 			iv_switch_open_notification.setVisibility(View.INVISIBLE);
 			iv_switch_close_notification.setVisibility(View.VISIBLE);
 		}
-		if (chatOptions.getNoticedBySound()) {
+		
+		// 是否打开声音
+		// sound notification is switched on or not?
+		if (model.getSettingMsgSound()) {
 			iv_switch_open_sound.setVisibility(View.VISIBLE);
 			iv_switch_close_sound.setVisibility(View.INVISIBLE);
 		} else {
 			iv_switch_open_sound.setVisibility(View.INVISIBLE);
 			iv_switch_close_sound.setVisibility(View.VISIBLE);
 		}
-		if (chatOptions.getNoticedByVibrate()) {
+		
+		// 是否打开震动
+		// vibrate notification is switched on or not?
+		if (model.getSettingMsgVibrate()) {
 			iv_switch_open_vibrate.setVisibility(View.VISIBLE);
 			iv_switch_close_vibrate.setVisibility(View.INVISIBLE);
 		} else {
@@ -176,7 +189,9 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 			iv_switch_close_vibrate.setVisibility(View.VISIBLE);
 		}
 
-		if (chatOptions.getUseSpeaker()) {
+		// 是否打开扬声器
+		// the speaker is switched on or not?
+		if (model.getSettingMsgSpeaker()) {
 			iv_switch_open_speaker.setVisibility(View.VISIBLE);
 			iv_switch_close_speaker.setVisibility(View.INVISIBLE);
 		} else {

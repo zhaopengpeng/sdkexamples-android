@@ -21,7 +21,7 @@ import com.easemob.applib.controller.HXSDKHelper;
 
 public class DbOpenHelper extends SQLiteOpenHelper{
 
-	private static final int DATABASE_VERSION = 2;
+	private static final int DATABASE_VERSION = 3;
 	private static DbOpenHelper instance;
 
 	private static final String USERNAME_TABLE_CREATE = "CREATE TABLE "
@@ -42,6 +42,10 @@ public class DbOpenHelper extends SQLiteOpenHelper{
 			+ InviteMessgeDao.COLUMN_NAME_TIME + " TEXT); ";
 			
 			
+	private static final String CREATE_PREF_TABLE = "CREATE TABLE "
+            + UserDao.PREF_TABLE_NAME + " ("
+            + UserDao.COLUMN_NAME_DISABLED_GROUPS + " TEXT, "
+            + UserDao.COLUMN_NAME_DISABLED_IDS + " TEXT);";
 	
 	private DbOpenHelper(Context context) {
 		super(context, getUserDatabaseName(), null, DATABASE_VERSION);
@@ -62,6 +66,7 @@ public class DbOpenHelper extends SQLiteOpenHelper{
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(USERNAME_TABLE_CREATE);
 		db.execSQL(INIVTE_MESSAGE_TABLE_CREATE);
+		db.execSQL(CREATE_PREF_TABLE);
 		
 	}
 
@@ -71,6 +76,10 @@ public class DbOpenHelper extends SQLiteOpenHelper{
 		    db.execSQL("ALTER TABLE "+ UserDao.TABLE_NAME +" ADD COLUMN "+ 
 		            UserDao.COLUMN_NAME_AVATAR + " TEXT ;");
 		}
+		
+		if(oldVersion < 3){
+		    db.execSQL(CREATE_PREF_TABLE);
+        }
 	}
 	
 	public void closeDB() {
