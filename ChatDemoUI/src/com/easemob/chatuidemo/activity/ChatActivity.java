@@ -63,8 +63,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.easemob.EMError;
-import com.easemob.EMEventListener;
-import com.easemob.EMNotifierEvent;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.applib.model.HXNotifier;
 import com.easemob.chat.EMChatManager;
@@ -102,7 +100,7 @@ import com.easemob.util.VoiceRecorder;
  * 聊天页面
  * 
  */
-public class ChatActivity extends BaseActivity implements OnClickListener, EMEventListener{
+public class ChatActivity extends BaseActivity implements OnClickListener{
 
 	private static final int REQUEST_CODE_EMPTY_HISTORY = 2;
 	public static final int REQUEST_CODE_CONTEXT_MENU = 3;
