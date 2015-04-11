@@ -103,9 +103,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 switch (event.getType()) {
                 case TypeNormalMessage:
                     //应用在后台，不需要刷新UI,通知栏提示新消息
-                    if(!EasyUtils.isAppRunningForeground(appContext)){
-                        HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
-                    }
+                    HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
                     break;
                 case TypeCMD:
                     EMLog.d(TAG, "收到透传消息");

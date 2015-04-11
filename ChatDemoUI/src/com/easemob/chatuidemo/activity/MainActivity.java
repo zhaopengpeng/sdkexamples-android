@@ -148,10 +148,6 @@ public class MainActivity extends BaseActivity implements EMEventListener{
 		EMGroupManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
 		// 通知sdk，UI 已经初始化完毕，注册了相应的receiver和listener, 可以接受broadcast了
 		EMChat.getInstance().setAppInited();
-		// 注册消息监听，demo现在仅对普通消息进行处理，EMNotifierEvent.EventType.TypeNormalMessage
-		// 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，消息将不会进一步传递。
-		// 后加入的事件监听会先收到事件的通知
-		EMChatManager.getInstance().registerEventListener(this,new EMNotifierEvent.EventType[]{EMNotifierEvent.EventType.TypeNormalMessage});
 	}
 
 	/**
@@ -211,11 +207,6 @@ public class MainActivity extends BaseActivity implements EMEventListener{
 	    switch (event.getType()) {
         case TypeNormalMessage: //普通消息
             EMMessage message = (EMMessage) event.getData();
-
-            // we pass this message to global listener, since we are in background
-            if(!EasyUtils.isAppRunningForeground(this)){
-                return false;
-            }
             
             //提示新消息
             HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
@@ -678,6 +669,16 @@ public class MainActivity extends BaseActivity implements EMEventListener{
 			EMChatManager.getInstance().activityResumed();
 		}
 
+		// 注册消息监听，demo现在仅对普通消息进行处理，EMNotifierEvent.EventType.TypeNormalMessage
+        // 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，消息将不会进一步传递。
+        // 后加入的事件监听会先收到事件的通知
+        EMChatManager.getInstance().registerEventListener(this,new EMNotifierEvent.EventType[]{EMNotifierEvent.EventType.TypeNormalMessage});
+	}
+	
+	@Override
+	protected void onStop(){
+	    EMChatManager.getInstance().unregisterEventListener(this);
+	    super.onStop();
 	}
 	
 	@Override

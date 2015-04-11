@@ -41,6 +41,7 @@ import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -197,11 +198,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		setContentView(R.layout.activity_chat);
 		initView();
 		setUpView();
-		// 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，事件将不会进一步传递。
-        // 后加入的事件监听会先收到事件的通知
-		EMChatManager.getInstance().registerEventListener(this,new EMNotifierEvent.EventType[]{EMNotifierEvent.EventType.TypeNormalMessage
-		                                                                                      ,EMNotifierEvent.EventType.TypeDeliveryAck
-		                                                                                      ,EMNotifierEvent.EventType.TypeReadAck});
 	}
 
 	/**
@@ -597,11 +593,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
         String from = message.getFrom();
         switch (event.getType()) {
         case TypeNormalMessage:
-            // ignore any message sent in background,since the global listener will catch this event and handle it
-            if(!EasyUtils.isAppRunningForeground(this)){
-                return false;
-            }
-
             //声音和震动提示有新消息
             HXSDKHelper.getInstance().getNotifier().viberateAndPlayTone(message);
             //可能会存在消息来时，聊天页面在，main页面不在的情况
@@ -1249,12 +1240,29 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 	@Override
 	protected void onResume() {
+	    Log.i("ChatActivity", "onResume");
 		super.onResume();
 		if(group != null)
 			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
 		adapter.refresh();
+		
+		// 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，事件将不会进一步传递。
+        // 后加入的事件监听会先收到事件的通知
+		// register the event listener when enter the foreground
+        EMChatManager.getInstance().registerEventListener(this,new EMNotifierEvent.EventType[]{EMNotifierEvent.EventType.TypeNormalMessage
+                                                                                              ,EMNotifierEvent.EventType.TypeDeliveryAck
+                                                                                              ,EMNotifierEvent.EventType.TypeReadAck});
 	}
 
+	@Override
+	protected void onStop(){
+	    Log.i("ChatActivity", "onStop");
+	    
+	    // unregister this event listener when this activity enters the background
+	    EMChatManager.getInstance().unregisterEventListener(this);
+	    super.onStop();
+	}
+	
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -1325,7 +1333,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * @param view
 	 */
 	public void back(View view) {
-	    EMChatManager.getInstance().unregisterEventListener(this);
 		finish();
 	}
 
@@ -1333,9 +1340,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * 覆盖手机返回键
 	 */
 	@Override
-	public void onBackPressed() {
-	    EMChatManager.getInstance().unregisterEventListener(this);
-	    
+	public void onBackPressed() {	    
 		if (more.getVisibility() == View.VISIBLE) {
 			more.setVisibility(View.GONE);
 			iv_emoticons_normal.setVisibility(View.VISIBLE);
