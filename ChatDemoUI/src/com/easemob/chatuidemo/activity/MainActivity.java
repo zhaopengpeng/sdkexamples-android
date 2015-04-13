@@ -115,9 +115,7 @@ public class MainActivity extends BaseActivity implements EMEventListener{
         }
 		setContentView(R.layout.activity_main);
 		initView();
-		
-		activityInstance = this;
-		
+				
 //		MobclickAgent.setDebugMode( true );
 		//--?--
 		MobclickAgent.updateOnlineConfig(this);
