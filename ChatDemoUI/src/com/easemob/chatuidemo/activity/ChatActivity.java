@@ -301,7 +301,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	}
 
 	private void setUpView() {
-		activityInstance = this;
 		iv_emoticons_normal.setOnClickListener(this);
 		iv_emoticons_checked.setOnClickListener(this);
 		// position = getIntent().getIntExtra("position", -1);
@@ -582,10 +581,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 	
 	/**
-     * 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，消息将不会进一步传递。
-     * 后加入的事件监听会先收到事件的通知
-     * 
-     * 如果收到的事件，能够被处理并且不需要其他的监听再处理，可以返回true，否则返回false
+	 * 事件监听
+	 * 
+	 * see {@link EMNotifierEvent}
      */
     @Override
     public void onEvent(EMNotifierEvent event) {
@@ -615,17 +613,12 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
             break;
         case TypeDeliveryAck:
-            if (message != null) {
-                message.setDelivered(true);
-            }
             refreshUI();
+            break;
 
         case TypeReadAck:
-            // 把message设为已读
-            if (message != null) {
-                message.setAcked(true);
-            }
             refreshUI();
+            break;
 
         default:
             break;
@@ -1261,6 +1254,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	    EMChatManager.getInstance().unregisterEventListener(this);
 	    
 	    DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
+	    
+	    // 把此activity 从foreground activity 列表里移除
         sdkHelper.popActivity(this);
         
 	    super.onStop();
