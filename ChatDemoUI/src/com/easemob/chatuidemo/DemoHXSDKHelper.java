@@ -13,10 +13,11 @@
  */
 package com.easemob.chatuidemo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.widget.Toast;
@@ -60,6 +61,17 @@ public class DemoHXSDKHelper extends HXSDKHelper{
      */
     private Map<String, User> contactList;
     private CallReceiver callReceiver;
+    private List<Activity> activityList = new ArrayList<Activity>();
+    
+    public void pushActivity(Activity activity){
+        if(!activityList.contains(activity)){
+            activityList.add(0,activity); 
+        }
+    }
+    
+    public void popActivity(Activity activity){
+        activityList.remove(activity);
+    }
     
     @Override
     protected void initHXOptions(){
@@ -96,14 +108,17 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         eventListener = new EMEventListener() {
             
             @Override
-            public boolean onEvent(EMNotifierEvent event) {
+            public void onEvent(EMNotifierEvent event) {
                 EMMessage message = (EMMessage)event.getData();
                 EMLog.d(TAG, "收到消息, messge type : " + event.getType() + ",id : " + message.getMsgId());
                 
                 switch (event.getType()) {
                 case TypeNormalMessage:
                     //应用在后台，不需要刷新UI,通知栏提示新消息
-                    HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
+                    if(activityList.size() <= 0){
+                        HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
+                    }
+
                     break;
                 case TypeCMD:
                     EMLog.d(TAG, "收到透传消息");
@@ -128,7 +143,6 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                     break;
                 }
                 
-                return false;
             }
         };
         

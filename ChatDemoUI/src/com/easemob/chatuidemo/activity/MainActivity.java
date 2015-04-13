@@ -50,6 +50,7 @@ import com.easemob.chat.GroupChangeListener;
 import com.easemob.chat.TextMessageBody;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
+import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.db.InviteMessgeDao;
 import com.easemob.chatuidemo.db.UserDao;
@@ -203,7 +204,7 @@ public class MainActivity extends BaseActivity implements EMEventListener{
      * 如果收到的事件，能够被处理并且不需要其他的监听再处理，可以返回true，否则返回false
      */
 	@Override
-    public boolean onEvent(EMNotifierEvent event) {
+    public void onEvent(EMNotifierEvent event) {
 	    switch (event.getType()) {
         case TypeNormalMessage: //普通消息
             EMMessage message = (EMMessage) event.getData();
@@ -224,25 +225,19 @@ public class MainActivity extends BaseActivity implements EMEventListener{
                 }
             });
             
-            return true;
-
         default:
-            return false;
+            break;
         }
     }
 	
    @Override
-    public void back(View view) {
-        EMChatManager.getInstance().unregisterEventListener(this);
-        
+    public void back(View view) {        
         super.back(view);
     }
 	   
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
-		EMChatManager.getInstance().unregisterEventListener(this);
-		
+		super.onDestroy();		
 		activityInstance = null;
 
 		if (conflictBuilder != null) {
@@ -669,15 +664,20 @@ public class MainActivity extends BaseActivity implements EMEventListener{
 			EMChatManager.getInstance().activityResumed();
 		}
 
-		// 注册消息监听，demo现在仅对普通消息进行处理，EMNotifierEvent.EventType.TypeNormalMessage
-        // 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，消息将不会进一步传递。
-        // 后加入的事件监听会先收到事件的通知
+		// unregister this event listener when this activity enters the background
+		DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
+        sdkHelper.pushActivity(this);
+        
+        // register the event listener when enter the foreground
         EMChatManager.getInstance().registerEventListener(this,new EMNotifierEvent.EventType[]{EMNotifierEvent.EventType.TypeNormalMessage});
 	}
 	
 	@Override
 	protected void onStop(){
 	    EMChatManager.getInstance().unregisterEventListener(this);
+	    DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
+	    sdkHelper.popActivity(this);
+	    
 	    super.onStop();
 	}
 	
