@@ -83,6 +83,7 @@ import com.easemob.chat.TextMessageBody;
 import com.easemob.chat.VideoMessageBody;
 import com.easemob.chat.VoiceMessageBody;
 import com.easemob.chatuidemo.DemoApplication;
+import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ExpressionAdapter;
 import com.easemob.chatuidemo.adapter.ExpressionPagerAdapter;
@@ -587,7 +588,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
      * 如果收到的事件，能够被处理并且不需要其他的监听再处理，可以返回true，否则返回false
      */
     @Override
-    public boolean onEvent(EMNotifierEvent event) {
+    public void onEvent(EMNotifierEvent event) {
         //获取到message
         EMMessage message = (EMMessage) event.getData();
         String from = message.getFrom();
@@ -599,12 +600,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
             if (message.getChatType() == ChatType.GroupChat) { //群组消息
                 if (message.getTo().equals(getToChatUsername())){
                     refreshUIWithNewMessage();
-                    return true;
                 }
             } else { //单聊消息
                 if (from.equals(getToChatUsername())){
                     refreshUIWithNewMessage();
-                    return true;
                 }
             }
             
@@ -615,7 +614,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
                 message.setDelivered(true);
             }
             refreshUI();
-            return true;
 
         case TypeReadAck:
             // 把message设为已读
@@ -623,13 +621,11 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
                 message.setAcked(true);
             }
             refreshUI();
-            return true;
 
         default:
             break;
         }
         
-        return false;
     }
 	
 	
@@ -1233,8 +1229,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		EMChatManager.getInstance().unregisterEventListener(this);
-		activityInstance = null;
 		EMGroupManager.getInstance().removeGroupChangeListener(groupListener);
 	}
 
@@ -1246,8 +1240,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
 		adapter.refresh();
 		
-		// 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，事件将不会进一步传递。
-        // 后加入的事件监听会先收到事件的通知
+		DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
+        sdkHelper.pushActivity(this);
 		// register the event listener when enter the foreground
         EMChatManager.getInstance().registerEventListener(this,new EMNotifierEvent.EventType[]{EMNotifierEvent.EventType.TypeNormalMessage
                                                                                               ,EMNotifierEvent.EventType.TypeDeliveryAck
@@ -1260,6 +1254,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	    
 	    // unregister this event listener when this activity enters the background
 	    EMChatManager.getInstance().unregisterEventListener(this);
+	    
+	    DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
+        sdkHelper.popActivity(this);
+        
 	    super.onStop();
 	}
 	
