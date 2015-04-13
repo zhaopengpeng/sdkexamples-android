@@ -591,22 +591,27 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
     public void onEvent(EMNotifierEvent event) {
         //获取到message
         EMMessage message = (EMMessage) event.getData();
-        String from = message.getFrom();
         switch (event.getType()) {
         case TypeNormalMessage:
-            //声音和震动提示有新消息
-            HXSDKHelper.getInstance().getNotifier().viberateAndPlayTone(message);
-            //可能会存在消息来时，聊天页面在，main页面不在的情况
-            if (message.getChatType() == ChatType.GroupChat) { //群组消息
-                if (message.getTo().equals(getToChatUsername())){
-                    refreshUIWithNewMessage();
-                }
-            } else { //单聊消息
-                if (from.equals(getToChatUsername())){
-                    refreshUIWithNewMessage();
-                }
+            String username = null;
+            //群组消息
+            if(message.getChatType() == ChatType.GroupChat){
+                username = message.getFrom();
             }
-            
+            else{
+                //单聊消息
+                username = message.getFrom();
+            }
+
+            //如果是当前会话的消息，刷新聊天页面
+            if(username.equals(getToChatUsername())){
+                refreshUIWithNewMessage();
+                //声音和震动提示有新消息
+                HXSDKHelper.getInstance().getNotifier().viberateAndPlayTone(message);
+            }else{
+                //如果消息不是和当前聊天ID的消息
+                HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
+            }
 
             break;
         case TypeDeliveryAck:
