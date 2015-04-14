@@ -110,18 +110,25 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             
             @Override
             public void onEvent(EMNotifierEvent event) {
-                EMMessage message = (EMMessage)event.getData();
-                EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
                 
                 switch (event.getEvent()) {
                 case EventNewMessage:
+                {
+                    EMMessage message = (EMMessage)event.getData();
+                    EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
+                    
                     //应用在后台，不需要刷新UI,通知栏提示新消息
                     if(activityList.size() <= 0){
                         HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
                     }
 
                     break;
+                }
                 case EventNewCMDMessage:
+                {
+                    EMMessage message = (EMMessage)event.getData();
+                    EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
+                    
                     EMLog.d(TAG, "收到透传消息");
                     //获取消息body
                     CmdMessageBody cmdMsgBody = (CmdMessageBody) message.getBody();
@@ -133,7 +140,8 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                     String str = appContext.getString(R.string.receive_the_passthrough);
                     Toast.makeText(appContext, str+action, Toast.LENGTH_SHORT).show();
                     break;
-
+                }
+                // add other events in case you are interested in
                 default:
                     break;
                 }

@@ -596,7 +596,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
             String username = null;
             //群组消息
             if(message.getChatType() == ChatType.GroupChat){
-                username = message.getFrom();
+                username = message.getTo();
             }
             else{
                 //单聊消息
