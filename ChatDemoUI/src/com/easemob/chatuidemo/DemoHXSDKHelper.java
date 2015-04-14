@@ -13,10 +13,11 @@
  */
 package com.easemob.chatuidemo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.widget.Toast;
@@ -61,12 +62,28 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     private Map<String, User> contactList;
     private CallReceiver callReceiver;
     
+    /**
+     * 用来记录foreground Activity
+     */
+    private List<Activity> activityList = new ArrayList<Activity>();
+    
+    public void pushActivity(Activity activity){
+        if(!activityList.contains(activity)){
+            activityList.add(0,activity); 
+        }
+    }
+    
+    public void popActivity(Activity activity){
+        activityList.remove(activity);
+    }
+    
     @Override
     protected void initHXOptions(){
         super.initHXOptions();
 
         // you can also get EMChatOptions to set related SDK options
         // EMChatOptions options = EMChatManager.getInstance().getChatOptions();
+        
     }
 
     @Override
@@ -79,33 +96,39 @@ public class DemoHXSDKHelper extends HXSDKHelper{
 
         //注册通话广播接收者
         appContext.registerReceiver(callReceiver, callFilter);    
+        //注册消息事件监听
         initEventListener();
     }
     
     /**
-     * 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，消息将不会进一步传递。
-     * 后加入的事件监听会先收到事件的通知
-     * 
-     * 如果收到的事件，能够被处理并且不需要其他的监听再处理，可以返回true，否则返回false
-     * 
-     * 由于这个是全局的监听，可以处理其他监听漏过来的事件。
+     * 全局事件监听
+     * 因为可能会有UI页面先处理到这个消息，所以一般如果UI页面已经处理，这里就不需要再次处理
+     * activityList.size() <= 0 意味着所有页面都已经在后台运行，或者已经离开Activity Stack
      */
     protected void initEventListener() {
         eventListener = new EMEventListener() {
             
             @Override
-            public boolean onEvent(EMNotifierEvent event) {
-                EMMessage message = (EMMessage)event.getData();
-                EMLog.d(TAG, "收到消息, messge type : " + event.getType() + ",id : " + message.getMsgId());
+            public void onEvent(EMNotifierEvent event) {
                 
-                switch (event.getType()) {
-                case TypeNormalMessage:
+                switch (event.getEvent()) {
+                case EventNewMessage:
+                {
+                    EMMessage message = (EMMessage)event.getData();
+                    EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
+                    
                     //应用在后台，不需要刷新UI,通知栏提示新消息
-                    if(!EasyUtils.isAppRunningForeground(appContext)){
+                    if(activityList.size() <= 0){
                         HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
                     }
+
                     break;
-                case TypeCMD:
+                }
+                case EventNewCMDMessage:
+                {
+                    EMMessage message = (EMMessage)event.getData();
+                    EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
+                    
                     EMLog.d(TAG, "收到透传消息");
                     //获取消息body
                     CmdMessageBody cmdMsgBody = (CmdMessageBody) message.getBody();
@@ -117,18 +140,12 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                     String str = appContext.getString(R.string.receive_the_passthrough);
                     Toast.makeText(appContext, str+action, Toast.LENGTH_SHORT).show();
                     break;
-                case TypeDeliveryAck:
-                    message.setDelivered(true);
-                    break;
-                case TypeReadAck:
-                    message.setAcked(true);
-                    break;
-
+                }
+                // add other events in case you are interested in
                 default:
                     break;
                 }
                 
-                return false;
             }
         };
         

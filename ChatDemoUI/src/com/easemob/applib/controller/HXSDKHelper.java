@@ -229,6 +229,8 @@ public abstract class HXSDKHelper {
         
         notifier = createNotifier();
         notifier.init(appContext);
+        
+        notifier.setNotificationInfoProvider(getNotificationListener());
     }
     
     /**

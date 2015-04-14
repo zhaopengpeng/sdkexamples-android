@@ -41,6 +41,7 @@ import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -82,6 +83,7 @@ import com.easemob.chat.TextMessageBody;
 import com.easemob.chat.VideoMessageBody;
 import com.easemob.chat.VoiceMessageBody;
 import com.easemob.chatuidemo.DemoApplication;
+import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ExpressionAdapter;
 import com.easemob.chatuidemo.adapter.ExpressionPagerAdapter;
@@ -197,12 +199,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		setContentView(R.layout.activity_chat);
 		initView();
 		setUpView();
-		// 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，事件将不会进一步传递。
-		// 后加入的事件监听会先收到事件的通知
-		EMChatManager.getInstance().registerEventListener(
-				this,
-				new EMNotifierEvent.EventType[] { EMNotifierEvent.EventType.TypeNormalMessage,
-						EMNotifierEvent.EventType.TypeDeliveryAck, EMNotifierEvent.EventType.TypeReadAck });
 	}
 
 	/**
@@ -311,7 +307,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	}
 
 	private void setUpView() {
-		activityInstance = this;
 		iv_emoticons_normal.setOnClickListener(this);
 		iv_emoticons_checked.setOnClickListener(this);
 		// position = getIntent().getIntExtra("position", -1);
@@ -589,61 +584,61 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	}
 
 	/**
-	 * 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，消息将不会进一步传递。
-	 * 后加入的事件监听会先收到事件的通知
+	 * 事件监听
 	 * 
-	 * 如果收到的事件，能够被处理并且不需要其他的监听再处理，可以返回true，否则返回false
+	 * see {@link EMNotifierEvent}
 	 */
 	@Override
-	public boolean onEvent(EMNotifierEvent event) {
-		// 获取到message
-		EMMessage message = (EMMessage) event.getData();
-		String from = message.getFrom();
-		switch (event.getType()) {
-		case TypeNormalMessage:
-			// ignore any message sent in background,since the global listener
-			// will catch this event and handle it
-			if (!EasyUtils.isAppRunningForeground(this)) {
-				return false;
+	public void onEvent(EMNotifierEvent event) {
+		switch (event.getEvent()) {
+		case EventNewMessage: {
+			// 获取到message
+			EMMessage message = (EMMessage) event.getData();
+
+			String username = null;
+			// 群组消息
+			if (message.getChatType() == ChatType.GroupChat) {
+				username = message.getTo();
+			} else {
+				// 单聊消息
+				username = message.getFrom();
 			}
 
-			// 可能会存在消息来时，聊天页面在，main页面不在的情况
-			if (message.getChatType() == ChatType.GroupChat) { // 群组消息
-				if (message.getTo().equals(getToChatUsername())) {
-					refreshUIWithNewMessage();
-					return true;
-				}
-			} else { // 单聊消息
-				if (from.equals(getToChatUsername())) {
-					refreshUIWithNewMessage();
-					return true;
-				}
+			// 如果是当前会话的消息，刷新聊天页面
+			if (username.equals(getToChatUsername())) {
+				refreshUIWithNewMessage();
+				// 声音和震动提示有新消息
+				HXSDKHelper.getInstance().getNotifier().viberateAndPlayTone(message);
+			} else {
+				// 如果消息不是和当前聊天ID的消息
+				HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
 			}
-
-			// 声音和震动提示有新消息
-			HXSDKHelper.getInstance().getNotifier().viberateAndPlayTone(message);
 
 			break;
-		case TypeDeliveryAck:
-			if (message != null) {
-				message.setDelivered(true);
-			}
+		}
+		case EventDeliveryAck: {
+			// 获取到message
+			EMMessage message = (EMMessage) event.getData();
 			refreshUI();
-			return true;
-
-		case TypeReadAck:
-			// 把message设为已读
-			if (message != null) {
-				message.setAcked(true);
-			}
+			break;
+		}
+		case EventReadAck: {
+			// 获取到message
+			EMMessage message = (EMMessage) event.getData();
 			refreshUI();
-			return true;
-
+			break;
+		}
+		case EventOfflineMessage: {
+			// a list of offline messages
+			// List<EMMessage> offlineMessages = (List<EMMessage>)
+			// event.getData();
+			refreshUI();
+			break;
+		}
 		default:
 			break;
 		}
 
-		return false;
 	}
 
 	private void refreshUIWithNewMessage() {
@@ -1247,17 +1242,40 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		EMChatManager.getInstance().unregisterEventListener(this);
-		activityInstance = null;
 		EMGroupManager.getInstance().removeGroupChangeListener(groupListener);
 	}
 
 	@Override
 	protected void onResume() {
+		Log.i("ChatActivity", "onResume");
 		super.onResume();
 		if (group != null)
 			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
 		adapter.refresh();
+
+		DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
+		sdkHelper.pushActivity(this);
+		// register the event listener when enter the foreground
+		EMChatManager.getInstance().registerEventListener(
+				this,
+				new EMNotifierEvent.Event[] { EMNotifierEvent.Event.EventNewMessage,
+						EMNotifierEvent.Event.EventDeliveryAck, EMNotifierEvent.Event.EventReadAck });
+	}
+
+	@Override
+	protected void onStop() {
+		Log.i("ChatActivity", "onStop");
+
+		// unregister this event listener when this activity enters the
+		// background
+		EMChatManager.getInstance().unregisterEventListener(this);
+
+		DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
+
+		// 把此activity 从foreground activity 列表里移除
+		sdkHelper.popActivity(this);
+
+		super.onStop();
 	}
 
 	@Override
@@ -1338,8 +1356,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 */
 	@Override
 	public void onBackPressed() {
-		EMChatManager.getInstance().unregisterEventListener(this);
-
 		if (more.getVisibility() == View.VISIBLE) {
 			more.setVisibility(View.GONE);
 			iv_emoticons_normal.setVisibility(View.VISIBLE);

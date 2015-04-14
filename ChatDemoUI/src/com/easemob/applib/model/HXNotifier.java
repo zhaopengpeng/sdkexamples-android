@@ -200,7 +200,7 @@ public class HXNotifier {
                 msgIntent = notificationInfoProvider.getLaunchIntent(message);
             }
 
-            PendingIntent pendingIntent = PendingIntent.getActivity(appContext, notifyID, msgIntent,Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivity(appContext, notifyID, msgIntent,PendingIntent.FLAG_UPDATE_CURRENT);
 
             // prepare latest event info section
             notificationNum++;
@@ -234,10 +234,6 @@ public class HXNotifier {
                 notificationManager.notify(foregroundNotifyID, notification);
                 notificationManager.cancel(foregroundNotifyID);
             } else {
-                try {
-                    notificationManager.cancel(notifyID);
-                } catch (Exception e) {
-                }
                 notificationManager.notify(notifyID, notification);
             }
 
@@ -320,9 +316,9 @@ public class HXNotifier {
 
 
     /**
-     * 设置通知栏相关事件listener
+     * 设置NotificationInfoProvider
      * 
-     * @param listener
+     * @param provider
      */
     public void setNotificationInfoProvider(HXNotificationInfoProvider provider) {
         notificationInfoProvider = provider;
