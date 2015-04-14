@@ -355,10 +355,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		// 显示消息
 		listView.setAdapter(adapter);
 		listView.setOnScrollListener(new ListScrollListener());
-		int count = listView.getCount();
-		if (count > 0) {
-			listView.setSelection(count - 1);
-		}
+		adapter.refreshSelectLast();
 
 		listView.setOnTouchListener(new OnTouchListener() {
 
@@ -385,7 +382,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			// 显示发送要转发的消息
 			forwardMessage(forward_msg_id);
 		}
-
 	}
 
 	
@@ -411,8 +407,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			case RESULT_CODE_DELETE: // 删除消息
 				EMMessage deleteMsg = (EMMessage) adapter.getItem(data.getIntExtra("position", -1));
 				conversation.removeMessage(deleteMsg.getMsgId());
-				adapter.refresh();
-				listView.setSelection(data.getIntExtra("position", adapter.getCount()) - 1);
+				adapter.refreshSeekTo(data.getIntExtra("position", adapter.getCount()) - 1);
 				break;
 
 			case RESULT_CODE_FORWARD: // 转发消息
@@ -647,8 +642,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	private void refreshUIWithNewMessage(){
 	    runOnUiThread(new Runnable() {
             public void run() {
-                adapter.refresh();
-                listView.setSelection(listView.getCount() -1);
+                adapter.refreshSelectLast();
             }
         });
 	}
@@ -732,8 +726,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			// 把messgage加到conversation中
 			conversation.addMessage(message);
 			// 通知adapter有消息变动，adapter会根据加入的这条message显示消息和调用sdk的发送方法
-			adapter.refresh();
-			listView.setSelection(listView.getCount() - 1);
+			adapter.refreshSelectLast();
 			mEditTextContent.setText("");
 
 			setResult(RESULT_OK);
@@ -764,8 +757,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			message.addBody(body);
 
 			conversation.addMessage(message);
-			adapter.refresh();
-			listView.setSelection(listView.getCount() - 1);
+			adapter.refreshSelectLast();
 			setResult(RESULT_OK);
 			// send file
 			// sendVoiceSub(filePath, fileName, message);
@@ -795,8 +787,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		conversation.addMessage(message);
 
 		listView.setAdapter(adapter);
-		adapter.refresh();
-		listView.setSelection(listView.getCount() - 1);
+		adapter.refreshSelectLast();
 		setResult(RESULT_OK);
 		// more(more);
 	}
@@ -820,8 +811,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			message.addBody(body);
 			conversation.addMessage(message);
 			listView.setAdapter(adapter);
-			adapter.refresh();
-			listView.setSelection(listView.getCount() - 1);
+			adapter.refreshSelectLast();
 			setResult(RESULT_OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -884,8 +874,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		message.setReceipt(toChatUsername);
 		conversation.addMessage(message);
 		listView.setAdapter(adapter);
-		adapter.notifyDataSetChanged();
-		listView.setSelection(listView.getCount() - 1);
+		adapter.refreshSelectLast();
 		setResult(RESULT_OK);
 
 	}
@@ -937,8 +926,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		message.addBody(body);
 		conversation.addMessage(message);
 		listView.setAdapter(adapter);
-		adapter.refresh();
-		listView.setSelection(listView.getCount() - 1);
+		adapter.refreshSelectLast();
 		setResult(RESULT_OK);
 	}
 
@@ -951,8 +939,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		// msg.setBackSend(true);
 		msg.status = EMMessage.Status.CREATE;
 
-		adapter.refresh();
-		listView.setSelection(resendPos);
+		adapter.refreshSeekTo(resendPos);
 	}
 
 	/**
@@ -1377,16 +1364,18 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			switch (scrollState) {
 			case OnScrollListener.SCROLL_STATE_IDLE:
 				if (view.getFirstVisiblePosition() == 0 && !isloading && haveMoreData) {
+					isloading = true;
 					loadmorePB.setVisibility(View.VISIBLE);
-					// sdk初始化加载的聊天记录为20条，到顶时去db里获取更多
+					// sdk初始化加载的聊天记录为20条，到顶时去db里获取更多					
 					List<EMMessage> messages;
+					EMMessage firstMsg = conversation.getAllMessages().get(0);
 					try {
 						// 获取更多messges，调用此方法的时候从db获取的messages
 						// sdk会自动存入到此conversation中
 						if (chatType == CHATTYPE_SINGLE)
-							messages = conversation.loadMoreMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
+							messages = conversation.loadMoreMsgFromDB(firstMsg.getMsgId(), pagesize);
 						else
-							messages = conversation.loadMoreGroupMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
+							messages = conversation.loadMoreGroupMsgFromDB(firstMsg.getMsgId(), pagesize);
 					} catch (Exception e1) {
 						loadmorePB.setVisibility(View.GONE);
 						return;
@@ -1397,8 +1386,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 					}
 					if (messages.size() != 0) {
 						// 刷新ui
-						adapter.notifyDataSetChanged();
-						listView.setSelection(messages.size() - 1);
+						if (messages.size() > 0) {
+							adapter.refreshSeekTo(messages.size() - 1);
+						}
 						if (messages.size() != pagesize)
 							haveMoreData = false;
 					} else {
