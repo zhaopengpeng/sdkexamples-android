@@ -203,30 +203,43 @@ public class MainActivity extends BaseActivity implements EMEventListener{
      */
 	@Override
     public void onEvent(EMNotifierEvent event) {
-	    switch (event.getType()) {
-        case TypeNormalMessage: //普通消息
+	    switch (event.getEvent()) {
+        case EventNewMessage: //普通消息
+        {
             EMMessage message = (EMMessage) event.getData();
             
             //提示新消息
             HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
 
-            runOnUiThread(new Runnable() {
-                public void run() {
-                    // 刷新bottom bar消息未读数
-                    updateUnreadLabel();
-                    if (currentTabIndex == 0) {
-                        // 当前页面如果为聊天历史页面，刷新此页面
-                        if (chatHistoryFragment != null) {
-                            chatHistoryFragment.refresh();
-                        }
-                    }
-                }
-            });
-            
+            refreshUI();
+            break;
+        }
+        
+        case EventOfflineMessage:
+        {
+            refreshUI();
+            break;
+        }
+        
         default:
             break;
         }
     }
+
+	private void refreshUI(){
+	    runOnUiThread(new Runnable() {
+            public void run() {
+                // 刷新bottom bar消息未读数
+                updateUnreadLabel();
+                if (currentTabIndex == 0) {
+                    // 当前页面如果为聊天历史页面，刷新此页面
+                    if (chatHistoryFragment != null) {
+                        chatHistoryFragment.refresh();
+                    }
+                }
+            }
+        });
+	}
 	
    @Override
     public void back(View view) {        
@@ -667,7 +680,7 @@ public class MainActivity extends BaseActivity implements EMEventListener{
         sdkHelper.pushActivity(this);
         
         // register the event listener when enter the foreground
-        EMChatManager.getInstance().registerEventListener(this,new EMNotifierEvent.EventType[]{EMNotifierEvent.EventType.TypeNormalMessage});
+        EMChatManager.getInstance().registerEventListener(this,new EMNotifierEvent.Event[]{EMNotifierEvent.Event.EventNewMessage});
 	}
 	
 	@Override

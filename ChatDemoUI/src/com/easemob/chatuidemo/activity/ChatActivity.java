@@ -587,10 +587,12 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
      */
     @Override
     public void onEvent(EMNotifierEvent event) {
-        //获取到message
-        EMMessage message = (EMMessage) event.getData();
-        switch (event.getType()) {
-        case TypeNormalMessage:
+        switch (event.getEvent()) {
+        case EventNewMessage:
+        {
+            //获取到message
+            EMMessage message = (EMMessage) event.getData();
+            
             String username = null;
             //群组消息
             if(message.getChatType() == ChatType.GroupChat){
@@ -612,14 +614,28 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
             }
 
             break;
-        case TypeDeliveryAck:
+        }
+        case EventDeliveryAck:
+        {
+            //获取到message
+            EMMessage message = (EMMessage) event.getData();
             refreshUI();
             break;
-
-        case TypeReadAck:
+        }
+        case EventReadAck:
+        {
+            //获取到message
+            EMMessage message = (EMMessage) event.getData();
             refreshUI();
             break;
-
+        }
+        case EventOfflineMessage:
+        {
+            //a list of offline messages 
+            //List<EMMessage> offlineMessages = (List<EMMessage>) event.getData();
+            refreshUI();
+            break;
+        }
         default:
             break;
         }
@@ -1241,9 +1257,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
         sdkHelper.pushActivity(this);
 		// register the event listener when enter the foreground
-        EMChatManager.getInstance().registerEventListener(this,new EMNotifierEvent.EventType[]{EMNotifierEvent.EventType.TypeNormalMessage
-                                                                                              ,EMNotifierEvent.EventType.TypeDeliveryAck
-                                                                                              ,EMNotifierEvent.EventType.TypeReadAck});
+        EMChatManager.getInstance().registerEventListener(this,new EMNotifierEvent.Event[]{EMNotifierEvent.Event.EventNewMessage
+                                                                                              ,EMNotifierEvent.Event.EventDeliveryAck
+                                                                                              ,EMNotifierEvent.Event.EventReadAck});
 	}
 
 	@Override
