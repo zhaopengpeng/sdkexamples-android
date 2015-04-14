@@ -18,6 +18,10 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.widget.Toast;
@@ -124,6 +128,8 @@ public class DemoHXSDKHelper extends HXSDKHelper{
 
                     break;
                 }
+                // below is just giving a example to show a cmd toast, the app should not follow this
+                // so be careful of this
                 case EventNewCMDMessage:
                 {
                     EMMessage message = (EMMessage)event.getData();
@@ -132,13 +138,32 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                     EMLog.d(TAG, "收到透传消息");
                     //获取消息body
                     CmdMessageBody cmdMsgBody = (CmdMessageBody) message.getBody();
-                    String action = cmdMsgBody.action;//获取自定义action
+                    final String action = cmdMsgBody.action;//获取自定义action
                     
                     //获取扩展属性 此处省略
                     //message.getStringAttribute("");
                     EMLog.d(TAG, String.format("透传消息：action:%s,message:%s", action,message.toString()));
-                    String str = appContext.getString(R.string.receive_the_passthrough);
-                    Toast.makeText(appContext, str+action, Toast.LENGTH_SHORT).show();
+                    final String str = appContext.getString(R.string.receive_the_passthrough);
+                    
+                    final String CMD_TOAST_BROADCAST = "easemob.demo.cmd.toast";
+                    IntentFilter cmdFilter = new IntentFilter(CMD_TOAST_BROADCAST);
+                    
+                    //注册通话广播接收者
+                    appContext.registerReceiver(new BroadcastReceiver(){
+
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            // TODO Auto-generated method stub
+                            Toast.makeText(appContext, intent.getStringExtra("cmd_value"), Toast.LENGTH_SHORT).show();
+                        }
+                        
+                    }, cmdFilter); 
+                    
+
+                    Intent broadcastIntent = new Intent(CMD_TOAST_BROADCAST);
+                    broadcastIntent.putExtra("cmd_value", str+action);
+                    appContext.sendBroadcast(broadcastIntent, null);
+                    
                     break;
                 }
                 // add other events in case you are interested in
