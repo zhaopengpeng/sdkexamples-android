@@ -111,17 +111,17 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             @Override
             public void onEvent(EMNotifierEvent event) {
                 EMMessage message = (EMMessage)event.getData();
-                EMLog.d(TAG, "收到消息, messge type : " + event.getType() + ",id : " + message.getMsgId());
+                EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
                 
-                switch (event.getType()) {
-                case TypeNormalMessage:
+                switch (event.getEvent()) {
+                case EventNewMessage:
                     //应用在后台，不需要刷新UI,通知栏提示新消息
                     if(activityList.size() <= 0){
                         HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
                     }
 
                     break;
-                case TypeCMD:
+                case EventNewCMDMessage:
                     EMLog.d(TAG, "收到透传消息");
                     //获取消息body
                     CmdMessageBody cmdMsgBody = (CmdMessageBody) message.getBody();
