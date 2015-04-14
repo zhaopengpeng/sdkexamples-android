@@ -1366,13 +1366,14 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 					loadmorePB.setVisibility(View.VISIBLE);
 					// sdk初始化加载的聊天记录为20条，到顶时去db里获取更多					
 					List<EMMessage> messages;
+					EMMessage firstMsg = conversation.getAllMessages().get(0);
 					try {
 						// 获取更多messges，调用此方法的时候从db获取的messages
 						// sdk会自动存入到此conversation中
 						if (chatType == CHATTYPE_SINGLE)
-							messages = conversation.loadMoreMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
+							messages = conversation.loadMoreMsgFromDB(firstMsg.getMsgId(), pagesize);
 						else
-							messages = conversation.loadMoreGroupMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
+							messages = conversation.loadMoreGroupMsgFromDB(firstMsg.getMsgId(), pagesize);
 					} catch (Exception e1) {
 						loadmorePB.setVisibility(View.GONE);
 						return;
