@@ -384,7 +384,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			// 显示发送要转发的消息
 			forwardMessage(forward_msg_id);
 		}
-
+		adapter.refreshSelectLast();
 	}
 
 	
@@ -646,8 +646,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	private void refreshUIWithNewMessage(){
 	    runOnUiThread(new Runnable() {
             public void run() {
-                adapter.refresh();
-                listView.setSelection(listView.getCount() -1);
+                adapter.refreshSelectLast();
             }
         });
 	}
@@ -883,7 +882,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		message.setReceipt(toChatUsername);
 		conversation.addMessage(message);
 		listView.setAdapter(adapter);
-		adapter.notifyDataSetChanged();
+		adapter.refresh();
 		listView.setSelection(listView.getCount() - 1);
 		setResult(RESULT_OK);
 
@@ -1376,7 +1375,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			case OnScrollListener.SCROLL_STATE_IDLE:
 				if (view.getFirstVisiblePosition() == 0 && !isloading && haveMoreData) {
 					loadmorePB.setVisibility(View.VISIBLE);
-					// sdk初始化加载的聊天记录为20条，到顶时去db里获取更多
+					// sdk初始化加载的聊天记录为20条，到顶时去db里获取更多					
 					List<EMMessage> messages;
 					try {
 						// 获取更多messges，调用此方法的时候从db获取的messages
@@ -1395,8 +1394,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 					}
 					if (messages.size() != 0) {
 						// 刷新ui
-						adapter.notifyDataSetChanged();
-						listView.setSelection(messages.size() - 1);
+						if (messages.size() > 0) {
+							adapter.refreshSeekTo(messages.size() - 1);
+						}
 						if (messages.size() != pagesize)
 							haveMoreData = false;
 					} else {
