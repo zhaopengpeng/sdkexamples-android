@@ -114,6 +114,10 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 	 * 诊断
 	 */
 	private LinearLayout llDiagnose;
+	/**
+	 * iOS离线推送昵称
+	 */
+	private LinearLayout pushNick;
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_conversation_settings, container, false);
@@ -147,6 +151,8 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 		
 		blacklistContainer = (LinearLayout) getView().findViewById(R.id.ll_black_list);
 		llDiagnose=(LinearLayout) getView().findViewById(R.id.ll_diagnose);
+		pushNick=(LinearLayout) getView().findViewById(R.id.ll_set_push_nick);
+		
 		blacklistContainer.setOnClickListener(this);
 		rl_switch_notification.setOnClickListener(this);
 		rl_switch_sound.setOnClickListener(this);
@@ -154,6 +160,7 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 		rl_switch_speaker.setOnClickListener(this);
 		logoutBtn.setOnClickListener(this);
 		llDiagnose.setOnClickListener(this);
+		pushNick.setOnClickListener(this);
 		
 		chatOptions = EMChatManager.getInstance().getChatOptions();
 		
@@ -282,6 +289,9 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 			break;
 		case R.id.ll_diagnose:
 			startActivity(new Intent(getActivity(), DiagnoseActivity.class));
+			break;
+		case R.id.ll_set_push_nick:
+			startActivity(new Intent(getActivity(), OfflinePushNickActivity.class));
 			break;
 		default:
 			break;

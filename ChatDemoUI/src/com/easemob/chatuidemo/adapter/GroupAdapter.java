@@ -35,81 +35,92 @@ import com.easemob.chatuidemo.R;
 public class GroupAdapter extends ArrayAdapter<EMGroup> {
 
 	private LayoutInflater inflater;
-	private String str;
+	private String newGroup;
+	private String addPublicGroup;
 
 	public GroupAdapter(Context context, int res, List<EMGroup> groups) {
 		super(context, res, groups);
 		this.inflater = LayoutInflater.from(context);
-		str = context.getResources().getString(R.string.The_new_group_chat);
+		newGroup = context.getResources().getString(R.string.The_new_group_chat);
+		addPublicGroup = context.getResources().getString(R.string.add_public_group_chat);
 	}
-	
+
 	@Override
 	public int getViewTypeCount() {
-		return 3;
+		return 4;
 	}
-	
+
 	@Override
 	public int getItemViewType(int position) {
-	    if(position == 0){
-	        return 0;
-	    }else if(position == getCount() - 1){ 
-	        return 1;
-	    }else{
-	        return 2;
-	    }
+		if (position == 0) {
+			return 0;
+		} else if (position == 1) {
+			return 1;
+		} else if (position == 2) {
+			return 2;
+		} else {
+			return 3;
+		}
 	}
-	
+
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-	    if(getItemViewType(position) == 0){
-	        if (convertView == null) {
-                convertView = inflater.inflate(R.layout.search_bar_with_padding, null);
-            }
-    	    final EditText query = (EditText) convertView.findViewById(R.id.query);
-            final ImageButton clearSearch = (ImageButton) convertView.findViewById(R.id.search_clear);
-            query.addTextChangedListener(new TextWatcher() {
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    getFilter().filter(s);
-                    if (s.length() > 0) {
-                        clearSearch.setVisibility(View.VISIBLE);
-                    } else {
-                        clearSearch.setVisibility(View.INVISIBLE);
-                    }
-                }
-    
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
-    
-                public void afterTextChanged(Editable s) {
-                }
-            });
-            clearSearch.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    query.getText().clear();
-                }
-            });
-	    }else if(getItemViewType(position) == 1){
+		if (getItemViewType(position) == 0) {
+			if (convertView == null) {
+				convertView = inflater.inflate(R.layout.search_bar_with_padding, null);
+			}
+			final EditText query = (EditText) convertView.findViewById(R.id.query);
+			final ImageButton clearSearch = (ImageButton) convertView.findViewById(R.id.search_clear);
+			query.addTextChangedListener(new TextWatcher() {
+				public void onTextChanged(CharSequence s, int start, int before, int count) {
+					getFilter().filter(s);
+					if (s.length() > 0) {
+						clearSearch.setVisibility(View.VISIBLE);
+					} else {
+						clearSearch.setVisibility(View.INVISIBLE);
+					}
+				}
+
+				public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+				}
+
+				public void afterTextChanged(Editable s) {
+				}
+			});
+			clearSearch.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					query.getText().clear();
+				}
+			});
+		} else if (getItemViewType(position) == 1) {
 			if (convertView == null) {
 				convertView = inflater.inflate(R.layout.row_add_group, null);
 			}
-			((ImageView)convertView.findViewById(R.id.avatar)).setImageResource(R.drawable.roominfo_add_btn);
-			((TextView)convertView.findViewById(R.id.name)).setText(str);
+			((ImageView) convertView.findViewById(R.id.avatar)).setImageResource(R.drawable.create_group);
+			((TextView) convertView.findViewById(R.id.name)).setText(newGroup);
+		} else if (getItemViewType(position) == 2) {
+			if (convertView == null) {
+				convertView = inflater.inflate(R.layout.row_add_group, null);
+			}
+			((ImageView) convertView.findViewById(R.id.avatar)).setImageResource(R.drawable.add_public_group);
+			((TextView) convertView.findViewById(R.id.name)).setText(addPublicGroup);
+			((TextView) convertView.findViewById(R.id.header)).setVisibility(View.VISIBLE);
+
 		} else {
 			if (convertView == null) {
 				convertView = inflater.inflate(R.layout.row_group, null);
 			}
-			
-			((TextView)convertView.findViewById(R.id.name)).setText(getItem(position-1).getGroupName());
-			
+			((TextView) convertView.findViewById(R.id.name)).setText(getItem(position - 3).getGroupName());
+
 		}
-		
+
 		return convertView;
 	}
 
 	@Override
 	public int getCount() {
-		return super.getCount() + 2;
+		return super.getCount() + 3;
 	}
 
 }

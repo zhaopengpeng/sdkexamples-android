@@ -74,11 +74,14 @@
     <string name="setting">setting</string>
     <string name="now_refresh_list">refreshing contact list</string>
     <string name="Application_and_notify">invitation and notification</string>
+    <string name="change_push_nickname">change the push nickname</string>
+    <string name="save_new_nickname">save new nickname</string>
     <string name="group_chat">group chat</string>
     <string name="add_friend">add friends</string>
     <string name="search">search</string>
     <string name="black_item">black list</string>
     <string name="diagnose">diagnose</string>
+    <string name="push_nick">iOS offline push nick</string>
     <string name="Current_version">current version</string>
     <string name="Not_Set">not set</string>
     <string name="Upload_the_log">uploading the log</string>

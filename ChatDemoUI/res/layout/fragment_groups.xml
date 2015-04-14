@@ -23,16 +23,6 @@
             android:textColor="@color/bottom_text_color_normal"
             android:textSize="18sp" />
         
-        <ImageView
-            android:id="@+id/iv_new_contact"
-            android:layout_width="48dp"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:background="@drawable/common_tab_bg"
-            android:clickable="true"
-            android:onClick="onPublicGroups"
-            android:scaleType="centerInside"
-            android:src="@drawable/add" />
     </RelativeLayout>
 
     <ListView
