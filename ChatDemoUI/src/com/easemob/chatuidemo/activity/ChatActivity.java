@@ -197,6 +197,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chat);
+		activityInstance = this;
 		initView();
 		setUpView();
 	}
@@ -1243,6 +1244,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		activityInstance = null;
 		EMGroupManager.getInstance().removeGroupChangeListener(groupListener);
 	}
 
