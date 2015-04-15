@@ -15,30 +15,74 @@ package com.easemob.chatuidemo.activity;
 
 import java.util.List;
 
-import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.GroupAdapter;
+import com.easemob.exceptions.EaseMobException;
+import com.easemob.util.EMLog;
 
 public class GroupsActivity extends BaseActivity {
+	public static final String TAG = "GroupsActivity";
 	private ListView groupListView;
 	protected List<EMGroup> grouplist;
 	private GroupAdapter groupAdapter;
 	private InputMethodManager inputMethodManager;
 	public static GroupsActivity instance;
+	private SyncListener syncListener;
+	private ProgressDialog pd;
+	
+	class SyncListener implements HXSDKHelper.SyncListener {
+		@Override
+		public void onSyncSucess(final boolean success) {
+			EMLog.d(TAG, "onSyncGroupsFinish success:" + success);
+			runOnUiThread(new Runnable() {
+				public void run() {
+					if (pd != null) {
+						pd.hide();
+					}
+					if (success) {
+						RelativeLayout syncButtonWrapper = (RelativeLayout)findViewById(R.id.wrapper_sync_groups_from_server);
+						syncButtonWrapper.setVisibility(View.GONE);
+						groupListView.setVisibility(View.VISIBLE);
+					} else {
+						if (!GroupsActivity.this.isFinishing()) {
+							String s1 = getResources().getString(R.string.Failed_to_get_group_chat_information);
+							Toast.makeText(GroupsActivity.this, s1, 1).show();
+						}
+						return;
+					}
+					if (groupListView != null && groupAdapter != null) {
+						grouplist = EMGroupManager.getInstance().getAllGroups();
+						groupAdapter = new GroupAdapter(GroupsActivity.this, 1, grouplist);
+						groupListView.setAdapter(groupAdapter);
+						groupAdapter.notifyDataSetChanged();
+					}
+				}
+			});
+		}
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +126,54 @@ public class GroupsActivity extends BaseActivity {
 				return false;
 			}
 		});
+		
+		syncListener = new SyncListener();
+		HXSDKHelper.getInstance().addSyncGroupListener(syncListener);
+		
+		EMLog.d(TAG, "isSyncingGroupsFromServer:" + HXSDKHelper.getInstance().isSyncingGroupsFromServer());
+		
+		if (!HXSDKHelper.getInstance().isSyncingGroupsFromServer() && !HXPreferenceUtils.getInstance().getSettingSyncGroupsFinished()) {
+			RelativeLayout syncButtonWrapper = (RelativeLayout)findViewById(R.id.wrapper_sync_groups_from_server);
+			syncButtonWrapper.setVisibility(View.VISIBLE);
+			groupListView.setVisibility(View.GONE);
+		}
+
+		// 如果之前更新群聊没有成功，需要重新更新群聊信息
+		Button syncButton = (Button)findViewById(R.id.sync_groups_from_server);
+		syncButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				initProgressDialog();
+				if (pd != null) {
+					pd.show();
+				}
+				new Thread() {
+					@Override
+					public void run() {
+						try {
+							HXSDKHelper.getInstance().getGroupsFromServer();
+							HXPreferenceUtils.getInstance().setSettingSyncGroupsFinished(true);
+						} catch (EaseMobException e) {
+							e.printStackTrace();
+						}
+					}
+				}.start();
+			}
+		});
+	}
+	
+	private void initProgressDialog() {
+		if (pd != null) {
+			return;
+		}
+		pd = new ProgressDialog(this);
+		pd.setMessage(getString(R.string.Sync_Groups_From_Server));
+		pd.setCanceledOnTouchOutside(false);
+		pd.setOnCancelListener(new OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog) {
+			}
+		});
 	}
 	
 	/**
@@ -107,6 +199,10 @@ public class GroupsActivity extends BaseActivity {
 	
 	@Override
 	protected void onDestroy() {
+		if (syncListener != null) {
+			HXSDKHelper.getInstance().removeSyncGroupListener(syncListener);
+			syncListener = null;
+		}
 		super.onDestroy();
 		instance = null;
 	}

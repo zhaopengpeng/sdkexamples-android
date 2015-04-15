@@ -15,6 +15,8 @@ package com.easemob.applib.utils;
 
 import java.util.Locale;
 
+import com.easemob.chatuidemo.DemoApplication;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -31,6 +33,9 @@ public class HXPreferenceUtils {
 	private String SHARED_KEY_SETTING_SOUND = "shared_key_setting_sound";
 	private String SHARED_KEY_SETTING_VIBRATE = "shared_key_setting_vibrate";
 	private String SHARED_KEY_SETTING_SPEAKER = "shared_key_setting_speaker";
+	private String SHARED_KEY_SETTING_SYNC_GROUPS_FINISHED = "shared_key_setting_sync_groups_finished";
+	private String SHARED_KEY_SETTING_SYNC_CONTACTS_FINISHED = "shared_key_setting_sync_contacts_finished";
+	private String SHARED_KEY_SETTING_SYNC_BLACK_LIST_FINISHED = "shared_key_setting_sync_blacklist_finished";
 
 	private HXPreferenceUtils(Context cxt) {
 		mSharedPreferences = cxt.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
@@ -94,4 +99,36 @@ public class HXPreferenceUtils {
 		return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_SPEAKER, true);
 	}
 
+	public void setSettingSyncGroupsFinished(boolean paramBoolean) {
+		String username = DemoApplication.getInstance().getUserName();
+		editor.putBoolean(SHARED_KEY_SETTING_SYNC_GROUPS_FINISHED + " " + username, paramBoolean);
+		editor.commit();
+	}
+	
+	public boolean getSettingSyncGroupsFinished() {
+		String username = DemoApplication.getInstance().getUserName();
+		return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_SYNC_GROUPS_FINISHED + " " + username, false);		
+	}
+
+	public void setSettingSyncContactsFinished(boolean paramBoolean) {
+		String username = DemoApplication.getInstance().getUserName();
+		editor.putBoolean(SHARED_KEY_SETTING_SYNC_CONTACTS_FINISHED + " " + username, paramBoolean);
+		editor.commit();
+	}
+	
+	public boolean getSettingSyncContactsFinished() {
+		String username = DemoApplication.getInstance().getUserName();
+		return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_SYNC_CONTACTS_FINISHED + " " + username, false);		
+	}
+
+	public void setSettingSyncBlackListFinished(boolean paramBoolean) {
+		String username = DemoApplication.getInstance().getUserName();
+		editor.putBoolean(SHARED_KEY_SETTING_SYNC_BLACK_LIST_FINISHED + " " + username, paramBoolean);
+		editor.commit();
+	}
+	
+	public boolean getSettingSyncBlackListFinished() {
+		String username = DemoApplication.getInstance().getUserName();
+		return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_SYNC_BLACK_LIST_FINISHED + " " + username, false);		
+	}
 }

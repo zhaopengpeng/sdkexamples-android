@@ -33,12 +33,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMMessage;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
+import com.easemob.chatuidemo.activity.GroupsActivity.SyncListener;
 import com.easemob.chatuidemo.adapter.ChatAllHistoryAdapter;
 import com.easemob.chatuidemo.db.InviteMessgeDao;
 
@@ -46,7 +49,7 @@ import com.easemob.chatuidemo.db.InviteMessgeDao;
  * 显示所有会话记录，比较简单的实现，更好的可能是把陌生人存入本地，这样取到的聊天记录是可控的
  * 
  */
-public class ChatAllHistoryFragment extends Fragment {
+public class ChatAllHistoryFragment extends Fragment implements View.OnClickListener {
 
 	private InputMethodManager inputMethodManager;
 	private ListView listView;
@@ -54,52 +57,118 @@ public class ChatAllHistoryFragment extends Fragment {
 	private EditText query;
 	private ImageButton clearSearch;
 	public RelativeLayout errorItem;
+	public RelativeLayout errorUpdateContacts;
+	public RelativeLayout errorUpdateGroups;
+	public RelativeLayout errorUpdateBlackList;
 	public TextView errorText;
 	private boolean hidden;
 	private List<EMConversation> conversationList = new ArrayList<EMConversation>();
 
+	class ContactSyncListener implements HXSDKHelper.SyncListener {
+		@Override
+		public void onSyncSucess(final boolean success) {
+			if (!success && errorUpdateContacts != null && getActivity() != null) {
+				getActivity().runOnUiThread(new Runnable() {
+					public void run() {
+						errorUpdateContacts.setVisibility(View.VISIBLE);
+					}
+				});
+			}
+		}
+	}
+	
+	class GroupSyncListener implements HXSDKHelper.SyncListener {
+		@Override
+		public void onSyncSucess(final boolean success) {
+			if (!success && errorUpdateGroups != null && getActivity() != null) {
+				getActivity().runOnUiThread(new Runnable() {
+					public void run() {
+						errorUpdateGroups.setVisibility(View.VISIBLE);
+					}
+				});
+			}
+		}
+	}
+	
+	class BlackListSyncListener implements HXSDKHelper.SyncListener {
+		@Override
+		public void onSyncSucess(final boolean success) {
+			if (!success && errorUpdateBlackList != null && getActivity() != null) {
+				getActivity().runOnUiThread(new Runnable() {
+					public void run() {
+						errorUpdateBlackList.setVisibility(View.VISIBLE);
+					}
+				});
+			}
+		}
+	}
+	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_conversation_history, container, false);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		return inflater.inflate(R.layout.fragment_conversation_history,
+				container, false);
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		if(savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false))
-            return;
-		inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (savedInstanceState != null
+				&& savedInstanceState.getBoolean("isConflict", false))
+			return;
+		inputMethodManager = (InputMethodManager) getActivity()
+				.getSystemService(Context.INPUT_METHOD_SERVICE);
+
 		errorItem = (RelativeLayout) getView().findViewById(R.id.rl_error_item);
 		errorText = (TextView) errorItem.findViewById(R.id.tv_connect_errormsg);
+
+		TextView text = null;
+		errorUpdateContacts = (RelativeLayout) getView().findViewById(R.id.rl_sync_contacts_error);
+		text = (TextView) errorUpdateContacts.findViewById(R.id.tv_connect_errormsg);
+		text.setText(getActivity().getResources().getString(R.string.update_contact_list_failed));
+		errorUpdateContacts.setOnClickListener(this);
 		
+		errorUpdateGroups = (RelativeLayout) getView().findViewById(R.id.rl_sync_groups_error);
+		text = (TextView) errorUpdateGroups.findViewById(R.id.tv_connect_errormsg);
+		text.setText(getActivity().getResources().getString(R.string.update_groups_failed));
+		errorUpdateGroups.setOnClickListener(this);
+
+		errorUpdateBlackList = (RelativeLayout) getView().findViewById(R.id.rl_sync_black_list_error);
+		text = (TextView) errorUpdateBlackList.findViewById(R.id.tv_connect_errormsg);
+		text.setText(getActivity().getResources().getString(R.string.update_black_list_failed));
+		errorUpdateBlackList.setOnClickListener(this);
+
 		conversationList.addAll(loadConversationsWithRecentChat());
 		listView = (ListView) getView().findViewById(R.id.list);
 		adapter = new ChatAllHistoryAdapter(getActivity(), 1, conversationList);
 		// 设置adapter
 		listView.setAdapter(adapter);
-				
-		
-		final String st2 = getResources().getString(R.string.Cant_chat_with_yourself);
+
+		final String st2 = getResources().getString(
+				R.string.Cant_chat_with_yourself);
 		listView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
 				EMConversation conversation = adapter.getItem(position);
 				String username = conversation.getUserName();
-				if (username.equals(DemoApplication.getInstance().getUserName()))
+				if (username
+						.equals(DemoApplication.getInstance().getUserName()))
 					Toast.makeText(getActivity(), st2, 0).show();
 				else {
-				    // 进入聊天页面
-				    Intent intent = new Intent(getActivity(), ChatActivity.class);
-				    if(conversation.isGroup()){
-				        // it is group chat
-                        intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
-                        intent.putExtra("groupId", username);
-				    }else{
-				        // it is single chat
-                        intent.putExtra("userId", username);
-				    }
-				    startActivity(intent);
+					// 进入聊天页面
+					Intent intent = new Intent(getActivity(),
+							ChatActivity.class);
+					if (conversation.isGroup()) {
+						// it is group chat
+						intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+						intent.putExtra("groupId", username);
+					} else {
+						// it is single chat
+						intent.putExtra("userId", username);
+					}
+					startActivity(intent);
 				}
 			}
 		});
@@ -123,7 +192,8 @@ public class ChatAllHistoryFragment extends Fragment {
 		// 搜索框中清除button
 		clearSearch = (ImageButton) getView().findViewById(R.id.search_clear);
 		query.addTextChangedListener(new TextWatcher() {
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
+			public void onTextChanged(CharSequence s, int start, int before,
+					int count) {
 				adapter.getFilter().filter(s);
 				if (s.length() > 0) {
 					clearSearch.setVisibility(View.VISIBLE);
@@ -132,7 +202,8 @@ public class ChatAllHistoryFragment extends Fragment {
 				}
 			}
 
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
 			}
 
 			public void afterTextChanged(Editable s) {
@@ -145,30 +216,52 @@ public class ChatAllHistoryFragment extends Fragment {
 				hideSoftKeyboard();
 			}
 		});
+		
+		HXSDKHelper.getInstance().addSyncGroupListener(new GroupSyncListener());
+		HXSDKHelper.getInstance().addSyncContactListener(new ContactSyncListener());
+		HXSDKHelper.getInstance().addSyncBlackListListener(new BlackListSyncListener());
+		
+		if (HXPreferenceUtils.getInstance().getSettingSyncGroupsFinished() == false &&
+				HXSDKHelper.getInstance().isSyncingGroupsFromServer() == false) {
+			showSyncGroupError(true);
+		}
+		if (HXPreferenceUtils.getInstance().getSettingSyncContactsFinished() == false &&
+				HXSDKHelper.getInstance().isSyncingContactsFromServer() == false) {
+			showSyncContactError(true);
+		}
+		if (HXPreferenceUtils.getInstance().getSettingSyncBlackListFinished() == false &&
+				HXSDKHelper.getInstance().isSyncingBlackListFromServer() == false) {
+			showSyncBlackListError(true);
+		}
 
 	}
 
 	void hideSoftKeyboard() {
 		if (getActivity().getWindow().getAttributes().softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN) {
 			if (getActivity().getCurrentFocus() != null)
-				inputMethodManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),
+				inputMethodManager.hideSoftInputFromWindow(getActivity()
+						.getCurrentFocus().getWindowToken(),
 						InputMethodManager.HIDE_NOT_ALWAYS);
 		}
 	}
+
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		// if(((AdapterContextMenuInfo)menuInfo).position > 0){ m,
-		getActivity().getMenuInflater().inflate(R.menu.delete_message, menu); 
+		getActivity().getMenuInflater().inflate(R.menu.delete_message, menu);
 		// }
 	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.delete_message) {
-			EMConversation tobeDeleteCons = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
+			EMConversation tobeDeleteCons = adapter
+					.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
 			// 删除此会话
-			EMChatManager.getInstance().deleteConversation(tobeDeleteCons.getUserName(), tobeDeleteCons.isGroup());
+			EMChatManager.getInstance().deleteConversation(
+					tobeDeleteCons.getUserName(), tobeDeleteCons.isGroup());
 			InviteMessgeDao inviteMessgeDao = new InviteMessgeDao(getActivity());
 			inviteMessgeDao.deleteMessage(tobeDeleteCons.getUserName());
 			adapter.remove(tobeDeleteCons);
@@ -188,19 +281,20 @@ public class ChatAllHistoryFragment extends Fragment {
 	public void refresh() {
 		conversationList.clear();
 		conversationList.addAll(loadConversationsWithRecentChat());
-		if(adapter != null)
-		    adapter.notifyDataSetChanged();
+		if (adapter != null)
+			adapter.notifyDataSetChanged();
 	}
 
 	/**
 	 * 获取所有会话
 	 * 
 	 * @param context
-	 * @return
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        +	 */
+	 * @return +
+	 */
 	private List<EMConversation> loadConversationsWithRecentChat() {
 		// 获取所有会话，包括陌生人
-		Hashtable<String, EMConversation> conversations = EMChatManager.getInstance().getAllConversations();
+		Hashtable<String, EMConversation> conversations = EMChatManager
+				.getInstance().getAllConversations();
 		List<EMConversation> list = new ArrayList<EMConversation>();
 		// 过滤掉messages seize为0的conversation
 		for (EMConversation conversation : conversations.values()) {
@@ -217,16 +311,20 @@ public class ChatAllHistoryFragment extends Fragment {
 	 * 
 	 * @param usernames
 	 */
-	private void sortConversationByLastChatTime(List<EMConversation> conversationList) {
+	private void sortConversationByLastChatTime(
+			List<EMConversation> conversationList) {
 		Collections.sort(conversationList, new Comparator<EMConversation>() {
 			@Override
-			public int compare(final EMConversation con1, final EMConversation con2) {
+			public int compare(final EMConversation con1,
+					final EMConversation con2) {
 
 				EMMessage con2LastMessage = con2.getLastMessage();
 				EMMessage con1LastMessage = con1.getLastMessage();
-				if (con2LastMessage.getMsgTime() == con1LastMessage.getMsgTime()) {
+				if (con2LastMessage.getMsgTime() == con1LastMessage
+						.getMsgTime()) {
 					return 0;
-				} else if (con2LastMessage.getMsgTime() > con1LastMessage.getMsgTime()) {
+				} else if (con2LastMessage.getMsgTime() > con1LastMessage
+						.getMsgTime()) {
 					return 1;
 				} else {
 					return -1;
@@ -248,19 +346,55 @@ public class ChatAllHistoryFragment extends Fragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (!hidden && ! ((MainActivity)getActivity()).isConflict) {
+		if (!hidden && !((MainActivity) getActivity()).isConflict) {
 			refresh();
 		}
 	}
 
 	@Override
-    public void onSaveInstanceState(Bundle outState) {
+	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-        if(((MainActivity)getActivity()).isConflict){
-        	outState.putBoolean("isConflict", true);
-        }else if(((MainActivity)getActivity()).getCurrentAccountRemoved()){
-        	outState.putBoolean(Constant.ACCOUNT_REMOVED, true);
-        }
-    }
+		if (((MainActivity) getActivity()).isConflict) {
+			outState.putBoolean("isConflict", true);
+		} else if (((MainActivity) getActivity()).getCurrentAccountRemoved()) {
+			outState.putBoolean(Constant.ACCOUNT_REMOVED, true);
+		}
+	}
+	
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.rl_sync_contacts_error:
+			((MainActivity) getActivity()).runInThread(MainActivity.EMTransportType.EUpdateContacts);
+			errorUpdateContacts.setVisibility(View.GONE);
+			break;
+		case R.id.rl_sync_groups_error:
+			((MainActivity) getActivity()).runInThread(MainActivity.EMTransportType.EUpdateGroups);
+			errorUpdateGroups.setVisibility(View.GONE);
+			break;
+		case R.id.rl_sync_black_list_error:
+			((MainActivity) getActivity()).runInThread(MainActivity.EMTransportType.EUpdateBlackList);
+			errorUpdateBlackList.setVisibility(View.GONE);
+			break;
+		}
+	}
+	
+	public void showSyncContactError(boolean show) {
+		if (errorUpdateContacts != null) {
+			errorUpdateContacts.setVisibility(show ? View.VISIBLE : View.GONE);
+		}
+	}
+	
+	public void showSyncGroupError(boolean show) {
+		if (errorUpdateGroups != null) {
+			errorUpdateGroups.setVisibility(show ? View.VISIBLE : View.GONE);
+		}
+	}
+	
+	public void showSyncBlackListError(boolean show) {
+		if (errorUpdateBlackList != null) {
+			errorUpdateBlackList.setVisibility(show ? View.VISIBLE : View.GONE);
+		}
+	}
 
 }
