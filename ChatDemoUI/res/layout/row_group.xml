@@ -10,9 +10,9 @@
         android:layout_width="55dp"
         android:layout_height="55dp"
         android:layout_alignParentLeft="true"
-        android:padding="5dp"
         android:layout_marginLeft="4dp"
-        android:src="@drawable/group_icon" />
+        android:padding="5dp"
+        android:src="@drawable/groups_icon" />
 
     <TextView
         android:id="@+id/name"
@@ -21,7 +21,7 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="7dp"
         android:layout_toRightOf="@id/avatar"
-        android:textColor="#0F0F0F"
+        android:textColor="#8C8C8C"
         android:textSize="16sp" />
 
 </RelativeLayout>
