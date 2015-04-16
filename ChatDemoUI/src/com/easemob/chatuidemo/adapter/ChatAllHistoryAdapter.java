@@ -100,7 +100,7 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 		}
 		if (isGroup) {
 			// 群聊消息，显示群聊头像
-			holder.avatar.setImageResource(R.drawable.group_icon);
+			holder.avatar.setImageResource(R.drawable.groups_icon);
 			holder.name.setText(contact.getNick() != null ? contact.getNick() : username);
 		} else {
 		    UserUtils.setUserAvatar(getContext(), username, holder.avatar);
