@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
+import android.os.Handler;
 import android.text.Spannable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,6 +39,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.BufferType;
@@ -66,10 +68,8 @@ import com.easemob.chatuidemo.activity.ContextMenu;
 import com.easemob.chatuidemo.activity.ShowBigImage;
 import com.easemob.chatuidemo.activity.ShowNormalFileActivity;
 import com.easemob.chatuidemo.activity.ShowVideoActivity;
-import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.task.LoadImageTask;
 import com.easemob.chatuidemo.task.LoadVideoImageTask;
-import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.chatuidemo.utils.ImageCache;
 import com.easemob.chatuidemo.utils.ImageUtils;
 import com.easemob.chatuidemo.utils.SmileUtils;
@@ -110,9 +110,14 @@ public class MessageAdapter extends BaseAdapter{
 	private String username;
 	private LayoutInflater inflater;
 	private Activity activity;
+	
+	private static final int HANDLER_MESSAGE_REFRESH_LIST = 0;
+	private static final int HANDLER_MESSAGE_SELECT_LAST = 1;
+	private static final int HANDLER_MESSAGE_SEEK_TO = 2;
 
 	// reference to conversation object in chatsdk
 	private EMConversation conversation;
+	EMMessage[] messages = null;
 
 	private Context context;
 
@@ -125,24 +130,88 @@ public class MessageAdapter extends BaseAdapter{
 		activity = (Activity) context;
 		this.conversation = EMChatManager.getInstance().getConversation(username);
 	}
+	
+	Handler handler = new Handler() {
+		private void refreshList() {
+			// UI线程不能直接使用conversation.getAllMessages()
+			// 否则在UI刷新过程中，如果收到新的消息，会导致并发问题
+			messages = (EMMessage[]) conversation.getAllMessages().toArray(new EMMessage[conversation.getAllMessages().size()]);
+			for (int i = 0; i < messages.length; i++) {
+				// getMessage will set message as read status
+				conversation.getMessage(i);
+			}
+			notifyDataSetChanged();
+		}
+		
+		@Override
+		public void handleMessage(android.os.Message message) {
+			switch (message.what) {
+			case HANDLER_MESSAGE_REFRESH_LIST:
+				refreshList();
+				break;
+			case HANDLER_MESSAGE_SELECT_LAST:
+				if (activity instanceof ChatActivity) {
+					ListView listView = ((ChatActivity)activity).getListView();
+					if (messages.length > 0) {
+						listView.setSelection(messages.length - 1);
+					}
+				}
+				break;
+			case HANDLER_MESSAGE_SEEK_TO:
+				int position = message.arg1;
+				if (activity instanceof ChatActivity) {
+					ListView listView = ((ChatActivity)activity).getListView();
+					listView.setSelection(position);
+				}
+				break;
+			default:
+				break;
+			}
+		}
+	};
 
 
 	/**
 	 * 获取item数
 	 */
 	public int getCount() {
-		return conversation.getMsgCount();
+		return messages == null ? 0 : messages.length;
 	}
 
 	/**
 	 * 刷新页面
 	 */
 	public void refresh() {
-		notifyDataSetChanged();
+		if (handler.hasMessages(HANDLER_MESSAGE_REFRESH_LIST)) {
+			return;
+		}
+		android.os.Message msg = handler.obtainMessage(HANDLER_MESSAGE_REFRESH_LIST);
+		handler.sendMessage(msg);
+	}
+	
+	/**
+	 * 刷新页面, 选择最后一个
+	 */
+	public void refreshSelectLast() {
+		handler.sendMessage(handler.obtainMessage(HANDLER_MESSAGE_REFRESH_LIST));
+		handler.sendMessage(handler.obtainMessage(HANDLER_MESSAGE_SELECT_LAST));
+	}
+	
+	/**
+	 * 刷新页面, 选择Position
+	 */
+	public void refreshSeekTo(int position) {
+		handler.sendMessage(handler.obtainMessage(HANDLER_MESSAGE_REFRESH_LIST));
+		android.os.Message msg = handler.obtainMessage(HANDLER_MESSAGE_SEEK_TO);
+		msg.arg1 = position;
+		handler.sendMessage(msg);
 	}
 
 	public EMMessage getItem(int position) {
-		return conversation.getMessage(position);
+		if (messages != null && position < messages.length) {
+			return messages[position];
+		}
+		return null;
 	}
 
 	public long getItemId(int position) {
@@ -160,7 +229,10 @@ public class MessageAdapter extends BaseAdapter{
 	 * 获取item类型
 	 */
 	public int getItemViewType(int position) {
-		EMMessage message = conversation.getMessage(position);
+		EMMessage message = getItem(position); 
+		if (message == null) {
+			return -1;
+		}
 		if (message.getType() == EMMessage.Type.TXT) {
 			if (message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL, false))
 			    return message.direct == EMMessage.Direct.RECEIVE ? MESSAGE_TYPE_RECV_VOICE_CALL : MESSAGE_TYPE_SENT_VOICE_CALL;
@@ -448,7 +520,8 @@ public class MessageAdapter extends BaseAdapter{
 			timestamp.setVisibility(View.VISIBLE);
 		} else {
 			// 两条消息时间离得如果稍长，显示时间
-			if (DateUtils.isCloseEnough(message.getMsgTime(), conversation.getMessage(position - 1).getMsgTime())) {
+			EMMessage prevMessage = getItem(position - 1);
+			if (prevMessage != null && DateUtils.isCloseEnough(message.getMsgTime(), prevMessage.getMsgTime())) {
 				timestamp.setVisibility(View.GONE);
 			} else {
 				timestamp.setText(DateUtils.getTimestampString(new Date(message.getMsgTime())));
@@ -1050,15 +1123,12 @@ public class MessageAdapter extends BaseAdapter{
 
 			@Override
 			public void onSuccess() {
-				//umeng自定义事件， 
-				sendEvent2Umeng(message, start);
 				
 				updateSendedView(message, holder);
 			}
 
 			@Override
 			public void onError(int code, String error) {
-				sendEvent2Umeng(message, start);
 				
 				updateSendedView(message, holder);
 			}
@@ -1144,7 +1214,6 @@ public class MessageAdapter extends BaseAdapter{
 				@Override
 				public void onSuccess() {
 					Log.d(TAG, "send image message successfully");
-					sendEvent2Umeng(message, start);
 					activity.runOnUiThread(new Runnable() {
 						public void run() {
 							// send success
@@ -1156,7 +1225,6 @@ public class MessageAdapter extends BaseAdapter{
 
 				@Override
 				public void onError(int code, String error) {
-					sendEvent2Umeng(message, start);
 					
 					activity.runOnUiThread(new Runnable() {
 						public void run() {
@@ -1383,46 +1451,5 @@ public class MessageAdapter extends BaseAdapter{
 		}
 
 	}
-
-	/**
-	 * umeng自定义事件统计
-	 * @param message
-	 */
-	private void sendEvent2Umeng(final EMMessage message,final long start){
-		activity.runOnUiThread(new Runnable() {
-			public void run() {
-				long costTime = System.currentTimeMillis() - start;
-				Map<String, String> params = new HashMap<String, String>();
-				if(message.status == EMMessage.Status.SUCCESS)
-					params.put("status", "success");
-				else
-					params.put("status", "failure");
-					
-				switch (message.getType()) {
-				case TXT:
-				case LOCATION:
-					MobclickAgent.onEventValue(activity, "text_msg", params, (int) costTime);
-					MobclickAgent.onEventDuration(activity, "text_msg", (int) costTime);
-					break;
-				case IMAGE:
-					MobclickAgent.onEventValue(activity, "img_msg", params, (int) costTime);
-					MobclickAgent.onEventDuration(activity, "img_msg", (int) costTime);
-					break;
-				case VOICE:
-					MobclickAgent.onEventValue(activity, "voice_msg", params, (int) costTime);
-					MobclickAgent.onEventDuration(activity, "voice_msg", (int) costTime);
-					break;
-				case VIDEO:
-					MobclickAgent.onEventValue(activity, "video_msg", params, (int) costTime);
-					MobclickAgent.onEventDuration(activity, "video_msg", (int) costTime);
-					break;
-				default:
-					break;
-				}
-				
-			}
-		});
-	}
- 
 
 }

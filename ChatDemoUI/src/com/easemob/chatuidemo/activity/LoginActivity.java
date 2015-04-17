@@ -32,12 +32,14 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.easemob.EMCallBack;
+import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.DemoHXSDKHelper;
+import com.easemob.chatuidemo.DemoHXSDKModel;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.db.UserDao;
 import com.easemob.chatuidemo.domain.User;
@@ -156,8 +158,6 @@ public class LoginActivity extends BaseActivity {
 
 					@Override
 					public void onSuccess() {
-						//umeng自定义事件，开发者可以把这个删掉
-						loginSuccess2Umeng(start);
 						
 						if (!progressShow) {
 							return;
@@ -165,6 +165,7 @@ public class LoginActivity extends BaseActivity {
 						// 登陆成功，保存用户名密码
 						DemoApplication.getInstance().setUserName(currentUsername);
 						DemoApplication.getInstance().setPassword(currentPassword);
+						
 						runOnUiThread(new Runnable() {
 							public void run() {
 								pd.setMessage(getString(R.string.list_is_for));
@@ -210,7 +211,6 @@ public class LoginActivity extends BaseActivity {
 
 					@Override
 					public void onError(final int code, final String message) {
-						loginFailure2Umeng(start,code,message);
 						if (!progressShow) {
 							return;
 						}
@@ -230,7 +230,6 @@ public class LoginActivity extends BaseActivity {
 	 private void processContactsAndGroups() throws EaseMobException {
          // demo中简单的处理成每次登陆都去获取好友username，开发者自己根据情况而定
          List<String> usernames = EMContactManager.getInstance().getContactUserNames();
-         System.out.println("----------------"+usernames.toString());
          EMLog.d("roster", "contacts size: " + usernames.size());
          Map<String, User> userlist = new HashMap<String, User>();
          for (String username : usernames) {
@@ -256,6 +255,7 @@ public class LoginActivity extends BaseActivity {
 
          // 存入内存
          DemoApplication.getInstance().setContactList(userlist);
+         System.out.println("----------------"+userlist.values().toString());
          // 存入db
          UserDao dao = new UserDao(LoginActivity.this);
          List<User> users = new ArrayList<User>(userlist.values());
@@ -286,7 +286,7 @@ public class LoginActivity extends BaseActivity {
 			return;
 		}
 	}
-
+	
 	/**
 	 * 设置hearder属性，方便通讯中对联系人按header分类显示，以及通过右侧ABCD...字母栏快速定位联系人
 	 * 
@@ -313,29 +313,4 @@ public class LoginActivity extends BaseActivity {
 		}
 	}
 	
-	private void loginSuccess2Umeng(final long start) {
-		runOnUiThread(new Runnable() {
-			public void run() {
-				long costTime = System.currentTimeMillis() - start;
-				Map<String, String> params = new HashMap<String, String>();
-				params.put("status", "success");
-				MobclickAgent.onEventValue(LoginActivity.this, "login1", params, (int) costTime);
-				MobclickAgent.onEventDuration(LoginActivity.this, "login1", (int) costTime);
-			}
-		});
-	}
-	private void loginFailure2Umeng(final long start, final int code, final String message) {
-		runOnUiThread(new Runnable() {
-			public void run() {
-				long costTime = System.currentTimeMillis() - start;
-				Map<String, String> params = new HashMap<String, String>();
-				params.put("status", "failure");
-				params.put("error_code", code + "");
-				params.put("error_description", message);
-				MobclickAgent.onEventValue(LoginActivity.this, "login1", params, (int) costTime);
-				MobclickAgent.onEventDuration(LoginActivity.this, "login1", (int) costTime);
-				
-			}
-		});
-	}
 }

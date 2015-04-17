@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -74,19 +75,32 @@ public class BlacklistActivity extends Activity {
 	 * @param tobeRemoveUser
 	 */
 	void removeOutBlacklist(final String tobeRemoveUser) {
-		try {
-			// 移出黑民单
-			EMContactManager.getInstance().deleteUserFromBlackList(tobeRemoveUser);
-			adapter.remove(tobeRemoveUser);
-		} catch (EaseMobException e) {
-			e.printStackTrace();
-			runOnUiThread(new Runnable() {
-				public void run() {
-					String str2 = getResources().getString(R.string.Removed_from_the_failure);
-					Toast.makeText(getApplicationContext(), str2, 0).show();
-				}
-			});
-		}
+	    final ProgressDialog pd = new ProgressDialog(this);
+	    pd.setMessage(getString(R.string.be_removing));
+	    pd.setCanceledOnTouchOutside(false);
+	    pd.show();
+	    new Thread(new Runnable() {
+            public void run() {
+                try {
+                    // 移出黑民单
+                    EMContactManager.getInstance().deleteUserFromBlackList(tobeRemoveUser);
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            pd.dismiss();
+                            adapter.remove(tobeRemoveUser);
+                        }
+                    });
+                } catch (EaseMobException e) {
+                    e.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            pd.dismiss();
+                            Toast.makeText(getApplicationContext(), R.string.Removed_from_the_failure, 0).show();
+                        }
+                    });
+                }
+            }
+        }).start();
 	}
 
 	/**

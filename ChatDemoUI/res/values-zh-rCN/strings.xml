@@ -20,6 +20,8 @@
     <string name="release_to_cancel">松开手指，取消发送</string>
     <string name="send_fail">发送消息失败,</string>
     <string name="delete_message">删除消息</string>
+    <string name="delete_conversation_messages">删除会话和消息</string>
+    <string name="delete_conversation">删除会话</string>
     <string name="copy_message">复制消息</string>
     <string name="delete_voice">删除语音</string>
     <string name="delete_video">删除视频</string>
@@ -126,6 +128,7 @@
     <string name="please_check">key 验证出错! 请在 AndroidManifest.xml 文件中检查 key 设置</string>
     <string name="expression">[表情]</string>
     <string name="Removed_from_the_failure">移出失败</string>
+    <string name="be_removing">正在移出...</string>
     <string name="call_duration">通话时长</string>
     <string name="Refused">已拒绝</string>
     <string name="The_other_party_has_refused_to">对方已拒绝</string>
@@ -189,7 +192,7 @@
     <string name="Video_footage">拍摄录像</string>
     <string name="User_name_cannot_be_empty">用户名不能为空！</string>
     <string name="Password_cannot_be_empty">密码不能为空！</string>
-    <string name="please_set_the_current">请设置当前用户的昵称\n为了ios离线推送不是userid而是nick，详情见注释</string>
+    <string name="please_set_the_current">设置当前用户的昵称\n用于ios离线推送时显示用户昵称</string>
     <string name="Is_landing">正在登陆...</string>
     <string name="list_is_for">正在获取好友和群聊列表...</string>
     <string name="login_failure_failed">登录失败: 获取好友或群聊失败</string>

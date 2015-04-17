@@ -20,10 +20,9 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.content.BroadcastReceiver;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -42,6 +41,7 @@ import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -64,6 +64,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.easemob.EMError;
+import com.easemob.EMEventListener;
+import com.easemob.EMNotifierEvent;
+import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.model.HXNotifier;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMConversation;
@@ -79,6 +83,7 @@ import com.easemob.chat.TextMessageBody;
 import com.easemob.chat.VideoMessageBody;
 import com.easemob.chat.VoiceMessageBody;
 import com.easemob.chatuidemo.DemoApplication;
+import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ExpressionAdapter;
 import com.easemob.chatuidemo.adapter.ExpressionPagerAdapter;
@@ -91,6 +96,7 @@ import com.easemob.chatuidemo.widget.ExpandGridView;
 import com.easemob.chatuidemo.widget.PasteEditText;
 import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.EMLog;
+import com.easemob.util.EasyUtils;
 import com.easemob.util.PathUtil;
 import com.easemob.util.VoiceRecorder;
 
@@ -98,7 +104,7 @@ import com.easemob.util.VoiceRecorder;
  * 聊天页面
  * 
  */
-public class ChatActivity extends BaseActivity implements OnClickListener {
+public class ChatActivity extends BaseActivity implements OnClickListener, EMEventListener{
 
 	private static final int REQUEST_CODE_EMPTY_HISTORY = 2;
 	public static final int REQUEST_CODE_CONTEXT_MENU = 3;
@@ -158,7 +164,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	private Drawable[] micImages;
 	private int chatType;
 	private EMConversation conversation;
-	private NewMessageBroadcastReceiver receiver;
 	public static ChatActivity activityInstance = null;
 	// 给谁发送消息
 	private String toChatUsername;
@@ -192,6 +197,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_chat);
+		activityInstance = this;
 		initView();
 		setUpView();
 	}
@@ -296,7 +302,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	}
 
 	private void setUpView() {
-		activityInstance = this;
 		iv_emoticons_normal.setOnClickListener(this);
 		iv_emoticons_checked.setOnClickListener(this);
 		// position = getIntent().getIntExtra("position", -1);
@@ -328,16 +333,29 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 			// EMChatManager.getInstance().getConversation(toChatUsername,true);
 		}
 		conversation = EMChatManager.getInstance().getConversation(toChatUsername);
-		// 把此会话的未读数置为0
+		// 把此会话的未读数置为0		
 		conversation.resetUnreadMsgCount();
+		
+		// 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
+		// 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
+		final List<EMMessage> msgs = conversation.getAllMessages();
+		int msgCount = msgs != null ? msgs.size() : 0;
+		if (msgCount < conversation.getAllMsgCount() && msgCount < pagesize) {
+			String msgId = null;
+			if (msgs != null && msgs.size() > 0) {
+				msgId = msgs.get(0).getMsgId();
+			}
+			if (chatType == CHATTYPE_SINGLE) {
+				conversation.loadMoreMsgFromDB(msgId, pagesize);
+			} else {
+				conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
+			}
+		}
 		adapter = new MessageAdapter(this, toChatUsername, chatType);
 		// 显示消息
 		listView.setAdapter(adapter);
 		listView.setOnScrollListener(new ListScrollListener());
-		int count = listView.getCount();
-		if (count > 0) {
-			listView.setSelection(count - 1);
-		}
+		adapter.refreshSelectLast();
 
 		listView.setOnTouchListener(new OnTouchListener() {
 
@@ -352,23 +370,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 				return false;
 			}
 		});
-		// 注册接收消息广播
-		receiver = new NewMessageBroadcastReceiver();
-		IntentFilter intentFilter = new IntentFilter(EMChatManager.getInstance().getNewMessageBroadcastAction());
-		// 设置广播的优先级别大于Mainacitivity,这样如果消息来的时候正好在chat页面，直接显示消息，而不是提示消息未读
-		intentFilter.setPriority(5);
-		registerReceiver(receiver, intentFilter);
 
-		// 注册一个ack回执消息的BroadcastReceiver
-		IntentFilter ackMessageIntentFilter = new IntentFilter(EMChatManager.getInstance().getAckMessageBroadcastAction());
-		ackMessageIntentFilter.setPriority(5);
-		registerReceiver(ackMessageReceiver, ackMessageIntentFilter);
-
-		// 注册一个消息送达的BroadcastReceiver
-		IntentFilter deliveryAckMessageIntentFilter = new IntentFilter(EMChatManager.getInstance().getDeliveryAckMessageBroadcastAction());
-		deliveryAckMessageIntentFilter.setPriority(5);
-		registerReceiver(deliveryAckMessageReceiver, deliveryAckMessageIntentFilter);
-
+		
 		// 监听当前会话的群聊解散被T事件
 		groupListener = new GroupListener();
 		EMGroupManager.getInstance().addGroupChangeListener(groupListener);
@@ -379,7 +382,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 			// 显示发送要转发的消息
 			forwardMessage(forward_msg_id);
 		}
-
 	}
 
 	
@@ -405,8 +407,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 			case RESULT_CODE_DELETE: // 删除消息
 				EMMessage deleteMsg = (EMMessage) adapter.getItem(data.getIntExtra("position", -1));
 				conversation.removeMessage(deleteMsg.getMsgId());
-				adapter.refresh();
-				listView.setSelection(data.getIntExtra("position", adapter.getCount()) - 1);
+				adapter.refreshSeekTo(data.getIntExtra("position", adapter.getCount()) - 1);
 				break;
 
 			case RESULT_CODE_FORWARD: // 转发消息
@@ -574,6 +575,86 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
         }
 	}
 
+	
+	/**
+	 * 事件监听
+	 * 
+	 * see {@link EMNotifierEvent}
+     */
+    @Override
+    public void onEvent(EMNotifierEvent event) {
+        switch (event.getEvent()) {
+        case EventNewMessage:
+        {
+            //获取到message
+            EMMessage message = (EMMessage) event.getData();
+            
+            String username = null;
+            //群组消息
+            if(message.getChatType() == ChatType.GroupChat){
+                username = message.getTo();
+            }
+            else{
+                //单聊消息
+                username = message.getFrom();
+            }
+
+            //如果是当前会话的消息，刷新聊天页面
+            if(username.equals(getToChatUsername())){
+                refreshUIWithNewMessage();
+                //声音和震动提示有新消息
+                HXSDKHelper.getInstance().getNotifier().viberateAndPlayTone(message);
+            }else{
+                //如果消息不是和当前聊天ID的消息
+                HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
+            }
+
+            break;
+        }
+        case EventDeliveryAck:
+        {
+            //获取到message
+            EMMessage message = (EMMessage) event.getData();
+            refreshUI();
+            break;
+        }
+        case EventReadAck:
+        {
+            //获取到message
+            EMMessage message = (EMMessage) event.getData();
+            refreshUI();
+            break;
+        }
+        case EventOfflineMessage:
+        {
+            //a list of offline messages 
+            //List<EMMessage> offlineMessages = (List<EMMessage>) event.getData();
+            refreshUI();
+            break;
+        }
+        default:
+            break;
+        }
+        
+    }
+	
+	
+	private void refreshUIWithNewMessage(){
+	    runOnUiThread(new Runnable() {
+            public void run() {
+                adapter.refreshSelectLast();
+            }
+        });
+	}
+	
+	private void refreshUI(){
+	    runOnUiThread(new Runnable() {
+            public void run() {
+                adapter.refresh();
+            }
+        });
+	}
+	
 	/**
 	 * 照相获取图片
 	 */
@@ -645,8 +726,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 			// 把messgage加到conversation中
 			conversation.addMessage(message);
 			// 通知adapter有消息变动，adapter会根据加入的这条message显示消息和调用sdk的发送方法
-			adapter.refresh();
-			listView.setSelection(listView.getCount() - 1);
+			adapter.refreshSelectLast();
 			mEditTextContent.setText("");
 
 			setResult(RESULT_OK);
@@ -677,8 +757,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 			message.addBody(body);
 
 			conversation.addMessage(message);
-			adapter.refresh();
-			listView.setSelection(listView.getCount() - 1);
+			adapter.refreshSelectLast();
 			setResult(RESULT_OK);
 			// send file
 			// sendVoiceSub(filePath, fileName, message);
@@ -708,8 +787,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 		conversation.addMessage(message);
 
 		listView.setAdapter(adapter);
-		adapter.refresh();
-		listView.setSelection(listView.getCount() - 1);
+		adapter.refreshSelectLast();
 		setResult(RESULT_OK);
 		// more(more);
 	}
@@ -733,8 +811,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 			message.addBody(body);
 			conversation.addMessage(message);
 			listView.setAdapter(adapter);
-			adapter.refresh();
-			listView.setSelection(listView.getCount() - 1);
+			adapter.refreshSelectLast();
 			setResult(RESULT_OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -797,8 +874,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 		message.setReceipt(toChatUsername);
 		conversation.addMessage(message);
 		listView.setAdapter(adapter);
-		adapter.notifyDataSetChanged();
-		listView.setSelection(listView.getCount() - 1);
+		adapter.refreshSelectLast();
 		setResult(RESULT_OK);
 
 	}
@@ -850,8 +926,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 		message.addBody(body);
 		conversation.addMessage(message);
 		listView.setAdapter(adapter);
-		adapter.refresh();
-		listView.setSelection(listView.getCount() - 1);
+		adapter.refreshSelectLast();
 		setResult(RESULT_OK);
 	}
 
@@ -864,8 +939,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 		// msg.setBackSend(true);
 		msg.status = EMMessage.Status.CREATE;
 
-		adapter.refresh();
-		listView.setSelection(resendPos);
+		adapter.refreshSeekTo(resendPos);
 	}
 
 	/**
@@ -989,83 +1063,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 
 	}
 
-	/**
-	 * 消息广播接收者
-	 * 
-	 */
-	private class NewMessageBroadcastReceiver extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			// 记得把广播给终结掉
-			abortBroadcast();
 
-			String username = intent.getStringExtra("from");
-			String msgid = intent.getStringExtra("msgid");
-			// 收到这个广播的时候，message已经在db和内存里了，可以通过id获取mesage对象
-			EMMessage message = EMChatManager.getInstance().getMessage(msgid);
-			// 如果是群聊消息，获取到group id
-			if (message.getChatType() == ChatType.GroupChat) {
-				username = message.getTo();
-			}
-			if (!username.equals(toChatUsername)) {
-				// 消息不是发给当前会话，return
-			    notifyNewMessage(message);
-				return;
-			}
-			// conversation =
-			// EMChatManager.getInstance().getConversation(toChatUsername);
-			// 通知adapter有新消息，更新ui
-			adapter.refresh();
-			listView.setSelection(listView.getCount() - 1);
-
-		}
-	}
-
-	/**
-	 * 消息回执BroadcastReceiver
-	 */
-	private BroadcastReceiver ackMessageReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			abortBroadcast();
-
-			String msgid = intent.getStringExtra("msgid");
-			String from = intent.getStringExtra("from");
-			EMConversation conversation = EMChatManager.getInstance().getConversation(from);
-			if (conversation != null) {
-				// 把message设为已读
-				EMMessage msg = conversation.getMessage(msgid);
-				if (msg != null) {
-					msg.isAcked = true;
-				}
-			}
-			adapter.notifyDataSetChanged();
-
-		}
-	};
-
-	/**
-	 * 消息送达BroadcastReceiver
-	 */
-	private BroadcastReceiver deliveryAckMessageReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			abortBroadcast();
-
-			String msgid = intent.getStringExtra("msgid");
-			String from = intent.getStringExtra("from");
-			EMConversation conversation = EMChatManager.getInstance().getConversation(from);
-			if (conversation != null) {
-				// 把message设为已读
-				EMMessage msg = conversation.getMessage(msgid);
-				if (msg != null) {
-					msg.isDelivered = true;
-				}
-			}
-
-			adapter.notifyDataSetChanged();
-		}
-	};
 	private PowerManager.WakeLock wakeLock;
 
 	/**
@@ -1229,36 +1227,45 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 		return reslist;
 
 	}
-
-
+	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		activityInstance = null;
 		EMGroupManager.getInstance().removeGroupChangeListener(groupListener);
-		// 注销广播
-		try {
-			unregisterReceiver(receiver);
-			receiver = null;
-		} catch (Exception e) {
-		}
-		try {
-			unregisterReceiver(ackMessageReceiver);
-			ackMessageReceiver = null;
-			unregisterReceiver(deliveryAckMessageReceiver);
-			deliveryAckMessageReceiver = null;
-		} catch (Exception e) {
-		}
 	}
 
 	@Override
 	protected void onResume() {
+	    Log.i("ChatActivity", "onResume");
 		super.onResume();
 		if(group != null)
 			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
 		adapter.refresh();
+		
+		DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
+        sdkHelper.pushActivity(this);
+		// register the event listener when enter the foreground
+        EMChatManager.getInstance().registerEventListener(this,new EMNotifierEvent.Event[]{EMNotifierEvent.Event.EventNewMessage
+                                                                                              ,EMNotifierEvent.Event.EventDeliveryAck
+                                                                                              ,EMNotifierEvent.Event.EventReadAck});
 	}
 
+	@Override
+	protected void onStop(){
+	    Log.i("ChatActivity", "onStop");
+	    
+	    // unregister this event listener when this activity enters the background
+	    EMChatManager.getInstance().unregisterEventListener(this);
+	    
+	    DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
+	    
+	    // 把此activity 从foreground activity 列表里移除
+        sdkHelper.popActivity(this);
+        
+	    super.onStop();
+	}
+	
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -1294,17 +1301,34 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	 * 
 	 * @param username
 	 */
-	private void addUserToBlacklist(String username) {
-		String st11 = getResources().getString(R.string.Move_into_blacklist_success);
-		String st12 = getResources().getString(R.string.Move_into_blacklist_failure);
-		try {
-			EMContactManager.getInstance().addUserToBlackList(username, false);
-			Toast.makeText(getApplicationContext(), st11, 0).show();
-		} catch (EaseMobException e) {
-			e.printStackTrace();
-			Toast.makeText(getApplicationContext(), st12, 0).show();
-		}
+	private void addUserToBlacklist(final String username) {
+	    final ProgressDialog pd = new ProgressDialog(this);
+        pd.setMessage(getString(R.string.Is_moved_into_blacklist));
+        pd.setCanceledOnTouchOutside(false);
+        pd.show();
+	    new Thread(new Runnable() {
+            public void run() {
+                try {
+                    EMContactManager.getInstance().addUserToBlackList(username, false);
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            pd.dismiss();
+                            Toast.makeText(getApplicationContext(), R.string.Move_into_blacklist_success, 0).show();
+                        }
+                    });
+                } catch (EaseMobException e) {
+                    e.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            pd.dismiss();
+                            Toast.makeText(getApplicationContext(), R.string.Move_into_blacklist_failure, 0).show();
+                        }
+                    });
+                }
+            }
+        }).start();
 	}
+	    
 
 	/**
 	 * 返回
@@ -1319,7 +1343,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	 * 覆盖手机返回键
 	 */
 	@Override
-	public void onBackPressed() {
+	public void onBackPressed() {	    
 		if (more.getVisibility() == View.VISIBLE) {
 			more.setVisibility(View.GONE);
 			iv_emoticons_normal.setVisibility(View.VISIBLE);
@@ -1340,16 +1364,18 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 			switch (scrollState) {
 			case OnScrollListener.SCROLL_STATE_IDLE:
 				if (view.getFirstVisiblePosition() == 0 && !isloading && haveMoreData) {
+					isloading = true;
 					loadmorePB.setVisibility(View.VISIBLE);
-					// sdk初始化加载的聊天记录为20条，到顶时去db里获取更多
+					// sdk初始化加载的聊天记录为20条，到顶时去db里获取更多					
 					List<EMMessage> messages;
+					EMMessage firstMsg = conversation.getAllMessages().get(0);
 					try {
 						// 获取更多messges，调用此方法的时候从db获取的messages
 						// sdk会自动存入到此conversation中
 						if (chatType == CHATTYPE_SINGLE)
-							messages = conversation.loadMoreMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
+							messages = conversation.loadMoreMsgFromDB(firstMsg.getMsgId(), pagesize);
 						else
-							messages = conversation.loadMoreGroupMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
+							messages = conversation.loadMoreGroupMsgFromDB(firstMsg.getMsgId(), pagesize);
 					} catch (Exception e1) {
 						loadmorePB.setVisibility(View.GONE);
 						return;
@@ -1360,8 +1386,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 					}
 					if (messages.size() != 0) {
 						// 刷新ui
-						adapter.notifyDataSetChanged();
-						listView.setSelection(messages.size() - 1);
+						if (messages.size() > 0) {
+							adapter.refreshSeekTo(messages.size() - 1);
+						}
 						if (messages.size() != pagesize)
 							haveMoreData = false;
 					} else {
@@ -1468,5 +1495,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 	public String getToChatUsername() {
 		return toChatUsername;
 	}
+	
+	public ListView getListView() {
+		return listView;
+	}
+
 
 }

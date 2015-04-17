@@ -93,13 +93,18 @@ public class AddContactActivity extends BaseActivity{
 	 */
 	public void addContact(View view){
 		if(DemoApplication.getInstance().getUserName().equals(nameText.getText().toString())){
-			String str = getResources().getString(R.string.not_add_myself);
+			String str = getString(R.string.not_add_myself);
 			startActivity(new Intent(this, AlertDialog.class).putExtra("msg", str));
 			return;
 		}
 		
 		if(DemoApplication.getInstance().getContactList().containsKey(nameText.getText().toString())){
-			String strin = getResources().getString(R.string.This_user_is_already_your_friend);
+		    //提示已在好友列表中，无需添加
+		    if(EMContactManager.getInstance().getBlackListUsernames().contains(nameText.getText().toString())){
+		        startActivity(new Intent(this, AlertDialog.class).putExtra("msg", "此用户已是你好友(被拉黑状态)，从黑名单列表中移出即可"));
+		        return;
+		    }
+			String strin = getString(R.string.This_user_is_already_your_friend);
 			startActivity(new Intent(this, AlertDialog.class).putExtra("msg", strin));
 			return;
 		}
