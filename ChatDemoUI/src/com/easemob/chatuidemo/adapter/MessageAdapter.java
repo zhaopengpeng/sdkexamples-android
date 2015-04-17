@@ -112,8 +112,8 @@ public class MessageAdapter extends BaseAdapter{
 	private Activity activity;
 	
 	private static final int HANDLER_MESSAGE_REFRESH_LIST = 0;
-	private static final int HANDLER_MESSAGE_REFRESH_LIST_SELECT_LAST = 1;
-	private static final int HANDLER_MESSAGE_REFRESH_LIST_SEEK_TO = 2;
+	private static final int HANDLER_MESSAGE_SELECT_LAST = 1;
+	private static final int HANDLER_MESSAGE_SEEK_TO = 2;
 
 	// reference to conversation object in chatsdk
 	private EMConversation conversation;
@@ -149,15 +149,15 @@ public class MessageAdapter extends BaseAdapter{
 			case HANDLER_MESSAGE_REFRESH_LIST:
 				refreshList();
 				break;
-			case HANDLER_MESSAGE_REFRESH_LIST_SELECT_LAST:
-				refreshList();
+			case HANDLER_MESSAGE_SELECT_LAST:
 				if (activity instanceof ChatActivity) {
 					ListView listView = ((ChatActivity)activity).getListView();
-					listView.setSelection(listView.getCount() - 1);
+					if (messages.length > 0) {
+						listView.setSelection(messages.length - 1);
+					}
 				}
 				break;
-			case HANDLER_MESSAGE_REFRESH_LIST_SEEK_TO:
-				refreshList();
+			case HANDLER_MESSAGE_SEEK_TO:
 				int position = message.arg1;
 				if (activity instanceof ChatActivity) {
 					ListView listView = ((ChatActivity)activity).getListView();
@@ -165,6 +165,7 @@ public class MessageAdapter extends BaseAdapter{
 				}
 				break;
 			default:
+				break;
 			}
 		}
 	};
@@ -192,21 +193,16 @@ public class MessageAdapter extends BaseAdapter{
 	 * 刷新页面, 选择最后一个
 	 */
 	public void refreshSelectLast() {
-		if (handler.hasMessages(HANDLER_MESSAGE_REFRESH_LIST_SELECT_LAST)) {
-			return;
-		}
-		android.os.Message msg = handler.obtainMessage(HANDLER_MESSAGE_REFRESH_LIST_SELECT_LAST);
-		handler.sendMessage(msg);
+		handler.sendMessage(handler.obtainMessage(HANDLER_MESSAGE_REFRESH_LIST));
+		handler.sendMessage(handler.obtainMessage(HANDLER_MESSAGE_SELECT_LAST));
 	}
 	
 	/**
 	 * 刷新页面, 选择Position
 	 */
 	public void refreshSeekTo(int position) {
-		if (handler.hasMessages(HANDLER_MESSAGE_REFRESH_LIST_SEEK_TO)) {
-			return;
-		}
-		android.os.Message msg = handler.obtainMessage(HANDLER_MESSAGE_REFRESH_LIST_SEEK_TO);
+		handler.sendMessage(handler.obtainMessage(HANDLER_MESSAGE_REFRESH_LIST));
+		android.os.Message msg = handler.obtainMessage(HANDLER_MESSAGE_SEEK_TO);
 		msg.arg1 = position;
 		handler.sendMessage(msg);
 	}
