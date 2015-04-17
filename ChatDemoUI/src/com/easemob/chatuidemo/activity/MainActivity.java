@@ -357,10 +357,8 @@ public class MainActivity extends BaseActivity implements EMEventListener{
 					}
 					updateUnreadLabel();
 					// 刷新ui
-					if (currentTabIndex == 1)
-						contactListFragment.refresh();
-					else if(currentTabIndex == 0)
-						chatHistoryFragment.refresh();
+					contactListFragment.refresh();
+					chatHistoryFragment.refresh();
 				}
 			});
 		
