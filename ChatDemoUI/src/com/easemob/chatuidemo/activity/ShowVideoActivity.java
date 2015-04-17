@@ -19,6 +19,7 @@ import com.easemob.chat.EMChatConfig;
 import com.easemob.chatuidemo.R;
 import com.easemob.cloud.CloudOperationCallback;
 import com.easemob.cloud.HttpFileManager;
+import com.easemob.util.EMLog;
 import com.easemob.util.PathUtil;
 
 /**
@@ -28,7 +29,8 @@ import com.easemob.util.PathUtil;
  * 
  */
 public class ShowVideoActivity extends BaseActivity{
-
+	private static final String TAG = "ShowVideoActivity";
+	
 	private RelativeLayout loadingLayout;
 	private ProgressBar progressBar;
 	private String localFilePath;
@@ -45,7 +47,7 @@ public class ShowVideoActivity extends BaseActivity{
 		localFilePath = getIntent().getStringExtra("localpath");
 		String remotepath = getIntent().getStringExtra("remotepath");
 		String secret = getIntent().getStringExtra("secret");
-		System.err.println("show video view file:" + localFilePath
+		EMLog.d(TAG, "show video view file:" + localFilePath
 				+ " remotepath:" + remotepath + " secret:" + secret);
 		if (localFilePath != null && new File(localFilePath).exists()) {
 			Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -54,7 +56,7 @@ public class ShowVideoActivity extends BaseActivity{
 			startActivity(intent);
 			finish();
 		} else if (!TextUtils.isEmpty(remotepath) && !remotepath.equals("null")) {
-			System.err.println("download remote video file");
+			EMLog.d(TAG, "download remote video file");
 			Map<String, String> maps = new HashMap<String, String>();
 			if (!TextUtils.isEmpty(secret)) {
 				maps.put("share-secret", secret);

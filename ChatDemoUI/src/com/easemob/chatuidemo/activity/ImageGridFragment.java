@@ -39,6 +39,7 @@ import com.easemob.chatuidemo.video.util.ImageResizer;
 import com.easemob.chatuidemo.video.util.Utils;
 import com.easemob.chatuidemo.widget.RecyclingImageView;
 import com.easemob.util.DateUtils;
+import com.easemob.util.EMLog;
 import com.easemob.util.TextFormater;
 
 public class ImageGridFragment extends Fragment implements OnItemClickListener {
@@ -381,7 +382,7 @@ public class ImageGridFragment extends Fragment implements OnItemClickListener {
 					duration = cursor
 							.getInt(cursor
 									.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
-					System.out.println("duration:"+duration);
+					EMLog.d(TAG, "duration:"+duration);
 				}
 				if(cursor!=null)
                 {

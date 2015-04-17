@@ -411,7 +411,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		switch (v.getId()) {
 		case R.id.rl_switch_block_groupmsg: // 屏蔽群组
 			if (iv_switch_block_groupmsg.getVisibility() == View.VISIBLE) {
-				System.out.println("change to unblock group msg");
+				EMLog.d(TAG, "change to unblock group msg");
 				if (progressDialog == null) {
 	                progressDialog = new ProgressDialog(GroupDetailsActivity.this);
 	                progressDialog.setCanceledOnTouchOutside(false);
@@ -445,7 +445,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 			} else {
 				String st8 = getResources().getString(R.string.group_is_blocked);
 				final String st9 = getResources().getString(R.string.group_of_shielding);
-				System.out.println("change to block group msg");
+				EMLog.d(TAG, "change to block group msg");
 				if (progressDialog == null) {
                     progressDialog = new ProgressDialog(GroupDetailsActivity.this);
                     progressDialog.setCanceledOnTouchOutside(false);
@@ -730,7 +730,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 							}
 
 							// update block
-							System.out.println("group msg is blocked:" + group.getMsgBlocked());
+							EMLog.d(TAG, "group msg is blocked:" + group.getMsgBlocked());
 							if (group.getMsgBlocked()) {
 								iv_switch_block_groupmsg.setVisibility(View.VISIBLE);
 								iv_switch_unblock_groupmsg.setVisibility(View.INVISIBLE);

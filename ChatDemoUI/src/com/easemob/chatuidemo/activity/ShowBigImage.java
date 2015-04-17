@@ -25,7 +25,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
@@ -37,6 +36,7 @@ import com.easemob.chatuidemo.utils.ImageCache;
 import com.easemob.chatuidemo.widget.photoview.PhotoView;
 import com.easemob.cloud.CloudOperationCallback;
 import com.easemob.cloud.HttpFileManager;
+import com.easemob.util.EMLog;
 import com.easemob.util.ImageUtils;
 import com.easemob.util.PathUtil;
 
@@ -45,7 +45,7 @@ import com.easemob.util.PathUtil;
  * 
  */
 public class ShowBigImage extends BaseActivity {
-
+	private static final String TAG = "ShowBigImage"; 
 	private ProgressDialog pd;
 	private PhotoView image;
 	private int default_res = R.drawable.default_image;
@@ -66,11 +66,11 @@ public class ShowBigImage extends BaseActivity {
 		Uri uri = getIntent().getParcelableExtra("uri");
 		String remotepath = getIntent().getExtras().getString("remotepath");
 		String secret = getIntent().getExtras().getString("secret");
-		System.err.println("show big image uri:" + uri + " remotepath:" + remotepath);
+		EMLog.d(TAG, "show big image uri:" + uri + " remotepath:" + remotepath);
 
 		//本地存在，直接显示本地的图片
 		if (uri != null && new File(uri.getPath()).exists()) {
-			System.err.println("showbigimage file exists. directly show it");
+			EMLog.d(TAG, "showbigimage file exists. directly show it");
 			DisplayMetrics metrics = new DisplayMetrics();
 			getWindowManager().getDefaultDisplay().getMetrics(metrics);
 			// int screenWidth = metrics.widthPixels;
@@ -88,7 +88,7 @@ public class ShowBigImage extends BaseActivity {
 				image.setImageBitmap(bitmap);
 			}
 		} else if (remotepath != null) { //去服务器下载图片
-			System.err.println("download remote image");
+			EMLog.d(TAG, "download remote image");
 			Map<String, String> maps = new HashMap<String, String>();
 			if (!TextUtils.isEmpty(secret)) {
 				maps.put("share-secret", secret);
@@ -163,7 +163,7 @@ public class ShowBigImage extends BaseActivity {
 			}
 
 			public void onError(String msg) {
-				Log.e("###", "offline file transfer error:" + msg);
+				EMLog.e(TAG, "offline file transfer error:" + msg);
 				File file = new File(localFilePath);
 				if (file.exists()&&file.isFile()) {
 					file.delete();
@@ -178,7 +178,7 @@ public class ShowBigImage extends BaseActivity {
 			}
 
 			public void onProgress(final int progress) {
-				Log.d("ease", "Progress: " + progress);
+				EMLog.d(TAG, "Progress: " + progress);
 				final String str2 = getResources().getString(R.string.Download_the_pictures_new);
 				runOnUiThread(new Runnable() {
 					@Override

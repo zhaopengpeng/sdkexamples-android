@@ -894,10 +894,10 @@ public class MessageAdapter extends BaseAdapter{
 			} else {
 				holder.iv_read_status.setVisibility(View.VISIBLE);
 			}
-			System.err.println("it is receive msg");
+			EMLog.d(TAG, "it is receive msg");
 			if (message.status == EMMessage.Status.INPROGRESS) {
 				holder.pb.setVisibility(View.VISIBLE);
-				System.err.println("!!!! back receive");
+				EMLog.d(TAG, "!!!! back receive");
 				((FileMessageBody) message.getBody()).setDownloadCallback(new EMCallBack() {
 
 					@Override
@@ -995,7 +995,7 @@ public class MessageAdapter extends BaseAdapter{
 		String st1 = context.getResources().getString(R.string.Have_downloaded);
 		String st2 = context.getResources().getString(R.string.Did_not_download);
 		if (message.direct == EMMessage.Direct.RECEIVE) { // 接收的消息
-			System.err.println("it is receive msg");
+			EMLog.d(TAG, "it is receive msg");
 			File file = new File(filePath);
 			if (file != null && file.exists()) {
 				holder.tv_file_download_state.setText(st1);
@@ -1146,7 +1146,7 @@ public class MessageAdapter extends BaseAdapter{
 	 * need to register callback show the download progress
 	 */
 	private void showDownloadImageProgress(final EMMessage message, final ViewHolder holder) {
-		System.err.println("!!! show download image progress");
+		EMLog.d(TAG, "!!! show download image progress");
 		// final ImageMessageBody msgbody = (ImageMessageBody)
 		// message.getBody();
 		final FileMessageBody msgbody = (FileMessageBody) message.getBody();
@@ -1267,7 +1267,7 @@ public class MessageAdapter extends BaseAdapter{
 				if (message.getType() == EMMessage.Type.VIDEO) {
 					holder.tv.setVisibility(View.GONE);
 				}
-				System.out.println("message status : " + message.status);
+				EMLog.d(TAG, "message status : " + message.status);
 				if (message.status == EMMessage.Status.SUCCESS) {
 					// if (message.getType() == EMMessage.Type.FILE) {
 					// holder.pb.setVisibility(View.INVISIBLE);
@@ -1319,13 +1319,13 @@ public class MessageAdapter extends BaseAdapter{
 			iv.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					System.err.println("image view on click");
+					EMLog.d(TAG, "image view on click");
 					Intent intent = new Intent(activity, ShowBigImage.class);
 					File file = new File(localFullSizePath);
 					if (file.exists()) {
 						Uri uri = Uri.fromFile(file);
 						intent.putExtra("uri", uri);
-						System.err.println("here need to check why download everytime");
+						EMLog.d(TAG, "here need to check why download everytime");
 					} else {
 						// The local full size pic does not exist yet.
 						// ShowBigImage needs to download it from the server
@@ -1378,7 +1378,7 @@ public class MessageAdapter extends BaseAdapter{
 				@Override
 				public void onClick(View v) {
 					VideoMessageBody videoBody = (VideoMessageBody) message.getBody();
-					System.err.println("video view is on click");
+					EMLog.d(TAG, "video view is on click");
 					Intent intent = new Intent(activity, ShowVideoActivity.class);
 					intent.putExtra("localpath", videoBody.getLocalUrl());
 					intent.putExtra("secret", videoBody.getSecret());
