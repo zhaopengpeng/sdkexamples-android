@@ -86,9 +86,6 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	public boolean isConflict = false;
 	// 账号被移除
 	private boolean isCurrentAccountRemoved = false;
-
-	public static MainActivity activityInstance;
-
 	/**
 	 * 检查当前用户是否被删除
 	 */
@@ -249,8 +246,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
-		activityInstance = null;
+		super.onDestroy();		
 
 		if (conflictBuilder != null) {
 			conflictBuilder.create().dismiss();
@@ -364,10 +360,8 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 					}
 					updateUnreadLabel();
 					// 刷新ui
-					if (currentTabIndex == 1)
-						contactListFragment.refresh();
-					else if (currentTabIndex == 0)
-						chatHistoryFragment.refresh();
+					contactListFragment.refresh();
+					chatHistoryFragment.refresh();
 				}
 			});
 

@@ -112,6 +112,8 @@ public class MessageAdapter extends BaseAdapter{
 	private Activity activity;
 	
 	private static final int HANDLER_MESSAGE_REFRESH_LIST = 0;
+	private static final int HANDLER_MESSAGE_SELECT_LAST = 1;
+	private static final int HANDLER_MESSAGE_SEEK_TO = 2;
 
 	// reference to conversation object in chatsdk
 	private EMConversation conversation;
@@ -130,25 +132,40 @@ public class MessageAdapter extends BaseAdapter{
 	}
 	
 	Handler handler = new Handler() {
+		private void refreshList() {
+			// UI线程不能直接使用conversation.getAllMessages()
+			// 否则在UI刷新过程中，如果收到新的消息，会导致并发问题
+			messages = (EMMessage[]) conversation.getAllMessages().toArray(new EMMessage[conversation.getAllMessages().size()]);
+			for (int i = 0; i < messages.length; i++) {
+				// getMessage will set message as read status
+				conversation.getMessage(i);
+			}
+			notifyDataSetChanged();
+		}
 		
 		@Override
 		public void handleMessage(android.os.Message message) {
 			switch (message.what) {
 			case HANDLER_MESSAGE_REFRESH_LIST:
-				// UI线程不能直接使用conversation.getAllMessages()
-				// 否则在UI刷新过程中，如果收到新的消息，会导致并发问题
-				messages = (EMMessage[]) conversation.getAllMessages().toArray(new EMMessage[conversation.getAllMessages().size()]);
-				for (int i = 0; i < messages.length; i++) {
-					// getMessage will set message as read status
-					conversation.getMessage(i);
-				}
-				notifyDataSetChanged();
+				refreshList();
+				break;
+			case HANDLER_MESSAGE_SELECT_LAST:
 				if (activity instanceof ChatActivity) {
 					ListView listView = ((ChatActivity)activity).getListView();
-					listView.setSelection(listView.getCount() - 1);
+					if (messages.length > 0) {
+						listView.setSelection(messages.length - 1);
+					}
+				}
+				break;
+			case HANDLER_MESSAGE_SEEK_TO:
+				int position = message.arg1;
+				if (activity instanceof ChatActivity) {
+					ListView listView = ((ChatActivity)activity).getListView();
+					listView.setSelection(position);
 				}
 				break;
 			default:
+				break;
 			}
 		}
 	};
@@ -169,6 +186,24 @@ public class MessageAdapter extends BaseAdapter{
 			return;
 		}
 		android.os.Message msg = handler.obtainMessage(HANDLER_MESSAGE_REFRESH_LIST);
+		handler.sendMessage(msg);
+	}
+	
+	/**
+	 * 刷新页面, 选择最后一个
+	 */
+	public void refreshSelectLast() {
+		handler.sendMessage(handler.obtainMessage(HANDLER_MESSAGE_REFRESH_LIST));
+		handler.sendMessage(handler.obtainMessage(HANDLER_MESSAGE_SELECT_LAST));
+	}
+	
+	/**
+	 * 刷新页面, 选择Position
+	 */
+	public void refreshSeekTo(int position) {
+		handler.sendMessage(handler.obtainMessage(HANDLER_MESSAGE_REFRESH_LIST));
+		android.os.Message msg = handler.obtainMessage(HANDLER_MESSAGE_SEEK_TO);
+		msg.arg1 = position;
 		handler.sendMessage(msg);
 	}
 
