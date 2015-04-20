@@ -60,7 +60,7 @@ import com.easemob.util.PathUtil;
 public class RecorderVideoActivity extends BaseActivity implements
 		OnClickListener, SurfaceHolder.Callback, OnErrorListener,
 		OnInfoListener {
-
+	private static final String TAG = "RecorderVideoActivity";
 	private final static String CLASS_LABEL = "RecordActivity";
 	private PowerManager.WakeLock mWakeLock;
 	private ImageView btnStart;// 开始录制按钮
@@ -475,7 +475,7 @@ public class RecorderVideoActivity extends BaseActivity implements
     
     					@Override
     					public void onScanCompleted(String path, Uri uri) {
-    						System.out.println("scanner completed");
+    						EMLog.d(TAG, "scanner completed");
     						msc.disconnect();
     						progressDialog.dismiss();
     						setResult(RESULT_OK, getIntent().putExtra("uri", uri));

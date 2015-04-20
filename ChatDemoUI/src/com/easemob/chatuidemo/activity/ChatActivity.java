@@ -104,8 +104,8 @@ import com.easemob.util.VoiceRecorder;
  * 聊天页面
  * 
  */
-public class ChatActivity extends BaseActivity implements OnClickListener, EMEventListener {
-
+public class ChatActivity extends BaseActivity implements OnClickListener, EMEventListener{
+	private static final String TAG = "ChatActivity";
 	private static final int REQUEST_CODE_EMPTY_HISTORY = 2;
 	public static final int REQUEST_CODE_CONTEXT_MENU = 3;
 	private static final int REQUEST_CODE_MAP = 4;
@@ -1032,7 +1032,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 */
 	public void more(View view) {
 		if (more.getVisibility() == View.GONE) {
-			System.out.println("more gone");
+			EMLog.d(TAG, "more gone");
 			hideKeyboard();
 			more.setVisibility(View.VISIBLE);
 			btnContainer.setVisibility(View.VISIBLE);

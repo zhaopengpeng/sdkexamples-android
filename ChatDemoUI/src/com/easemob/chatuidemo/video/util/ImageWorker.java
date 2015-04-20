@@ -17,6 +17,8 @@
 package com.easemob.chatuidemo.video.util;
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -26,6 +28,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.widget.ImageView;
@@ -55,6 +58,9 @@ public abstract class ImageWorker {
     private static final int MESSAGE_INIT_DISK_CACHE = 1;
     private static final int MESSAGE_FLUSH = 2;
     private static final int MESSAGE_CLOSE = 3;
+    
+	public static final Executor DUAL_THREAD_EXECUTOR = Executors
+			.newFixedThreadPool(2);
 
     protected ImageWorker(Context context) {
         mResources = context.getResources();
@@ -95,7 +101,7 @@ public abstract class ImageWorker {
             // NOTE: This uses a custom version of AsyncTask that has been pulled from the
             // framework and slightly modified. Refer to the docs at the top of the class
             // for more info on what was changed.
-            task.executeOnExecutor(AsyncTask.DUAL_THREAD_EXECUTOR);
+            task.executeOnExecutor(DUAL_THREAD_EXECUTOR);
             //END_INCLUDE(execute_background_task)
         }
     }

@@ -154,7 +154,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 		for (int i = 1; i < count; i++) {
 
 			String letter = getItem(i).getHeader();
-			System.err.println("contactadapter getsection getHeader:" + letter + " name:" + getItem(i).getUsername());
+			EMLog.d(TAG, "contactadapter getsection getHeader:" + letter + " name:" + getItem(i).getUsername());
 			int section = list.size() - 1;
 			if (list.get(section) != null && !list.get(section).equals(letter)) {
 				list.add(letter);

@@ -40,6 +40,7 @@ import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.utils.SmileUtils;
 import com.easemob.chatuidemo.utils.UserUtils;
 import com.easemob.util.DateUtils;
+import com.easemob.util.EMLog;
 
 /**
  * 显示所有聊天记录adpater
@@ -47,6 +48,7 @@ import com.easemob.util.DateUtils;
  */
 public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 
+	private static final String TAG = "ChatAllHistoryAdapter";
 	private LayoutInflater inflater;
 	private List<EMConversation> conversationList;
 	private List<EMConversation> copyConversationList;
@@ -185,7 +187,7 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 			digest = getStrng(context, R.string.file);
 			break;
 		default:
-			System.err.println("error, unknow type");
+			EMLog.e(TAG, "unknow type");
 			return "";
 		}
 

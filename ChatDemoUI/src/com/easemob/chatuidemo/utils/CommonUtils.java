@@ -14,15 +14,6 @@
 package com.easemob.chatuidemo.utils;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.easemob.chat.EMMessage;
-import com.easemob.chat.TextMessageBody;
-import com.easemob.chatuidemo.Constant;
-import com.easemob.chatuidemo.DemoApplication;
-import com.easemob.chatuidemo.R;
-import com.easemob.chatuidemo.domain.User;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -30,8 +21,14 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-public class CommonUtils {
+import com.easemob.chat.EMMessage;
+import com.easemob.chat.TextMessageBody;
+import com.easemob.chatuidemo.Constant;
+import com.easemob.chatuidemo.R;
+import com.easemob.util.EMLog;
 
+public class CommonUtils {
+	private static final String TAG = "CommonUtils";
 	/**
 	 * 检测网络是否可用
 	 * 
@@ -107,7 +104,7 @@ public class CommonUtils {
             digest = getString(context, R.string.file);
             break;
         default:
-            System.err.println("error, unknow type");
+            EMLog.e(TAG, "error, unknow type");
             return "";
         }
 
