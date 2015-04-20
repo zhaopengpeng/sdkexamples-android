@@ -203,7 +203,8 @@ public class HXNotifier {
             PendingIntent pendingIntent = PendingIntent.getActivity(appContext, notifyID, msgIntent,PendingIntent.FLAG_UPDATE_CURRENT);
 
             // prepare latest event info section
-            notificationNum++;
+            if(!isForeground)
+                notificationNum++;
             fromUsers.add(message.getFrom());
 
             int fromUsersNum = fromUsers.size();
