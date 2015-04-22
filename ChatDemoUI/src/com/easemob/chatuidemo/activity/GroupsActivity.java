@@ -15,12 +15,15 @@ package com.easemob.chatuidemo.activity;
 
 import java.util.List;
 
+import android.R.anim;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -52,7 +55,9 @@ public class GroupsActivity extends BaseActivity {
 	public static GroupsActivity instance;
 	private SyncListener syncListener;
 	private ProgressDialog pd;
-	
+
+	private SwipeRefreshLayout swipeRefreshLayout;
+
 	class SyncListener implements HXSDKHelper.SyncListener {
 		@Override
 		public void onSyncSucess(final boolean success) {
@@ -62,9 +67,8 @@ public class GroupsActivity extends BaseActivity {
 					if (pd != null) {
 						pd.hide();
 					}
+					swipeRefreshLayout.setRefreshing(false);
 					if (success) {
-						RelativeLayout syncButtonWrapper = (RelativeLayout)findViewById(R.id.wrapper_sync_groups_from_server);
-						syncButtonWrapper.setVisibility(View.GONE);
 						groupListView.setVisibility(View.VISIBLE);
 					} else {
 						if (!GroupsActivity.this.isFinishing()) {
@@ -88,11 +92,42 @@ public class GroupsActivity extends BaseActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.fragment_groups);
-		
+
 		instance = this;
-		inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-		grouplist =	EMGroupManager.getInstance().getAllGroups();
-		groupListView = (ListView)findViewById(R.id.list);
+		inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		grouplist = EMGroupManager.getInstance().getAllGroups();
+		groupListView = (ListView) findViewById(R.id.list);
+
+		swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
+
+		swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light,
+				android.R.color.holo_orange_light, android.R.color.holo_red_light);
+
+		swipeRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
+
+			@Override
+			public void onRefresh() {
+				// TODO Auto-generated method stub
+
+				initProgressDialog();
+				if (pd != null) {
+					pd.show();
+				}
+				new Thread() {
+					@Override
+					public void run() {
+						try {
+							HXSDKHelper.getInstance().getGroupsFromServer();
+							HXPreferenceUtils.getInstance().setSettingSyncGroupsFinished(true);
+						} catch (EaseMobException e) {
+							e.printStackTrace();
+						}
+					}
+				}.start();
+
+			}
+		});
+
 		groupAdapter = new GroupAdapter(this, 1, grouplist);
 		groupListView.setAdapter(groupAdapter);
 		groupListView.setOnItemClickListener(new OnItemClickListener() {
@@ -100,11 +135,11 @@ public class GroupsActivity extends BaseActivity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if (position == groupAdapter.getCount() - 1) {
-					//新建群聊
+					// 新建群聊
 					startActivityForResult(new Intent(GroupsActivity.this, NewGroupActivity.class), 0);
 				} else {
-					
-					//进入群聊
+
+					// 进入群聊
 					Intent intent = new Intent(GroupsActivity.this, ChatActivity.class);
 					// it is group chat
 					intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
@@ -126,42 +161,18 @@ public class GroupsActivity extends BaseActivity {
 				return false;
 			}
 		});
-		
+
 		syncListener = new SyncListener();
 		HXSDKHelper.getInstance().addSyncGroupListener(syncListener);
-		
+
 		EMLog.d(TAG, "isSyncingGroupsFromServer:" + HXSDKHelper.getInstance().isSyncingGroupsFromServer());
-		
-		if (!HXSDKHelper.getInstance().isSyncingGroupsFromServer() && !HXPreferenceUtils.getInstance().getSettingSyncGroupsFinished()) {
-			RelativeLayout syncButtonWrapper = (RelativeLayout)findViewById(R.id.wrapper_sync_groups_from_server);
-			syncButtonWrapper.setVisibility(View.VISIBLE);
+
+		if (!HXSDKHelper.getInstance().isSyncingGroupsFromServer()
+				&& !HXPreferenceUtils.getInstance().getSettingSyncGroupsFinished()) {
 			groupListView.setVisibility(View.GONE);
 		}
-
-		// 如果之前更新群聊没有成功，需要重新更新群聊信息
-		Button syncButton = (Button)findViewById(R.id.sync_groups_from_server);
-		syncButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				initProgressDialog();
-				if (pd != null) {
-					pd.show();
-				}
-				new Thread() {
-					@Override
-					public void run() {
-						try {
-							HXSDKHelper.getInstance().getGroupsFromServer();
-							HXPreferenceUtils.getInstance().setSettingSyncGroupsFinished(true);
-						} catch (EaseMobException e) {
-							e.printStackTrace();
-						}
-					}
-				}.start();
-			}
-		});
 	}
-	
+
 	private void initProgressDialog() {
 		if (pd != null) {
 			return;
@@ -175,19 +186,19 @@ public class GroupsActivity extends BaseActivity {
 			}
 		});
 	}
-	
+
 	/**
 	 * 进入公开群聊列表
 	 */
-	public void onPublicGroups(View view){
+	public void onPublicGroups(View view) {
 		startActivity(new Intent(this, PublicGroupsActivity.class));
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -196,7 +207,7 @@ public class GroupsActivity extends BaseActivity {
 		groupListView.setAdapter(groupAdapter);
 		groupAdapter.notifyDataSetChanged();
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		if (syncListener != null) {
@@ -206,12 +217,13 @@ public class GroupsActivity extends BaseActivity {
 		super.onDestroy();
 		instance = null;
 	}
-	
+
 	/**
 	 * 返回
+	 * 
 	 * @param view
 	 */
-	public void back(View view){
+	public void back(View view) {
 		finish();
 	}
 }
