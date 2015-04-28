@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -32,7 +31,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListView;
 
 import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMGroupManager;
+import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
@@ -61,7 +60,7 @@ public class GroupPickContactsActivity extends BaseActivity {
 			isCreatingNewGroup = true;
 		} else {
 			// 获取此群组的成员列表
-			EMGroup group = EMGroupManager.getInstance().getGroup(groupId);
+			EMGroup group = EMMultiUserChatManager.getInstance().getGroup(groupId);
 			exitingMembers = group.getMembers();
 		}
 		if(exitingMembers == null)

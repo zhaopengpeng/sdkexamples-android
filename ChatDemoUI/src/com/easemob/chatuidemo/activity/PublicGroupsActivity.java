@@ -36,7 +36,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.easemob.chat.EMGroupInfo;
-import com.easemob.chat.EMGroupManager;
+import com.easemob.chat.EMMultiUserChatManager;
+import com.easemob.chat.EMResult;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
 
@@ -59,7 +60,12 @@ public class PublicGroupsActivity extends BaseActivity {
 			public void run() {
 				try {
 					// 从服务器获取所用公开的群聊
-					final List<EMGroupInfo> groupsList = EMGroupManager.getInstance().getAllPublicGroupsFromServer();
+					final EMResult<EMGroupInfo> results = EMMultiUserChatManager.getInstance().fetchPublicGroupsFromServer(20,null);
+					final List<EMGroupInfo> groupsList = results.getList();
+					if(groupsList == null || groupsList.size() < 1){
+					    return;
+					}
+					
 					runOnUiThread(new Runnable() {
 
 						public void run() {

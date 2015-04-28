@@ -25,7 +25,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.easemob.chat.EMGroupManager;
+import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
 
@@ -98,12 +98,11 @@ public class NewGroupActivity extends BaseActivity {
 					try {
 						if(checkBox.isChecked()){
 							//创建公开群，此种方式创建的群，可以自由加入
-//							EMGroupManager.getInstance().createPublicGroup(groupName, desc, members, false);
 							//创建公开群，此种方式创建的群，用户需要申请，等群主同意后才能加入此群
-							EMGroupManager.getInstance().createPublicGroup(groupName, desc, members, true);
+						    EMMultiUserChatManager.getInstance().createPublicGroup(groupName, desc, members, true,200);
 						}else{
 							//创建不公开群
-							EMGroupManager.getInstance().createPrivateGroup(groupName, desc, members, memberCheckbox.isChecked());
+						    EMMultiUserChatManager.getInstance().createPrivateGroup(groupName, desc, members, memberCheckbox.isChecked(),200);
 						}
 						runOnUiThread(new Runnable() {
 							public void run() {

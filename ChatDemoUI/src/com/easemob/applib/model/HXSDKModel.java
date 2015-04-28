@@ -83,7 +83,7 @@ public abstract class HXSDKModel {
      * @return
      */
     public boolean getRequireDeliveryAck(){
-        return false;
+        return true;
     }
     
     /**

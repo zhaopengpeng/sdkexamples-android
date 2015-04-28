@@ -65,17 +65,16 @@ import android.widget.Toast;
 
 import com.easemob.EMError;
 import com.easemob.EMEventListener;
+import com.easemob.EMGroupChangeListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.applib.controller.HXSDKHelper;
-import com.easemob.applib.model.HXNotifier;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMGroupManager;
+import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
-import com.easemob.chat.GroupReomveListener;
 import com.easemob.chat.ImageMessageBody;
 import com.easemob.chat.LocationMessageBody;
 import com.easemob.chat.NormalFileMessageBody;
@@ -331,7 +330,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			findViewById(R.id.container_voice_call).setVisibility(View.GONE);
 			findViewById(R.id.container_video_call).setVisibility(View.GONE);
 			toChatUsername = getIntent().getStringExtra("groupId");
-			group = EMGroupManager.getInstance().getGroup(toChatUsername);
+			group = EMMultiUserChatManager.getInstance().getGroup(toChatUsername);
 			if (group != null)
 				((TextView) findViewById(R.id.name)).setText(group.getGroupName());
 			else
@@ -341,7 +340,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		}
 		conversation = EMChatManager.getInstance().getConversation(toChatUsername);
 		// 把此会话的未读数置为0
-		conversation.resetUnreadMsgCount();
+		conversation.markAllMessagesAsRead();
 
 		// 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
 		// 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
@@ -380,7 +379,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 		// 监听当前会话的群聊解散被T事件
 		groupListener = new GroupListener();
-		EMGroupManager.getInstance().addGroupChangeListener(groupListener);
+		EMMultiUserChatManager.getInstance().addGroupChangeListener(groupListener);
 
 		// show forward message if the message is not null
 		String forward_msg_id = getIntent().getStringExtra("forward_msg_id");
@@ -1236,7 +1235,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	protected void onDestroy() {
 		super.onDestroy();
 		activityInstance = null;
-		EMGroupManager.getInstance().removeGroupChangeListener(groupListener);
+		EMMultiUserChatManager.getInstance().removeGroupChangeListener(groupListener);
 	}
 
 	@Override
@@ -1464,7 +1463,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * 监测群组解散或者被T事件
 	 * 
 	 */
-	class GroupListener extends GroupReomveListener {
+	class GroupListener implements EMGroupChangeListener {
 
 		@Override
 		public void onUserRemoved(final String groupId, String groupName) {
@@ -1498,6 +1497,37 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				}
 			});
 		}
+
+        @Override
+        public void onInvitationReceived(String groupId, String groupName,
+                String inviter, String reason) {            
+        }
+
+        @Override
+        public void onApplicationReceived(String groupId, String groupName,
+                String applyer, String reason) {            
+        }
+
+        @Override
+        public void onApplicationAccept(String groupId, String groupName,
+                String accepter) {
+            
+        }
+
+        @Override
+        public void onApplicationDeclined(String groupId, String groupName,
+                String decliner, String reason) {            
+        }
+
+        @Override
+        public void onInvitationAccpted(String groupId, String inviter,
+                String reason) {            
+        }
+
+        @Override
+        public void onInvitationDeclined(String groupId, String invitee,
+                String reason) {            
+        }
 
 	}
 

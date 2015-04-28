@@ -31,8 +31,8 @@ import android.widget.TextView.BufferType;
 import com.easemob.chat.EMContact;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
+import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chat.ImageMessageBody;
 import com.easemob.chat.TextMessageBody;
 import com.easemob.chatuidemo.Constant;
@@ -90,7 +90,7 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 		EMConversation conversation = getItem(position);
 		// 获取用户username或者群组groupid
 		String username = conversation.getUserName();
-		List<EMGroup> groups = EMGroupManager.getInstance().getAllGroups();
+		List<EMGroup> groups = EMMultiUserChatManager.getInstance().getAllGroups();
 		EMContact contact = null;
 		boolean isGroup = false;
 		for (EMGroup group : groups) {
@@ -252,7 +252,7 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 					final EMConversation value = mOriginalValues.get(i);
 					String username = value.getUserName();
 					
-					EMGroup group = EMGroupManager.getInstance().getGroup(username);
+					EMGroup group = EMMultiUserChatManager.getInstance().getGroup(username);
 					if(group != null){
 						username = group.getGroupName();
 					}

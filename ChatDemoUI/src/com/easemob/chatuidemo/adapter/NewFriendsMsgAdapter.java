@@ -15,8 +15,6 @@ package com.easemob.chatuidemo.adapter;
 
 import java.util.List;
 
-import javax.crypto.spec.IvParameterSpec;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
@@ -33,12 +31,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.easemob.chat.EMChatManager;
-import com.easemob.chat.EMGroupManager;
+import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.db.InviteMessgeDao;
 import com.easemob.chatuidemo.domain.InviteMessage;
 import com.easemob.chatuidemo.domain.InviteMessage.InviteMesageStatus;
-import com.easemob.exceptions.EaseMobException;
 
 public class NewFriendsMsgAdapter extends ArrayAdapter<InviteMessage> {
 
@@ -154,7 +151,7 @@ public class NewFriendsMsgAdapter extends ArrayAdapter<InviteMessage> {
 					if(msg.getGroupId() == null) //同意好友请求
 						EMChatManager.getInstance().acceptInvitation(msg.getFrom());
 					else //同意加群申请
-						EMGroupManager.getInstance().acceptApplication(msg.getFrom(), msg.getGroupId());
+					    EMMultiUserChatManager.getInstance().acceptApplication(msg.getFrom(), msg.getGroupId());
 					((Activity) context).runOnUiThread(new Runnable() {
 
 						@Override
