@@ -115,6 +115,7 @@
     <string name="newchat">the new chat</string>
     <string name="agree">agree</string>
     <string name="Group_chat">group chat:</string>
+    <string name="chat_room">Chat room</string>
     <string name="not_download">Did not download:</string>
     <string name="is_down_please_wait">downloading video, please try again later</string>
     <string name="Exit_the_group_chat">exit the group</string>
@@ -256,4 +257,5 @@
     <string name="The_dissolution_of_chatting_new">The dissolution of chatting</string>
     
     <string name="gorup_not_found">Can not find this group</string>
+    <string name="add_public_group_chat">add chat room</string>
 </resources>

@@ -113,6 +113,10 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 			//群聊item
 		    holder.nameTextview.setText(user.getNick());
 		    holder.avatar.setImageResource(R.drawable.groups_icon);
+		}else if(username.equals(Constant.CHAT_ROOM)){
+            //群聊item
+            holder.nameTextview.setText(user.getNick());
+            holder.avatar.setImageResource(R.drawable.groups_icon);
 		}else{
 		    holder.nameTextview.setText(username);
 		    //设置用户头像

@@ -223,6 +223,7 @@ public class LoginActivity extends BaseActivity {
 		newFriends.setNick(strChat);
 
 		userlist.put(Constant.NEW_FRIENDS_USERNAME, newFriends);
+		
 		// 添加"群聊"
 		User groupUser = new User();
 		String strGroup = getResources().getString(R.string.group_chat);
@@ -230,6 +231,14 @@ public class LoginActivity extends BaseActivity {
 		groupUser.setNick(strGroup);
 		groupUser.setHeader("");
 		userlist.put(Constant.GROUP_USERNAME, groupUser);
+		
+		// 添加"群聊"
+        User chatRoomItem = new User();
+        String chatRoomId = getResources().getString(R.string.chat_room);
+        chatRoomItem.setUsername(Constant.CHAT_ROOM);
+        chatRoomItem.setNick(chatRoomId);
+        groupUser.setHeader("");
+        userlist.put(Constant.CHAT_ROOM, chatRoomItem);
 
 		// 存入内存
 		DemoApplication.getInstance().setContactList(userlist);
