@@ -96,8 +96,8 @@ public class AlertDialog extends BaseActivity {
 		setResult(RESULT_OK,new Intent().putExtra("position", position).
 				putExtra("edittext", editText.getText().toString())
 				/*.putExtra("voicePath", voicePath)*/);
-		if(position != -1)
-			ChatActivity.resendPos = position;
+//		if(position != -1)
+//			ChatActivity.resendPos = position;
 		finish();
 		
 	}
