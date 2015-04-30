@@ -252,6 +252,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener {
 								else
 									messages = conversation.loadMoreGroupMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
 							} catch (Exception e1) {
+								swipeRefreshLayout.setRefreshing(false);
 								return;
 							}
 							if (messages.size() != 0) {
