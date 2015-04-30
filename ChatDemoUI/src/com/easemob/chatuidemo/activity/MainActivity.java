@@ -194,11 +194,8 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	}
 
 	/**
-	 * 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，消息将不会进一步传递。
-	 * 后加入的事件监听会先收到事件的通知
-	 * 
-	 * 如果收到的事件，能够被处理并且不需要其他的监听再处理，可以返回true，否则返回false
-	 */
+	 * 监听事件
+     */
 	@Override
 	public void onEvent(EMNotifierEvent event) {
 		switch (event.getEvent()) {
