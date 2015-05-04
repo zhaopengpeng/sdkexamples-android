@@ -21,12 +21,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMConversation;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.db.InviteMessgeDao;
-import com.easemob.uidata.EMChatManager;
-import com.easemob.uidata.EMConversation;
 import com.easemob.widget.EMConversationListWidget;
 
 /**
@@ -168,7 +168,7 @@ public class ChatAllHistoryFragment extends Fragment implements EMConversationLi
     }
 
 	@Override
-	public void onClick(com.easemob.uidata.EMConversation conversation) {
+	public void onClick(EMConversation conversation) {
 		final String st2 = getResources().getString(R.string.Cant_chat_with_yourself);
         String username = conversation.getUserName();
         if (username.equals(DemoApplication.getInstance().getUserName()))
@@ -186,6 +186,5 @@ public class ChatAllHistoryFragment extends Fragment implements EMConversationLi
             }
             startActivity(intent);
         }
-	}
-	
+	}	
 }

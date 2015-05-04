@@ -149,6 +149,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/MyDialogStyle" >
         </activity>
+        <activity
+            android:name="com.easemob.widget.AlertDialog"
+            android:screenOrientation="portrait"
+            android:theme="@style/MyDialogStyle" >
+        </activity>
         <!-- 显示下载大图页面 -->
         <activity
             android:name=".activity.ShowBigImage"

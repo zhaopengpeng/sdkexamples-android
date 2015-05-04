@@ -73,7 +73,16 @@ public class ChatActivity extends Activity {
 		super.onCreate(bundle);
 		setContentView(R.layout.activity_chat);
 		chatWidget = (EMChatWidget) findViewById(R.id.chat);
-		chatWidget.setUpView(1, "user0");
+		
+		int chatType = getIntent().getIntExtra("chatType", CHATTYPE_SINGLE);
+		String username = "";
+		if (chatType == CHATTYPE_SINGLE) {
+			username = getIntent().getStringExtra("userId");
+		} else {
+			username = getIntent().getStringExtra("groupId");
+		}
+		chatWidget.setUpView(chatType, username);
+
 		activityInstance = this;
 	}
 	
