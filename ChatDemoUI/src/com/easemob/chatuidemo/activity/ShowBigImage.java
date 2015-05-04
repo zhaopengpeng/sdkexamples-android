@@ -29,13 +29,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
 
-import com.easemob.chat.EMChatConfig;
+import com.easemob.EMCallBack;
+import com.easemob.chat.EMChatManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.task.LoadLocalBigImgTask;
 import com.easemob.chatuidemo.utils.ImageCache;
 import com.easemob.chatuidemo.widget.photoview.PhotoView;
-import com.easemob.cloud.CloudOperationCallback;
-import com.easemob.cloud.HttpFileManager;
 import com.easemob.util.EMLog;
 import com.easemob.util.ImageUtils;
 import com.easemob.util.PathUtil;
@@ -135,9 +134,8 @@ public class ShowBigImage extends BaseActivity {
 		pd.setMessage(str1);
 		pd.show();
 		localFilePath = getLocalFilePath(remoteFilePath);
-		final HttpFileManager httpFileMgr = new HttpFileManager(this, EMChatConfig.getInstance().getStorageUrl());
-		final CloudOperationCallback callback = new CloudOperationCallback() {
-			public void onSuccess(String resultMsg) {
+		final EMCallBack callback = new EMCallBack() {
+			public void onSuccess() {
 
 				runOnUiThread(new Runnable() {
 					@Override
@@ -162,7 +160,7 @@ public class ShowBigImage extends BaseActivity {
 				});
 			}
 
-			public void onError(String msg) {
+			public void onError(int error, String msg) {
 				EMLog.e(TAG, "offline file transfer error:" + msg);
 				File file = new File(localFilePath);
 				if (file.exists()&&file.isFile()) {
@@ -177,7 +175,7 @@ public class ShowBigImage extends BaseActivity {
 				});
 			}
 
-			public void onProgress(final int progress) {
+			public void onProgress(final int progress, String status) {
 				EMLog.d(TAG, "Progress: " + progress);
 				final String str2 = getResources().getString(R.string.Download_the_pictures_new);
 				runOnUiThread(new Runnable() {
@@ -190,12 +188,8 @@ public class ShowBigImage extends BaseActivity {
 			}
 		};
 
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				httpFileMgr.downloadFile(remoteFilePath, localFilePath, headers, callback);
-			}
-		}).start();
+	    EMChatManager.getInstance().downloadFile(remoteFilePath, localFilePath, headers, callback);
+
 	}
 
 	@Override
