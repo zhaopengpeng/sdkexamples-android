@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -38,7 +37,7 @@ import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ContactAdapter;
 import com.easemob.chatuidemo.domain.User;
-import com.easemob.chatuidemo.widget.Sidebar;
+import com.easemob.widget.Sidebar;
 
 public class GroupPickContactsActivity extends BaseActivity {
 	private ListView listView;

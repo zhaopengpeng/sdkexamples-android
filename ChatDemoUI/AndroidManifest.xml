@@ -132,14 +132,14 @@
         </activity>
         <!-- 转发消息用户列表页面 -->
         <activity
-            android:name=".activity.ForwardMessageActivity"
+            android:name="com.easemob.widget.activity.ForwardMessageActivity"
             android:screenOrientation="portrait"
             android:theme="@style/horizontal_slide"
             android:windowSoftInputMode="adjustPan" >
         </activity>
         <!-- 自定义的contextmenu -->
         <activity
-            android:name=".activity.ContextMenu"
+            android:name="com.easemob.widget.activity.ContextMenu"
             android:screenOrientation="portrait"
             android:theme="@style/MyDialogStyle" >
         </activity>

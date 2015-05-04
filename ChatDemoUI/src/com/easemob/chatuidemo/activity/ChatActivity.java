@@ -25,7 +25,7 @@ import com.easemob.widget.EMChatWidget;
  * 聊天页面
  * 
  */
-public class ChatActivity extends Activity {
+public class ChatActivity extends Activity implements EMChatWidget.EMChatWidgetUser {
 	private static final String TAG = "ChatActivity";
 	private static final int REQUEST_CODE_EMPTY_HISTORY = 2;
 	public static final int REQUEST_CODE_CONTEXT_MENU = 3;
@@ -82,7 +82,8 @@ public class ChatActivity extends Activity {
 			username = getIntent().getStringExtra("groupId");
 		}
 		chatWidget.setUpView(chatType, username);
-
+		chatWidget.setUser(this);
+		
 		activityInstance = this;
 	}
 	
@@ -93,7 +94,7 @@ public class ChatActivity extends Activity {
 
 	@Override
 	public void onDestroy() {
-		this.activityInstance = null;
+		ChatActivity.activityInstance = null;
 		super.onDestroy();
 	}
 
@@ -103,5 +104,17 @@ public class ChatActivity extends Activity {
 	
 	public ListView getListView() {
 		return null;
+	}
+	
+	public void onGroupDetail(String groupId) {
+		// TODO, EMWidget
+		startActivityForResult((new Intent(this, GroupDetailsActivity.class).putExtra("groupId", groupId)),
+				REQUEST_CODE_GROUP_DETAIL);
+	}
+	
+	@Override
+	public void onPause() {
+		chatWidget.onPause();
+		super.onPause();
 	}
 }
