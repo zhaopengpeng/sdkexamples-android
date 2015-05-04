@@ -45,34 +45,31 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.easemob.chat.EMContactManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
-import com.easemob.chatuidemo.adapter.ContactAdapter;
 import com.easemob.chatuidemo.db.InviteMessgeDao;
 import com.easemob.chatuidemo.db.UserDao;
 import com.easemob.chatuidemo.domain.User;
-import com.easemob.chatuidemo.widget.Sidebar;
 import com.easemob.exceptions.EaseMobException;
+import com.easemob.uidata.EMContact;
+import com.easemob.widget.EMContactListWidget;
 
 /**
  * 联系人列表页
  * 
  */
-public class ContactlistFragment extends Fragment {
-	private ContactAdapter adapter;
+public class ContactlistFragment extends Fragment implements EMContactListWidget.EMContactListWidgetUser {
 	private List<User> contactList;
-	private ListView listView;
+	private EMContactListWidget contactListWidget;
 	private boolean hidden;
-	private Sidebar sidebar;
 	private InputMethodManager inputMethodManager;
 	private List<String> blackList;
-	ImageButton clearSearch;
-	EditText query;
+	private ImageButton clearSearch;
+	private EditText query;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -86,22 +83,19 @@ public class ContactlistFragment extends Fragment {
 		if(savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false))
 		    return;
 		inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-		listView = (ListView) getView().findViewById(R.id.list);
-		sidebar = (Sidebar) getView().findViewById(R.id.sidebar);
-		sidebar.setListView(listView);
+		contactListWidget = (EMContactListWidget) getView().findViewById(R.id.contact_widget);
 		//黑名单列表
 		blackList = EMContactManager.getInstance().getBlackListUsernames();
 		contactList = new ArrayList<User>();
 		// 获取设置contactlist
-		getContactList();
-		
+	
 		//搜索框
 		query = (EditText) getView().findViewById(R.id.query);
 		query.setHint(R.string.search);
 		clearSearch = (ImageButton) getView().findViewById(R.id.search_clear);
 		query.addTextChangedListener(new TextWatcher() {
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				adapter.getFilter().filter(s);
+				contactListWidget.filter(s);
 				if (s.length() > 0) {
 					clearSearch.setVisibility(View.VISIBLE);
 				} else {
@@ -124,29 +118,9 @@ public class ContactlistFragment extends Fragment {
 			}
 		});
 		
-		// 设置adapter
-		adapter = new ContactAdapter(getActivity(), R.layout.row_contact, contactList);
-		listView.setAdapter(adapter);
-		listView.setOnItemClickListener(new OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				String username = adapter.getItem(position).getUsername();
-				if (Constant.NEW_FRIENDS_USERNAME.equals(username)) {
-					// 进入申请与通知页面
-					User user = DemoApplication.getInstance().getContactList().get(Constant.NEW_FRIENDS_USERNAME);
-					user.setUnreadMsgCount(0);
-					startActivity(new Intent(getActivity(), NewFriendsMsgActivity.class));
-				} else if (Constant.GROUP_USERNAME.equals(username)) {
-					// 进入群聊列表页面
-					startActivity(new Intent(getActivity(), GroupsActivity.class));
-				} else {
-					// demo中直接进入聊天页面，实际一般是进入用户详情页
-					startActivity(new Intent(getActivity(), ChatActivity.class).putExtra("userId", adapter.getItem(position).getUsername()));
-				}
-			}
-		});
-		listView.setOnTouchListener(new OnTouchListener() {
+		contactListWidget.setUser(this);
+		
+		contactListWidget.getListView().setOnTouchListener(new OnTouchListener() {
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -169,7 +143,7 @@ public class ContactlistFragment extends Fragment {
 				startActivity(new Intent(getActivity(), AddContactActivity.class));
 			}
 		});
-		registerForContextMenu(listView);
+		registerForContextMenu(contactListWidget.getListView());
 
 	}
 
@@ -185,7 +159,7 @@ public class ContactlistFragment extends Fragment {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.delete_contact) {
-			User tobeDeleteUser = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
+			User tobeDeleteUser = (User)contactListWidget.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
 			// 删除此联系人
 			deleteContact(tobeDeleteUser);
 			// 删除相关的邀请消息
@@ -193,7 +167,7 @@ public class ContactlistFragment extends Fragment {
 			dao.deleteMessage(tobeDeleteUser.getUsername());
 			return true;
 		}else if(item.getItemId() == R.id.add_to_blacklist){
-			User user = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
+			User user = (User)contactListWidget.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
 			moveToBlacklist(user.getUsername());
 			return true;
 		}
@@ -240,8 +214,7 @@ public class ContactlistFragment extends Fragment {
 					getActivity().runOnUiThread(new Runnable() {
 						public void run() {
 							pd.dismiss();
-							adapter.remove(tobeDeleteUser);
-							adapter.notifyDataSetChanged();
+							contactListWidget.refresh();
 
 						}
 					});
@@ -303,45 +276,13 @@ public class ContactlistFragment extends Fragment {
 			// 可能会在子线程中调到这方法
 			getActivity().runOnUiThread(new Runnable() {
 				public void run() {
-					getContactList();
-					adapter.notifyDataSetChanged();
-
+//					getContactList();
+					contactListWidget.refresh();
 				}
 			});
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * 获取联系人列表，并过滤掉黑名单和排序
-	 */
-	private void getContactList() {
-		contactList.clear();
-		//获取本地好友列表
-		Map<String, User> users = DemoApplication.getInstance().getContactList();
-		Iterator<Entry<String, User>> iterator = users.entrySet().iterator();
-		while (iterator.hasNext()) {
-			Entry<String, User> entry = iterator.next();
-			if (!entry.getKey().equals(Constant.NEW_FRIENDS_USERNAME) && !entry.getKey().equals(Constant.GROUP_USERNAME)
-					&& !blackList.contains(entry.getKey()))
-				contactList.add(entry.getValue());
-		}
-		// 排序
-		Collections.sort(contactList, new Comparator<User>() {
-
-			@Override
-			public int compare(User lhs, User rhs) {
-				return lhs.getUsername().compareTo(rhs.getUsername());
-			}
-		});
-
-		// 加入"申请与通知"和"群聊"
-		if(users.get(Constant.GROUP_USERNAME) != null)
-		    contactList.add(0, users.get(Constant.GROUP_USERNAME));
-		// 把"申请与通知"添加到首位
-		if(users.get(Constant.NEW_FRIENDS_USERNAME) != null)
-		    contactList.add(0, users.get(Constant.NEW_FRIENDS_USERNAME));
 	}
 	
 	void hideSoftKeyboard() {
@@ -361,5 +302,22 @@ public class ContactlistFragment extends Fragment {
 	    	outState.putBoolean(Constant.ACCOUNT_REMOVED, true);
 	    }
 	    
+	}
+
+	@Override
+	public void onClick(int position, Object obj) {
+		String username = ((EMContact)contactListWidget.getItem(position)).getUsername();
+		if (Constant.NEW_FRIENDS_USERNAME.equals(username)) {
+			// 进入申请与通知页面
+			User user = DemoApplication.getInstance().getContactList().get(Constant.NEW_FRIENDS_USERNAME);
+			user.setUnreadMsgCount(0);
+			startActivity(new Intent(getActivity(), NewFriendsMsgActivity.class));
+		} else if (Constant.GROUP_USERNAME.equals(username)) {
+			// 进入群聊列表页面
+			startActivity(new Intent(getActivity(), GroupsActivity.class));
+		} else {
+			// demo中直接进入聊天页面，实际一般是进入用户详情页
+			startActivity(new Intent(getActivity(), ChatActivity.class).putExtra("userId", ((EMContact)contactListWidget.getItem(position)).getUsername()));
+		}
 	}
 }
