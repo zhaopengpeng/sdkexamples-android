@@ -116,7 +116,7 @@ public class BlacklistActivity extends Activity {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			if (convertView == null) {
-				convertView = View.inflate(getContext(), R.layout.row_contact, null);
+				convertView = View.inflate(getContext(), R.layout.em_row_contact, null);
 			}
 
 			TextView name = (TextView) convertView.findViewById(R.id.name);

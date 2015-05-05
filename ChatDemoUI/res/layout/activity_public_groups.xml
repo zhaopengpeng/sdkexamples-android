@@ -30,7 +30,7 @@
             android:layout_marginRight="7dp" />
     </RelativeLayout>
 	
-    <include layout="@layout/search_bar" />
+    <include layout="@layout/em_search_bar" />
     
     <ListView
         android:id="@+id/list"
