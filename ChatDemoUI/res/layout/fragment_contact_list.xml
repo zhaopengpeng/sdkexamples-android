@@ -36,7 +36,7 @@
         android:id="@+id/search_bar_view"
         layout="@layout/search_bar_with_padding"/>
 
-    <com.easemob.widget.EMContactListWidget
+    <com.easemob.chatuidemo.widget.ContactListWidget
         android:id="@+id/contact_widget"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
