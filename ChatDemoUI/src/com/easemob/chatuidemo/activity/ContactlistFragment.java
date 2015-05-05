@@ -137,7 +137,6 @@ public class ContactlistFragment extends Fragment implements EMContactListWidget
 			}
 		});
 		registerForContextMenu(contactListWidget.getListView());
-
 	}
 
 	@Override
@@ -294,11 +293,10 @@ public class ContactlistFragment extends Fragment implements EMContactListWidget
 	    }else if(((MainActivity)getActivity()).getCurrentAccountRemoved()){
 	    	outState.putBoolean(Constant.ACCOUNT_REMOVED, true);
 	    }
-	    
 	}
 
 	@Override
-	public void onClick(int position, Object obj) {
+	public void onItemClick(int position, Object obj) {
 		String username = ((EMContact)contactListWidget.getItem(position)).getUsername();
 		if (Constant.NEW_FRIENDS_USERNAME.equals(username)) {
 			// 进入申请与通知页面
@@ -313,4 +311,5 @@ public class ContactlistFragment extends Fragment implements EMContactListWidget
 			startActivity(new Intent(getActivity(), ChatActivity.class).putExtra("userId", ((EMContact)contactListWidget.getItem(position)).getUsername()));
 		}
 	}
+
 }
