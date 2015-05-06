@@ -40,7 +40,7 @@ import com.easemob.chatuidemo.activity.ChatActivity;
 import com.easemob.chatuidemo.activity.MainActivity;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.receiver.CallReceiver;
-import com.easemob.chatuidemo.utils.CommonUtils;
+import com.easemob.ui.utils.CommonUtils;
 import com.easemob.util.EMLog;
 import com.easemob.util.EasyUtils;
 

@@ -32,6 +32,7 @@ public class ContactListWidget extends EMContactListWidget {
 		List<User> contactList = new ArrayList<User>();
 		for (com.easemob.chatuidemo.domain.User user : DemoApplication.getInstance().getContactList().values()) {
 			User temp = new User(user.getUsername());
+			temp.setHeader(user.getHeader());
 			contactList.add(temp);
 		}
 		return contactList;

@@ -41,10 +41,10 @@ import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.db.UserDao;
 import com.easemob.chatuidemo.domain.User;
-import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.EMLog;
 import com.easemob.util.HanziToPinyin;
+import com.easemob.util.NetUtils;
 
 /**
  * 登陆页面
@@ -106,7 +106,7 @@ public class LoginActivity extends BaseActivity {
 	 * @param view
 	 */
 	public void login(View view) {
-		if (!CommonUtils.isNetWorkConnected(this)) {
+		if (!NetUtils.hasNetwork(this)) {
 			Toast.makeText(this, R.string.network_isnot_available, Toast.LENGTH_SHORT).show();
 			return;
 		}
@@ -217,20 +217,20 @@ public class LoginActivity extends BaseActivity {
 			setUserHearder(username, user);
 			userlist.put(username, user);
 		}
-		// 添加user"申请与通知"
-		User newFriends = new User();
-		newFriends.setUsername(Constant.NEW_FRIENDS_USERNAME);
-		String strChat = getResources().getString(R.string.Application_and_notify);
-		newFriends.setNick(strChat);
-
-		userlist.put(Constant.NEW_FRIENDS_USERNAME, newFriends);
-		// 添加"群聊"
-		User groupUser = new User();
-		String strGroup = getResources().getString(R.string.group_chat);
-		groupUser.setUsername(Constant.GROUP_USERNAME);
-		groupUser.setNick(strGroup);
-		groupUser.setHeader("");
-		userlist.put(Constant.GROUP_USERNAME, groupUser);
+//		// 添加user"申请与通知"
+//		User newFriends = new User();
+//		newFriends.setUsername(Constant.NEW_FRIENDS_USERNAME);
+//		String strChat = getResources().getString(R.string.Application_and_notify);
+//		newFriends.setNick(strChat);
+//
+//		userlist.put(Constant.NEW_FRIENDS_USERNAME, newFriends);
+//		// 添加"群聊"
+//		User groupUser = new User();
+//		String strGroup = getResources().getString(R.string.group_chat);
+//		groupUser.setUsername(Constant.GROUP_USERNAME);
+//		groupUser.setNick(strGroup);
+//		groupUser.setHeader("");
+//		userlist.put(Constant.GROUP_USERNAME, groupUser);
 
 		// 存入内存
 		DemoApplication.getInstance().setContactList(userlist);

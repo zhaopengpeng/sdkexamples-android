@@ -156,7 +156,7 @@
         </activity>
         <!-- 显示下载大图页面 -->
         <activity
-            android:name=".activity.ShowBigImage"
+            android:name="com.easemob.widget.activity.ShowImageActivity"
             android:screenOrientation="portrait"
             android:theme="@style/horizontal_slide" >
         </activity>
@@ -212,7 +212,7 @@
             android:windowSoftInputMode="stateVisible" >
         </activity>
         <activity
-            android:name=".activity.ShowVideoActivity"
+            android:name="com.easemob.widget.activity.ShowVideoActivity"
             android:screenOrientation="portrait"
             android:theme="@style/horizontal_slide"
             android:windowSoftInputMode="stateAlwaysHidden" >
@@ -220,12 +220,6 @@
         <!-- choose video -->
         <activity
             android:name=".activity.ImageGridActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/horizontal_slide"
-            android:windowSoftInputMode="stateAlwaysHidden" >
-        </activity>
-        <activity
-            android:name=".activity.RecorderVideoActivity"
             android:screenOrientation="portrait"
             android:theme="@style/horizontal_slide"
             android:windowSoftInputMode="stateAlwaysHidden" >

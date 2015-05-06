@@ -13,10 +13,7 @@
  */
 package com.easemob.chatuidemo.activity;
 
-import java.io.File;
-
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,9 +23,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.easemob.chatuidemo.R;
-import com.easemob.chatuidemo.task.DownloadImageTask;
-import com.easemob.chatuidemo.utils.ImageCache;
-import com.easemob.util.ImageUtils;
+//import com.easemob.chatuidemo.task.DownloadImageTask;
 
 public class AlertDialog extends BaseActivity {
 	private TextView mTextView;
@@ -71,21 +66,21 @@ public class AlertDialog extends BaseActivity {
 		}
 		if(isCanceShow)
 			mButton.setVisibility(View.VISIBLE);
-		if(path != null){
-			 //优先拿大图，没有去取缩略图
-			if(!new File(path).exists())
-				path = DownloadImageTask.getThumbnailImagePath(path);
-		    imageView.setVisibility(View.VISIBLE);
-		    ((TextView)findViewById(R.id.alert_message)).setVisibility(View.GONE);
-		    if(ImageCache.getInstance().get(path) != null){
-		        imageView.setImageBitmap(ImageCache.getInstance().get(path));
-		    }else{
-		        Bitmap bm = ImageUtils.decodeScaleImage(path, 150, 150);
-		        imageView.setImageBitmap(bm);
-		        ImageCache.getInstance().put(path, bm);
-		    }
-		    
-		}
+//		if(path != null){
+//			 //优先拿大图，没有去取缩略图
+//			if(!new File(path).exists())
+//				path = DownloadImageTask.getThumbnailImagePath(path);
+//		    imageView.setVisibility(View.VISIBLE);
+//		    ((TextView)findViewById(R.id.alert_message)).setVisibility(View.GONE);
+//		    if(ImageCache.getInstance().get(path) != null){
+//		        imageView.setImageBitmap(ImageCache.getInstance().get(path));
+//		    }else{
+//		        Bitmap bm = ImageUtils.decodeScaleImage(path, 150, 150);
+//		        imageView.setImageBitmap(bm);
+//		        ImageCache.getInstance().put(path, bm);
+//		    }
+//		    
+//		}
 		if(isEditextShow){
 			editText.setVisibility(View.VISIBLE);
 			editText.setText(edit_text);
