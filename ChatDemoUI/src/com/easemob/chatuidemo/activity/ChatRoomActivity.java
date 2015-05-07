@@ -19,24 +19,36 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
+import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ChatRoomAdapter;
-import com.easemob.chatuidemo.adapter.GroupAdapter;
 
 public class ChatRoomActivity extends BaseActivity {
 	private ListView chatListView;
-	protected List<EMGroup> grouplist;
+	protected List<EMChatRoom> roomList;
 	private ChatRoomAdapter chatRoomAdapter;
 	private InputMethodManager inputMethodManager;
 	public static ChatRoomActivity instance;
@@ -48,9 +60,9 @@ public class ChatRoomActivity extends BaseActivity {
 
 		instance = this;
 		inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		grouplist = EMMultiUserChatManager.getInstance().getAllGroups();
+		roomList = EMMultiUserChatManager.getInstance().getAllChatRooms();
 		chatListView = (ListView) findViewById(R.id.list);
-		chatRoomAdapter = new ChatRoomAdapter(this, 1, grouplist);
+		chatRoomAdapter = new ChatRoomAdapter(this, 1, roomList);
 		chatListView.setAdapter(chatRoomAdapter);
 		chatListView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -58,18 +70,42 @@ public class ChatRoomActivity extends BaseActivity {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if(position == 1) {
 					// 添加公开群
-					startActivityForResult(new Intent(ChatRoomActivity.this, PublicGroupsActivity.class), 0);
+					startActivityForResult(new Intent(ChatRoomActivity.this, PublicChatRoomsActivity.class), 0);
 				} else {
 					// 进入群聊
 					Intent intent = new Intent(ChatRoomActivity.this, ChatActivity.class);
 					// it is group chat
-					intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
-					intent.putExtra("groupId", chatRoomAdapter.getItem(position - 2).getGroupId());
+					intent.putExtra("chatType", ChatActivity.CHATTYPE_CHATROOM);
+					intent.putExtra("groupId", chatRoomAdapter.getItem(position - 2).getId());
 					startActivityForResult(intent, 0);
 				}
 			}
 
 		});
+		
+		// TODO: we need more official UI, but for now, for test purpose
+		chatListView.setOnItemLongClickListener(new OnItemLongClickListener(){
+
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view,
+                    int position, long id) {
+                if(position > 1){
+                    final  String roomId = chatRoomAdapter.getItem(position - 2).getId();
+                    
+                    new Thread(){
+                        @Override
+                        public void run(){
+                            EMMultiUserChatManager.getInstance().leaveChatRoom(roomId);
+                        }
+                    }.start();
+                    
+                    return true;
+                }
+                return false;
+            }
+		    
+		});
+		
 		chatListView.setOnTouchListener(new OnTouchListener() {
 
 			@Override
@@ -99,8 +135,8 @@ public class ChatRoomActivity extends BaseActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		grouplist = EMMultiUserChatManager.getInstance().getAllGroups();
-		chatRoomAdapter = new ChatRoomAdapter(this, 1, grouplist);
+		roomList = EMMultiUserChatManager.getInstance().getAllChatRooms();
+		chatRoomAdapter = new ChatRoomAdapter(this, 1, roomList);
 		chatListView.setAdapter(chatRoomAdapter);
 		chatRoomAdapter.notifyDataSetChanged();
 	}

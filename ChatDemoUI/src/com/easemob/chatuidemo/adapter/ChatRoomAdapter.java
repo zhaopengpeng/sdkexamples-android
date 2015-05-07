@@ -29,15 +29,16 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMGroup;
 import com.easemob.chatuidemo.R;
 
-public class ChatRoomAdapter extends ArrayAdapter<EMGroup> {
+public class ChatRoomAdapter extends ArrayAdapter<EMChatRoom> {
 
 	private LayoutInflater inflater;
 	private String addChatRoomString;
 
-	public ChatRoomAdapter(Context context, int res, List<EMGroup> groups) {
+	public ChatRoomAdapter(Context context, int res, List<EMChatRoom> groups) {
 		super(context, res, groups);
 		this.inflater = LayoutInflater.from(context);
 		addChatRoomString = context.getResources().getString(R.string.add_public_chat_room);
@@ -101,7 +102,7 @@ public class ChatRoomAdapter extends ArrayAdapter<EMGroup> {
 			if (convertView == null) {
 				convertView = inflater.inflate(R.layout.row_group, null);
 			}
-			((TextView) convertView.findViewById(R.id.name)).setText(getItem(position - 2).getGroupName());
+			((TextView) convertView.findViewById(R.id.name)).setText(getItem(position - 2).getName());
 
 		}
 

@@ -139,6 +139,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 	public static final int CHATTYPE_SINGLE = 1;
 	public static final int CHATTYPE_GROUP = 2;
+	public static final int CHATTYPE_CHATROOM = 3;
 
 	public static final String COPY_IMAGE = "EASEMOBIMG";
 	private View recordingContainer;
@@ -593,7 +594,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
             
             String username = null;
             //群组消息
-            if(message.getChatType() == ChatType.GroupChat){
+            if(message.getChatType() == ChatType.GroupChat || message.getChatType() == ChatType.ChatRoom){
                 username = message.getTo();
             }
             else{
@@ -719,8 +720,12 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		if (content.length() > 0) {
 			EMMessage message = EMMessage.createSendMessage(EMMessage.Type.TXT);
 			// 如果是群聊，设置chattype,默认是单聊
-			if (chatType == CHATTYPE_GROUP)
-				message.setChatType(ChatType.GroupChat);
+			if (chatType == CHATTYPE_GROUP){
+			    message.setChatType(ChatType.GroupChat);
+			}else if(chatType == CHATTYPE_CHATROOM){
+			    message.setChatType(ChatType.ChatRoom);
+			}
+			
 			TextMessageBody txtBody = new TextMessageBody(content);
 			// 设置消息body
 			message.addBody(txtBody);
