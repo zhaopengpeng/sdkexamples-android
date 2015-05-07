@@ -206,28 +206,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                     String inviter, String reason) {
                 showToast(" Invitation was received from : " + inviter + " to the room : " + roomName + " with roomID : " + roomName + " reason : " + reason);
             }
-
-            @Override
-            public void onApplicationReceived(String roomId, String roomName,
-                    String applyer, String reason) {
-                // TODO Auto-generated method stub
-                
-            }
-
-            @Override
-            public void onApplicationAccepted(String roomId, String roomName,
-                    String accepter) {
-                // TODO Auto-generated method stub
-                
-            }
-
-            @Override
-            public void onApplicationDeclined(String roomId, String roomName,
-                    String decliner, String reason) {
-                // TODO Auto-generated method stub
-                
-            }
-
+ 
             @Override
             public void onChatRoomDestroyed(String roomId, String roomName) {
                 showToast(" room : " + roomId + " with room name : " + roomName + " was destroyed");
