@@ -185,6 +185,14 @@
             android:theme="@style/horizontal_slide"
             android:windowSoftInputMode="adjustPan" >
         </activity>
+        
+        <activity
+            android:name=".activity.PublicChatRoomsActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/horizontal_slide"
+            android:windowSoftInputMode="adjustPan" >
+        </activity>
+        
         <!-- 语音通话 -->
         <activity
             android:name=".activity.VoiceCallActivity"
