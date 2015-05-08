@@ -255,7 +255,6 @@ public class LoginActivity extends BaseActivity {
 
 		// 获取群聊列表(群聊里只有groupid和groupname等简单信息，不包含members),sdk会把群组存入到内存和db中
 		EMMultiUserChatManager.getInstance().fetchJoinedGroupsFromServer();
-		EMMultiUserChatManager.getInstance().fetchJoinedChatRoomsFromServer();
 	}
 
 	/**
