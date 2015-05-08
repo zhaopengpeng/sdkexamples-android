@@ -283,7 +283,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 
             }
         };
-		EMChatManager.getInstance().addVoiceCallStateChangeListener(callStateListener);
+		EMChatManager.getInstance().addCallStateChangeListener(callStateListener);
 	}
 
 	@Override
@@ -303,23 +303,24 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 			break;
 
 		case R.id.btn_answer_call: // 接听电话
-			comingBtnContainer.setVisibility(View.INVISIBLE);
-			hangupBtn.setVisibility(View.VISIBLE);
-			voiceContronlLayout.setVisibility(View.VISIBLE);
-			if (ringtone != null)
-				ringtone.stop();
-			closeSpeakerOn();
+		    if (ringtone != null)
+                ringtone.stop();
 			if (isInComingCall) {
 				try {
-					isAnswered = true;
 					EMChatManager.getInstance().answerCall();
+					isAnswered = true;
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					saveCallRecord(0);
 					finish();
+					return;
 				}
 			}
+			comingBtnContainer.setVisibility(View.INVISIBLE);
+            hangupBtn.setVisibility(View.VISIBLE);
+            voiceContronlLayout.setVisibility(View.VISIBLE);
+            closeSpeakerOn();
 			break;
 
 		case R.id.btn_hangup_call: // 挂断电话
@@ -327,6 +328,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 				soundPool.stop(streamID);
 			endCallTriggerByMe = true;
 			try {
+			    callStateTextView.setText("正在挂断...");
 				EMChatManager.getInstance().endCall();
 			} catch (Exception e) {
 				e.printStackTrace();

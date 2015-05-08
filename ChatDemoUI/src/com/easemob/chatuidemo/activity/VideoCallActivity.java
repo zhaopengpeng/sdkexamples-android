@@ -381,29 +381,29 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
             break;
 
         case R.id.btn_answer_call: // 接听电话
-            comingBtnContainer.setVisibility(View.INVISIBLE);
-            hangupBtn.setVisibility(View.VISIBLE);
-            voiceContronlLayout.setVisibility(View.VISIBLE);
-            localSurface.setVisibility(View.VISIBLE);
             if (ringtone != null)
                 ringtone.stop();
-
             if (isInComingCall) {
                 try {
-                    isAnswered = true;
                     EMChatManager.getInstance().answerCall();
                     cameraHelper.setStartFlag(true);
 
                     openSpeakerOn();
                     handsFreeImage.setImageResource(R.drawable.icon_speaker_on);
+                    isAnswered = true;
                     isHandsfreeState = true;
                 } catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                     saveCallRecord(1);
                     finish();
+                    return;
                 }
             }
+            comingBtnContainer.setVisibility(View.INVISIBLE);
+            hangupBtn.setVisibility(View.VISIBLE);
+            voiceContronlLayout.setVisibility(View.VISIBLE);
+            localSurface.setVisibility(View.VISIBLE);
             break;
 
         case R.id.btn_hangup_call: // 挂断电话
