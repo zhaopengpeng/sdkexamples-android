@@ -30,8 +30,8 @@ import com.easemob.EMEventListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.applib.model.HXNotifier;
-import com.easemob.applib.model.HXSDKModel;
 import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
+import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
@@ -113,13 +113,12 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             
             @Override
             public void onEvent(EMNotifierEvent event) {
+                EMMessage message = (EMMessage)event.getData();
+                EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
                 
                 switch (event.getEvent()) {
                 case EventNewMessage:
                 {
-                    EMMessage message = (EMMessage)event.getData();
-                    EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
-                    
                     //应用在后台，不需要刷新UI,通知栏提示新消息
                     if(activityList.size() <= 0){
                         HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
@@ -131,8 +130,6 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 // so be careful of this
                 case EventNewCMDMessage:
                 {
-                    EMMessage message = (EMMessage)event.getData();
-                    EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
                     
                     EMLog.d(TAG, "收到透传消息");
                     //获取消息body
@@ -165,6 +162,12 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                     
                     break;
                 }
+                case EventDeliveryAck:
+                    message.setDelivered(true);
+                    break;
+                case EventReadAck:
+                    message.setAcked(true);
+                    break;
                 // add other events in case you are interested in
                 default:
                     break;
