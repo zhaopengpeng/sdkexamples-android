@@ -46,8 +46,10 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
@@ -58,12 +60,14 @@ import com.easemob.chatuidemo.db.UserDao;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.widget.Sidebar;
 import com.easemob.exceptions.EaseMobException;
+import com.easemob.util.EMLog;
 
 /**
  * 联系人列表页
  * 
  */
 public class ContactlistFragment extends Fragment {
+	public static final String TAG = "ContactlistFragment";
 	private ContactAdapter adapter;
 	private List<User> contactList;
 	private ListView listView;
@@ -73,7 +77,27 @@ public class ContactlistFragment extends Fragment {
 	private List<String> blackList;
 	ImageButton clearSearch;
 	EditText query;
+	SyncListener syncListener;
+	View progressBar;
 
+	class SyncListener implements HXSDKHelper.SyncListener {
+		@Override
+		public void onSyncSucess(final boolean success) {
+			EMLog.d(TAG, "onSyncGroupsFinish success:" + success);
+			ContactlistFragment.this.getActivity().runOnUiThread(new Runnable() {
+				public void run() {
+					if (success) {
+						refresh();
+					} else {
+						String s1 = getResources().getString(R.string.get_failed_please_check);
+						Toast.makeText(getActivity(), s1, 1).show();
+					}
+					progressBar.setVisibility(View.GONE);
+				}
+			});
+		}
+	}
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_contact_list, container, false);
@@ -173,12 +197,24 @@ public class ContactlistFragment extends Fragment {
 			}
 		});
 		registerForContextMenu(listView);
-
+		
+		progressBar = (View) getView().findViewById(R.id.progress_bar);
+		
+		if (HXSDKHelper.getInstance().isSyncingContactsFromServer()) {
+			progressBar.setVisibility(View.VISIBLE);
+		} else {
+			progressBar.setVisibility(View.GONE);
+		}
+		
+		syncListener = new SyncListener();
+		HXSDKHelper.getInstance().addSyncContactListener(syncListener);
 	}
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
+		// 不生成MainActivity所在的ContextMenu
+		// super.onCreateContextMenu(menu, v, menuInfo);
+		
 		// 长按前两个不弹menu
 		if (((AdapterContextMenuInfo) menuInfo).position > 1) {
 			getActivity().getMenuInflater().inflate(R.menu.context_contact_list, menu);
@@ -308,11 +344,29 @@ public class ContactlistFragment extends Fragment {
 				public void run() {
 					getContactList();
 					adapter.notifyDataSetChanged();
-
 				}
 			});
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void onDestroy() {
+		if (syncListener != null) {
+			HXSDKHelper.getInstance().removeSyncContactListener(syncListener);
+			syncListener = null;
+		}
+		super.onDestroy();
+	}
+	
+	public void showProgressBar(boolean show) {
+		if (progressBar != null) {
+			if (show) {
+				progressBar.setVisibility(View.VISIBLE);
+			} else {
+				progressBar.setVisibility(View.GONE);
+			}
 		}
 	}
 
