@@ -40,8 +40,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMGroupInfo;
-import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chat.EMResult;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
@@ -148,7 +148,7 @@ public class PublicGroupsActivity extends BaseActivity {
             public void run() {
                 try {
                     isLoading = true;
-                    final EMResult<EMGroupInfo> data = EMMultiUserChatManager.getInstance().fetchPublicGroupsFromServer(pagesize, cursor);
+                    final EMResult<EMGroupInfo> data = EMChatManager.getInstance().fetchPublicGroupsFromServer(pagesize, cursor);
                     //获取group list
                     final List<EMGroupInfo> returnGroups = data.getList();
                     runOnUiThread(new Runnable() {

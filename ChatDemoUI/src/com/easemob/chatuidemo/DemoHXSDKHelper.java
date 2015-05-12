@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,7 +35,6 @@ import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
 import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
-import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
 import com.easemob.chatuidemo.activity.ChatActivity;
@@ -178,7 +175,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         
         EMChatManager.getInstance().registerEventListener(eventListener);
         
-        EMMultiUserChatManager.getInstance().addChatRoomChangeListener(new EMChatRoomChangeListener(){
+        EMChatManager.getInstance().addChatRoomChangeListener(new EMChatRoomChangeListener(){
             private final static String ROOM_CHANGE_BROADCAST = "easemob.demo.chatroom.changeevent.toast";
             private final IntentFilter filter = new IntentFilter(ROOM_CHANGE_BROADCAST);
             private boolean registered = false;

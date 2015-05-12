@@ -40,9 +40,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMGroupInfo;
-import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chat.EMResult;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
@@ -102,7 +102,7 @@ public class PublicChatRoomsActivity extends BaseActivity {
                     @Override
                     public void run(){
                         try {
-                            EMMultiUserChatManager.getInstance().joinChatRoom(room.getId());
+                            EMChatManager.getInstance().joinChatRoom(room.getId());
                             runOnUiThread(new Runnable(){
                                 @Override
                                 public void run(){
@@ -178,7 +178,7 @@ public class PublicChatRoomsActivity extends BaseActivity {
             public void run() {
                 try {
                     isLoading = true;
-                    final EMResult<EMChatRoom> data = EMMultiUserChatManager.getInstance().fetchPublicChatRoomsFromServer(pagesize, cursor);
+                    final EMResult<EMChatRoom> data = EMChatManager.getInstance().fetchPublicChatRoomsFromServer(pagesize, cursor);
                     //获取group list
                     final List<EMChatRoom> chatRooms = data.getList();
                     runOnUiThread(new Runnable() {
