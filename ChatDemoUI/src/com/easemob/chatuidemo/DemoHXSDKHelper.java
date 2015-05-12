@@ -232,6 +232,24 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 showToast("member : " + participant + " was kicked from the room : " + roomId + " room name : " + roomName);
                 
             }
+
+			@Override
+			public void onApplicationReceived(String roomId, String roomName, String applyer, String reason) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onApplicationAccepted(String roomId, String roomName, String accepter) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onApplicationDeclined(String roomId, String roomName, String decliner, String reason) {
+				// TODO Auto-generated method stub
+				
+			}
             
         });
     }

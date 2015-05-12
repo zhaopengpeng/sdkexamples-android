@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,12 +45,14 @@ import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMGroupInfo;
 import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chat.EMResult;
+import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.NetUtils;
 
 public class PublicChatRoomsActivity extends BaseActivity {
 	private ProgressBar pb;
+	private TextView title;
 	private ListView listView;
 	private EditText query;
 	private ImageButton clearSearch;
@@ -76,6 +79,8 @@ public class PublicChatRoomsActivity extends BaseActivity {
         clearSearch = (ImageButton) findViewById(R.id.search_clear);
 		pb = (ProgressBar) findViewById(R.id.progressBar);
 		listView = (ListView) findViewById(R.id.list);
+		title = (TextView)findViewById(R.id.tv_title);
+		title.setText(getResources().getString(R.string.chat_room));
 		chatRoomList = new ArrayList<EMChatRoom>();
 		
 		View footView = getLayoutInflater().inflate(R.layout.listview_footer_view, null);
@@ -93,37 +98,11 @@ public class PublicChatRoomsActivity extends BaseActivity {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-               // startActivity(new Intent(PublicChatRoomsActivity.this, GroupSimpleDetailActivity.class).
-                 //       putExtra("groupinfo", adapter.getItem(position)));
                 
                 final EMChatRoom room = adapter.getItem(position);
+                startActivity(new Intent(PublicChatRoomsActivity.this, ChatActivity.class).putExtra("chatType", 3).
+                		putExtra("groupId", room.getId()));
                 
-                new Thread(){
-                    @Override
-                    public void run(){
-                        try {
-                            EMMultiUserChatManager.getInstance().joinChatRoom(room.getId());
-                            runOnUiThread(new Runnable(){
-                                @Override
-                                public void run(){
-                                    Toast.makeText(PublicChatRoomsActivity.this, "join romm success : " + room.getId() + " with id : " + room.getId(), Toast.LENGTH_SHORT).show();
-
-                                }
-                            });
-                        } catch (EaseMobException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                            final String error = e.getMessage();
-                            runOnUiThread(new Runnable(){
-                                @Override
-                                public void run(){
-                                    Toast.makeText(PublicChatRoomsActivity.this, "join romm error : " + room.getId() + " with error : " + error, Toast.LENGTH_SHORT).show();
-
-                                }
-                            });
-                        }
-                    }
-                }.start();
             }
         });
         listView.setOnScrollListener(new OnScrollListener() {
@@ -173,12 +152,14 @@ public class PublicChatRoomsActivity extends BaseActivity {
 	}
 	
 	private void loadAndShowData(){
-	    new Thread(new Runnable() {
+		new Thread(new Runnable() {
 
             public void run() {
                 try {
                     isLoading = true;
                     final EMResult<EMChatRoom> data = EMMultiUserChatManager.getInstance().fetchPublicChatRoomsFromServer(pagesize, cursor);
+                    
+                    Log.i("info", "chatroom="+EMMultiUserChatManager.getInstance().fetchJoinedChatRoomsFromServer().size());
                     //获取group list
                     final List<EMChatRoom> chatRooms = data.getList();
                     runOnUiThread(new Runnable() {

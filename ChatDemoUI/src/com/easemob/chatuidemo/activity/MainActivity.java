@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import android.R.integer;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -42,6 +43,8 @@ import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactListener;
 import com.easemob.chat.EMContactManager;
+import com.easemob.chat.EMConversation;
+import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
@@ -302,8 +305,13 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	 */
 	public int getUnreadMsgCountTotal() {
 		int unreadMsgCountTotal = 0;
+		int chatroomUnreadMsgCount = 0;
 		unreadMsgCountTotal = EMChatManager.getInstance().getUnreadMsgsCount();
-		return unreadMsgCountTotal;
+		for(EMConversation conversation:EMChatManager.getInstance().getAllConversations().values()){
+			if(conversation.getType() == EMConversationType.ChatRoom)
+			chatroomUnreadMsgCount=chatroomUnreadMsgCount+conversation.getUnreadMsgCount();
+		}
+		return unreadMsgCountTotal-chatroomUnreadMsgCount;
 	}
 
 	private InviteMessgeDao inviteMessgeDao;

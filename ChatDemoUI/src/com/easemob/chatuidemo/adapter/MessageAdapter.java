@@ -392,12 +392,12 @@ public class MessageAdapter extends BaseAdapter{
 		}
 
 		// 群聊时，显示接收的消息的发送人的名称
-		if (chatType == ChatType.GroupChat && message.direct == EMMessage.Direct.RECEIVE){
+		if ((chatType == ChatType.GroupChat || chatType == chatType.ChatRoom) && message.direct == EMMessage.Direct.RECEIVE){
 		    //demo里使用username代码nick
 			holder.tv_usernick.setText(message.getFrom());
 		}
 		// 如果是发送的消息并且不是群聊消息，显示已读textview
-		if (message.direct == EMMessage.Direct.SEND && chatType != ChatType.GroupChat) {
+		if (!(chatType == ChatType.GroupChat || chatType == chatType.ChatRoom) && message.direct == EMMessage.Direct.SEND) {
 			holder.tv_ack = (TextView) convertView.findViewById(R.id.tv_ack);
 			holder.tv_delivered = (TextView) convertView.findViewById(R.id.tv_delivered);
 			if (holder.tv_ack != null) {
@@ -498,19 +498,21 @@ public class MessageAdapter extends BaseAdapter{
 
 		} else {
 			final String st = context.getResources().getString(R.string.Into_the_blacklist);
-			// 长按头像，移入黑名单
-			holder.iv_avatar.setOnLongClickListener(new OnLongClickListener() {
+			if(chatType != ChatType.ChatRoom){
+				// 长按头像，移入黑名单
+				holder.iv_avatar.setOnLongClickListener(new OnLongClickListener() {
 
-				@Override
-				public boolean onLongClick(View v) {
-					Intent intent = new Intent(activity, AlertDialog.class);
-					intent.putExtra("msg", st);
-					intent.putExtra("cancel", true);
-					intent.putExtra("position", position);
-					activity.startActivityForResult(intent, ChatActivity.REQUEST_CODE_ADD_TO_BLACKLIST);
-					return true;
-				}
-			});
+					@Override
+					public boolean onLongClick(View v) {
+						Intent intent = new Intent(activity, AlertDialog.class);
+						intent.putExtra("msg", st);
+						intent.putExtra("cancel", true);
+						intent.putExtra("position", position);
+						activity.startActivityForResult(intent, ChatActivity.REQUEST_CODE_ADD_TO_BLACKLIST);
+						return true;
+					}
+				});
+			}
 		}
 
 		TextView timestamp = (TextView) convertView.findViewById(R.id.timestamp);

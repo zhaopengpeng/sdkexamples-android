@@ -106,6 +106,12 @@
             android:theme="@style/horizontal_slide"
             android:windowSoftInputMode="adjustPan" >
         </activity>
+        <!-- 聊天室详情 -->
+        <activity
+            android:name=".activity.ChatRoomDetailsActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/horizontal_slide" >
+        </activity>
         
         <!-- 新建群组 -->
         <activity

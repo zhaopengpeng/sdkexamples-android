@@ -37,6 +37,7 @@ import android.widget.Toast;
 
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMConversation;
+import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chat.EMMessage;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
@@ -220,7 +221,9 @@ public class ChatAllHistoryFragment extends Fragment {
 		synchronized (conversations) {
 			for (EMConversation conversation : conversations.values()) {
 				if (conversation.getAllMessages().size() != 0) {
-					sortList.add(new Pair<Long, EMConversation>(conversation.getLastMessage().getMsgTime(), conversation));
+					if(conversation.getType() != EMConversationType.ChatRoom){
+						sortList.add(new Pair<Long, EMConversation>(conversation.getLastMessage().getMsgTime(), conversation));
+					}
 				}
 			}
 		}
