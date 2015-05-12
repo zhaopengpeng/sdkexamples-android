@@ -40,9 +40,9 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
+import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ChatRoomAdapter;
 
@@ -60,7 +60,7 @@ public class ChatRoomActivity extends BaseActivity {
 
 		instance = this;
 		inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		roomList = EMMultiUserChatManager.getInstance().getAllChatRooms();
+		roomList = EMChatManager.getInstance().getAllChatRooms();
 		chatListView = (ListView) findViewById(R.id.list);
 		chatRoomAdapter = new ChatRoomAdapter(this, 1, roomList);
 		chatListView.setAdapter(chatRoomAdapter);
@@ -95,7 +95,7 @@ public class ChatRoomActivity extends BaseActivity {
                     new Thread(){
                         @Override
                         public void run(){
-                            EMMultiUserChatManager.getInstance().leaveChatRoom(roomId);
+                            EMChatManager.getInstance().leaveChatRoom(roomId);
                         }
                     }.start();
                     
@@ -135,7 +135,7 @@ public class ChatRoomActivity extends BaseActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		roomList = EMMultiUserChatManager.getInstance().getAllChatRooms();
+		roomList = EMChatManager.getInstance().getAllChatRooms();
 		chatRoomAdapter = new ChatRoomAdapter(this, 1, roomList);
 		chatListView.setAdapter(chatRoomAdapter);
 		chatRoomAdapter.notifyDataSetChanged();

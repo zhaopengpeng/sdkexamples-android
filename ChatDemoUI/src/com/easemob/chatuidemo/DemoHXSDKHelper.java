@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,12 +30,11 @@ import com.easemob.EMEventListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.applib.model.HXNotifier;
-import com.easemob.applib.model.HXSDKModel;
 import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
+import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
-import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
 import com.easemob.chatuidemo.activity.ChatActivity;
@@ -116,13 +113,12 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             
             @Override
             public void onEvent(EMNotifierEvent event) {
+                EMMessage message = (EMMessage)event.getData();
+                EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
                 
                 switch (event.getEvent()) {
                 case EventNewMessage:
                 {
-                    EMMessage message = (EMMessage)event.getData();
-                    EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
-                    
                     //应用在后台，不需要刷新UI,通知栏提示新消息
                     if(activityList.size() <= 0){
                         HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
@@ -134,8 +130,6 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 // so be careful of this
                 case EventNewCMDMessage:
                 {
-                    EMMessage message = (EMMessage)event.getData();
-                    EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
                     
                     EMLog.d(TAG, "收到透传消息");
                     //获取消息body
@@ -168,6 +162,12 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                     
                     break;
                 }
+                case EventDeliveryAck:
+                    message.setDelivered(true);
+                    break;
+                case EventReadAck:
+                    message.setAcked(true);
+                    break;
                 // add other events in case you are interested in
                 default:
                     break;
@@ -178,7 +178,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         
         EMChatManager.getInstance().registerEventListener(eventListener);
         
-        EMMultiUserChatManager.getInstance().addChatRoomChangeListener(new EMChatRoomChangeListener(){
+        EMChatManager.getInstance().addChatRoomChangeListener(new EMChatRoomChangeListener(){
             private final static String ROOM_CHANGE_BROADCAST = "easemob.demo.chatroom.changeevent.toast";
             private final IntentFilter filter = new IntentFilter(ROOM_CHANGE_BROADCAST);
             private boolean registered = false;
@@ -233,24 +233,6 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 
             }
 
-			@Override
-			public void onApplicationReceived(String roomId, String roomName, String applyer, String reason) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void onApplicationAccepted(String roomId, String roomName, String accepter) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void onApplicationDeclined(String roomId, String roomName, String decliner, String reason) {
-				// TODO Auto-generated method stub
-				
-			}
-            
         });
     }
 

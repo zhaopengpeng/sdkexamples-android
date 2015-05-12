@@ -39,7 +39,6 @@ import android.widget.Toast;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.utils.UserUtils;
 import com.easemob.chatuidemo.widget.ExpandGridView;
@@ -112,7 +111,7 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 		 roomId = getIntent().getStringExtra("roomId");
 		 
 		 rl_switch_block_groupmsg.setVisibility(View.GONE);
-		 room = EMMultiUserChatManager.getInstance().getChatRoom(roomId);
+		 room = EMChatManager.getInstance().getChatRoom(roomId);
 
 		if (room.getOwner() == null || "".equals(room.getOwner())
 				|| !room.getOwner().equals(EMChatManager.getInstance().getCurrentUser())) {
@@ -242,7 +241,7 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-				    EMMultiUserChatManager.getInstance().leaveChatRoom(roomId);
+					EMChatManager.getInstance().leaveChatRoom(roomId);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							progressDialog.dismiss();
@@ -268,7 +267,7 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					final EMChatRoom returnRoom = EMMultiUserChatManager.getInstance().fetchChatRoomFromServer(roomId);
+					final EMChatRoom returnRoom = EMChatManager.getInstance().fetchChatRoomFromServer(roomId);
 
 					runOnUiThread(new Runnable() {
 						public void run() {
@@ -310,7 +309,7 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					EMMultiUserChatManager.getInstance().dismissGroup(roomId);
+					EMChatManager.getInstance().dismissGroup(roomId);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							progressDialog.dismiss();
@@ -502,7 +501,7 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 							public void run() {
 								try {
 									// 删除被选中的成员
-									EMMultiUserChatManager.getInstance().removeUserFromGroup(roomId, username);
+									EMChatManager.getInstance().removeUserFromGroup(roomId, username);
 									isInDeleteMode = false;
 									runOnUiThread(new Runnable() {
 

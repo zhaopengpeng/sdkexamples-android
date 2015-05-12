@@ -41,9 +41,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMGroupInfo;
-import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chat.EMResult;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
@@ -157,9 +157,7 @@ public class PublicChatRoomsActivity extends BaseActivity {
             public void run() {
                 try {
                     isLoading = true;
-                    final EMResult<EMChatRoom> data = EMMultiUserChatManager.getInstance().fetchPublicChatRoomsFromServer(pagesize, cursor);
-                    
-                    Log.i("info", "chatroom="+EMMultiUserChatManager.getInstance().fetchJoinedChatRoomsFromServer().size());
+                    final EMResult<EMChatRoom> data = EMChatManager.getInstance().fetchPublicChatRoomsFromServer(pagesize, cursor);
                     //获取group list
                     final List<EMChatRoom> chatRooms = data.getList();
                     runOnUiThread(new Runnable() {

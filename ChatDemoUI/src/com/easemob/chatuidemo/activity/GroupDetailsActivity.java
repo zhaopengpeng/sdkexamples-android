@@ -39,7 +39,6 @@ import android.widget.Toast;
 
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMMultiUserChatManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.utils.UserUtils;
 import com.easemob.chatuidemo.widget.ExpandGridView;
@@ -114,7 +113,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 
 		// 获取传过来的groupid
 		groupId = getIntent().getStringExtra("groupId");
-		group = EMMultiUserChatManager.getInstance().getGroup(groupId);
+		group = EMChatManager.getInstance().getGroup(groupId);
 
 		if (group.getOwner() == null || "".equals(group.getOwner())
 				|| !group.getOwner().equals(EMChatManager.getInstance().getCurrentUser())) {
@@ -215,7 +214,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 					new Thread(new Runnable() {
 						public void run() {
 							try {
-							    EMMultiUserChatManager.getInstance().changeGroupName(groupId, returnData);
+							    EMChatManager.getInstance().changeGroupName(groupId, returnData);
 								runOnUiThread(new Runnable() {
 									public void run() {
 										((TextView) findViewById(R.id.group_name)).setText(returnData + "(" + group.getAffiliationsCount()
@@ -244,7 +243,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 				new Thread(new Runnable() {
 					public void run() {
 						try {
-						    EMMultiUserChatManager.getInstance().blockUser(groupId, longClickUsername);
+						    EMChatManager.getInstance().blockGroupUser(groupId, longClickUsername);
 							runOnUiThread(new Runnable() {
 								public void run() {
 									adapter.notifyDataSetChanged();
@@ -312,7 +311,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-				    EMMultiUserChatManager.getInstance().leaveGroup(groupId);
+				    EMChatManager.getInstance().leaveGroup(groupId);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							progressDialog.dismiss();
@@ -344,7 +343,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					EMMultiUserChatManager.getInstance().dismissGroup(groupId);
+				    EMChatManager.getInstance().dismissGroup(groupId);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							progressDialog.dismiss();
@@ -379,10 +378,10 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 				try {
 					// 创建者调用add方法
 					if (EMChatManager.getInstance().getCurrentUser().equals(group.getOwner())) {
-						EMMultiUserChatManager.getInstance().addUsersToGroup(groupId, newmembers);
+					    EMChatManager.getInstance().addUsersToGroup(groupId, newmembers);
 					} else {
 						// 一般成员调用invite方法
-						EMMultiUserChatManager.getInstance().inviteUser(groupId, newmembers, null);
+					    EMChatManager.getInstance().inviteGroupUsers(groupId, newmembers, null);
 					}
 					runOnUiThread(new Runnable() {
 						public void run() {
@@ -421,7 +420,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 				new Thread(new Runnable() {
                     public void run() {
                         try {
-                            EMMultiUserChatManager.getInstance().unblockGroupMessage(groupId);
+                            EMChatManager.getInstance().unblockGroupMessage(groupId);
                             runOnUiThread(new Runnable() {
                                 public void run() {
                                     iv_switch_block_groupmsg.setVisibility(View.INVISIBLE);
@@ -455,7 +454,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 				new Thread(new Runnable() {
                     public void run() {
                         try {
-                            EMMultiUserChatManager.getInstance().blockGroupMessage(groupId);
+                            EMChatManager.getInstance().blockGroupMessage(groupId);
                             runOnUiThread(new Runnable() {
                                 public void run() {
                                     iv_switch_block_groupmsg.setVisibility(View.VISIBLE);
@@ -652,7 +651,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 							public void run() {
 								try {
 									// 删除被选中的成员
-									EMMultiUserChatManager.getInstance().removeUserFromGroup(groupId, username);
+								    EMChatManager.getInstance().removeUserFromGroup(groupId, username);
 									isInDeleteMode = false;
 									runOnUiThread(new Runnable() {
 
@@ -708,9 +707,9 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					EMGroup returnGroup = EMMultiUserChatManager.getInstance().fetchGroupFromServer(groupId);
+					EMGroup returnGroup = EMChatManager.getInstance().fetchGroupFromServer(groupId);
 					// 更新本地数据
-					EMMultiUserChatManager.getInstance().createOrUpdateLocalGroup(returnGroup);
+					EMChatManager.getInstance().createOrUpdateLocalGroup(returnGroup);
 
 					runOnUiThread(new Runnable() {
 						public void run() {
