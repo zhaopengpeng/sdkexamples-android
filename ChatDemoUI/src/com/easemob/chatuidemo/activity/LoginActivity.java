@@ -34,7 +34,6 @@ import android.widget.Toast;
 import com.easemob.EMCallBack;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactManager;
-import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.DemoHXSDKHelper;
@@ -156,8 +155,7 @@ public class LoginActivity extends BaseActivity {
 				try {
 					// ** 第一次登录或者之前logout后再登录，加载所有本地群和回话
 					// ** manually load all local groups and
-					// conversations in case we are auto login
-					EMGroupManager.getInstance().loadAllGroups();
+				    EMChatManager.getInstance().loadAllLocalGroups();
 					EMChatManager.getInstance().loadAllConversations();
 					// 处理好友和群组
 					processContactsAndGroups();
@@ -224,6 +222,7 @@ public class LoginActivity extends BaseActivity {
 		newFriends.setNick(strChat);
 
 		userlist.put(Constant.NEW_FRIENDS_USERNAME, newFriends);
+		
 		// 添加"群聊"
 		User groupUser = new User();
 		String strGroup = getResources().getString(R.string.group_chat);
@@ -231,6 +230,14 @@ public class LoginActivity extends BaseActivity {
 		groupUser.setNick(strGroup);
 		groupUser.setHeader("");
 		userlist.put(Constant.GROUP_USERNAME, groupUser);
+		
+		// 添加"群聊"
+        User chatRoomItem = new User();
+        String chatRoomId = getResources().getString(R.string.chat_room);
+        chatRoomItem.setUsername(Constant.CHAT_ROOM);
+        chatRoomItem.setNick(chatRoomId);
+        groupUser.setHeader("");
+        userlist.put(Constant.CHAT_ROOM, chatRoomItem);
 
 		// 存入内存
 		DemoApplication.getInstance().setContactList(userlist);
@@ -241,12 +248,12 @@ public class LoginActivity extends BaseActivity {
 		dao.saveContactList(users);
 
 		// 获取黑名单列表
-		List<String> blackList = EMContactManager.getInstance().getBlackListUsernamesFromServer();
+		//List<String> blackList = EMContactManager.getInstance().getBlackListUsernamesFromServer();
 		// 保存黑名单
-		EMContactManager.getInstance().saveBlackList(blackList);
+		//EMContactManager.getInstance().saveBlackList(blackList);
 
 		// 获取群聊列表(群聊里只有groupid和groupname等简单信息，不包含members),sdk会把群组存入到内存和db中
-		EMGroupManager.getInstance().getGroupsFromServer();
+		EMChatManager.getInstance().fetchJoinedGroupsFromServer();
 	}
 
 	/**

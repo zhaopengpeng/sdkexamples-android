@@ -19,60 +19,94 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMGroup;
 import com.easemob.chatuidemo.R;
-import com.easemob.chatuidemo.adapter.GroupAdapter;
+import com.easemob.chatuidemo.adapter.ChatRoomAdapter;
 
-public class GroupsActivity extends BaseActivity {
-	private ListView groupListView;
-	protected List<EMGroup> grouplist;
-	private GroupAdapter groupAdapter;
+public class ChatRoomActivity extends BaseActivity {
+	private ListView chatListView;
+	protected List<EMChatRoom> roomList;
+	private ChatRoomAdapter chatRoomAdapter;
 	private InputMethodManager inputMethodManager;
-	public static GroupsActivity instance;
+	public static ChatRoomActivity instance;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.fragment_groups);
+		setContentView(R.layout.fragment_chatroom);
 
 		instance = this;
 		inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		grouplist = EMChatManager.getInstance().getAllGroups();
-		groupListView = (ListView) findViewById(R.id.list);
-		groupAdapter = new GroupAdapter(this, 1, grouplist);
-		groupListView.setAdapter(groupAdapter);
-		groupListView.setOnItemClickListener(new OnItemClickListener() {
+		roomList = EMChatManager.getInstance().getAllChatRooms();
+		chatListView = (ListView) findViewById(R.id.list);
+		chatRoomAdapter = new ChatRoomAdapter(this, 1, roomList);
+		chatListView.setAdapter(chatRoomAdapter);
+		chatListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				if (position == 1) {
-					// 新建群聊
-					startActivityForResult(new Intent(GroupsActivity.this, NewGroupActivity.class), 0);
-				} else if (position == 2) {
+				if(position == 1) {
 					// 添加公开群
-					startActivityForResult(new Intent(GroupsActivity.this, PublicGroupsActivity.class), 0);
+					startActivityForResult(new Intent(ChatRoomActivity.this, PublicChatRoomsActivity.class), 0);
 				} else {
 					// 进入群聊
-					Intent intent = new Intent(GroupsActivity.this, ChatActivity.class);
+					Intent intent = new Intent(ChatRoomActivity.this, ChatActivity.class);
 					// it is group chat
-					intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
-					intent.putExtra("groupId", groupAdapter.getItem(position - 3).getGroupId());
+					intent.putExtra("chatType", ChatActivity.CHATTYPE_CHATROOM);
+					intent.putExtra("groupId", chatRoomAdapter.getItem(position - 2).getId());
 					startActivityForResult(intent, 0);
 				}
 			}
 
 		});
-		groupListView.setOnTouchListener(new OnTouchListener() {
+		
+		// TODO: we need more official UI, but for now, for test purpose
+		chatListView.setOnItemLongClickListener(new OnItemLongClickListener(){
+
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view,
+                    int position, long id) {
+                if(position > 1){
+                    final  String roomId = chatRoomAdapter.getItem(position - 2).getId();
+                    
+                    new Thread(){
+                        @Override
+                        public void run(){
+                            EMChatManager.getInstance().leaveChatRoom(roomId);
+                        }
+                    }.start();
+                    
+                    return true;
+                }
+                return false;
+            }
+		    
+		});
+		
+		chatListView.setOnTouchListener(new OnTouchListener() {
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -101,10 +135,10 @@ public class GroupsActivity extends BaseActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		grouplist = EMChatManager.getInstance().getAllGroups();
-		groupAdapter = new GroupAdapter(this, 1, grouplist);
-		groupListView.setAdapter(groupAdapter);
-		groupAdapter.notifyDataSetChanged();
+		roomList = EMChatManager.getInstance().getAllChatRooms();
+		chatRoomAdapter = new ChatRoomAdapter(this, 1, roomList);
+		chatListView.setAdapter(chatRoomAdapter);
+		chatRoomAdapter.notifyDataSetChanged();
 	}
 
 	@Override

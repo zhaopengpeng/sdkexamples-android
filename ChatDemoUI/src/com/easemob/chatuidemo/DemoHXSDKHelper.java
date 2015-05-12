@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.widget.Toast;
 
 import com.easemob.EMCallBack;
+import com.easemob.EMChatRoomChangeListener;
 import com.easemob.EMEventListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.applib.controller.HXSDKHelper;
@@ -176,6 +177,63 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         };
         
         EMChatManager.getInstance().registerEventListener(eventListener);
+        
+        EMChatManager.getInstance().addChatRoomChangeListener(new EMChatRoomChangeListener(){
+            private final static String ROOM_CHANGE_BROADCAST = "easemob.demo.chatroom.changeevent.toast";
+            private final IntentFilter filter = new IntentFilter(ROOM_CHANGE_BROADCAST);
+            private boolean registered = false;
+            
+            private void showToast(String value){
+                if(!registered){
+                  //注册通话广播接收者
+                    appContext.registerReceiver(new BroadcastReceiver(){
+
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            Toast.makeText(appContext, intent.getStringExtra("value"), Toast.LENGTH_LONG).show();
+                        }
+                        
+                    }, filter);
+                }
+                
+                Intent broadcastIntent = new Intent(ROOM_CHANGE_BROADCAST);
+                broadcastIntent.putExtra("value", value);
+                appContext.sendBroadcast(broadcastIntent, null);
+            }
+            
+            @Override
+            public void onInvitationReceived(String roomId, String roomName,
+                    String inviter, String reason) {
+                showToast(" Invitation was received from : " + inviter + " to the room : " + roomName + " with roomID : " + roomName + " reason : " + reason);
+            }
+ 
+            @Override
+            public void onChatRoomDestroyed(String roomId, String roomName) {
+                showToast(" room : " + roomId + " with room name : " + roomName + " was destroyed");
+                
+            }
+
+            @Override
+            public void onMemberJoined(String roomId, String participant) {
+                showToast("member : " + participant + " join the room : " + roomId);
+                
+            }
+
+            @Override
+            public void onMemberExited(String roomId, String roomName,
+                    String participant) {
+                showToast("member : " + participant + " leave the room : " + roomId + " room name : " + roomName);
+                
+            }
+
+            @Override
+            public void onMemberKicked(String roomId, String roomName,
+                    String participant) {
+                showToast("member : " + participant + " was kicked from the room : " + roomId + " room name : " + roomName);
+                
+            }
+
+        });
     }
 
     /**

@@ -65,17 +65,16 @@ import android.widget.Toast;
 
 import com.easemob.EMError;
 import com.easemob.EMEventListener;
+import com.easemob.EMGroupChangeListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.applib.controller.HXSDKHelper;
-import com.easemob.applib.model.HXNotifier;
 import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
-import com.easemob.chat.GroupReomveListener;
 import com.easemob.chat.ImageMessageBody;
 import com.easemob.chat.LocationMessageBody;
 import com.easemob.chat.NormalFileMessageBody;
@@ -140,6 +139,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 	public static final int CHATTYPE_SINGLE = 1;
 	public static final int CHATTYPE_GROUP = 2;
+	public static final int CHATTYPE_CHATROOM = 3;
 
 	public static final String COPY_IMAGE = "EASEMOBIMG";
 	private View recordingContainer;
@@ -191,7 +191,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			micImage.setImageDrawable(micImages[msg.what]);
 		}
 	};
-	private EMGroup group;
+	public EMGroup group;
+	public EMChatRoom room;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -331,17 +332,62 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			findViewById(R.id.container_voice_call).setVisibility(View.GONE);
 			findViewById(R.id.container_video_call).setVisibility(View.GONE);
 			toChatUsername = getIntent().getStringExtra("groupId");
-			group = EMGroupManager.getInstance().getGroup(toChatUsername);
-			if (group != null)
-				((TextView) findViewById(R.id.name)).setText(group.getGroupName());
-			else
-				((TextView) findViewById(R.id.name)).setText(toChatUsername);
+
+			if(chatType == CHATTYPE_GROUP){
+				group = EMChatManager.getInstance().getGroup(toChatUsername);
+				
+				if (group != null){
+					((TextView) findViewById(R.id.name)).setText(group.getGroupName());
+				}else{
+					((TextView) findViewById(R.id.name)).setText(toChatUsername);
+				}
+			}else{
+				
+				final ProgressDialog pd = ProgressDialog.show(this, "", "Joining......");
+				 new Thread(){
+	               @Override
+	               public void run(){
+	                   try {
+	                	   EMChatManager.getInstance().joinChatRoom(toChatUsername);
+	                       runOnUiThread(new Runnable(){
+	                           @Override
+	                           public void run(){
+	                        	   	pd.dismiss();
+	                        	   	room = EMChatManager.getInstance().getChatRoom(toChatUsername);
+	                        	   	if(room !=null){
+	                        	   		((TextView) findViewById(R.id.name)).setText(room.getName());
+	                        	   	}else{
+	                        	   		((TextView) findViewById(R.id.name)).setText(toChatUsername);
+	                        	   	}
+//	                        	   	Toast.makeText(ChatActivity.this, "join room success : " + room.getName(), Toast.LENGTH_SHORT).show();
+	                        	   	Log.i("info", "join room success!");
+
+	                           }
+	                       });
+	                   } catch (EaseMobException e) {
+	                       // TODO Auto-generated catch block
+	                       e.printStackTrace();
+	                       final String error = e.getMessage();
+	                       runOnUiThread(new Runnable(){
+	                           @Override
+	                           public void run(){
+	                        	   pd.dismiss();
+//	                               Toast.makeText(ChatActivity.this, "join room failure : " + error, Toast.LENGTH_SHORT).show();
+	                        	   Log.i("info", "join room failure = "+error);
+	                           }
+	                       });
+	                       finish();
+	                   }
+	               }
+	           }.start();
+			}
+			
 			// conversation =
 			// EMChatManager.getInstance().getConversation(toChatUsername,true);
 		}
 		conversation = EMChatManager.getInstance().getConversation(toChatUsername);
 		// 把此会话的未读数置为0
-		conversation.resetUnreadMsgCount();
+		conversation.markAllMessagesAsRead();
 
 		// 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
 		// 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
@@ -380,7 +426,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 		// 监听当前会话的群聊解散被T事件
 		groupListener = new GroupListener();
-		EMGroupManager.getInstance().addGroupChangeListener(groupListener);
+		EMChatManager.getInstance().addGroupChangeListener(groupListener);
 
 		// show forward message if the message is not null
 		String forward_msg_id = getIntent().getStringExtra("forward_msg_id");
@@ -594,7 +640,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
             
             String username = null;
             //群组消息
-            if(message.getChatType() == ChatType.GroupChat){
+            if(message.getChatType() == ChatType.GroupChat || message.getChatType() == ChatType.ChatRoom){
                 username = message.getTo();
             }
             else{
@@ -720,8 +766,12 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		if (content.length() > 0) {
 			EMMessage message = EMMessage.createSendMessage(EMMessage.Type.TXT);
 			// 如果是群聊，设置chattype,默认是单聊
-			if (chatType == CHATTYPE_GROUP)
-				message.setChatType(ChatType.GroupChat);
+			if (chatType == CHATTYPE_GROUP){
+			    message.setChatType(ChatType.GroupChat);
+			}else if(chatType == CHATTYPE_CHATROOM){
+			    message.setChatType(ChatType.ChatRoom);
+			}
+			
 			TextMessageBody txtBody = new TextMessageBody(content);
 			// 设置消息body
 			message.addBody(txtBody);
@@ -753,8 +803,11 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		try {
 			final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.VOICE);
 			// 如果是群聊，设置chattype,默认是单聊
-			if (chatType == CHATTYPE_GROUP)
+			if (chatType == CHATTYPE_GROUP){
 				message.setChatType(ChatType.GroupChat);
+				}else if(chatType == CHATTYPE_CHATROOM){
+				    message.setChatType(ChatType.ChatRoom);
+				}
 			message.setReceipt(toChatUsername);
 			int len = Integer.parseInt(length);
 			VoiceMessageBody body = new VoiceMessageBody(new File(filePath), len);
@@ -780,8 +833,11 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		// create and add image message in view
 		final EMMessage message = EMMessage.createSendMessage(EMMessage.Type.IMAGE);
 		// 如果是群聊，设置chattype,默认是单聊
-		if (chatType == CHATTYPE_GROUP)
+		if (chatType == CHATTYPE_GROUP){
 			message.setChatType(ChatType.GroupChat);
+		}else if(chatType == CHATTYPE_CHATROOM){
+		    message.setChatType(ChatType.ChatRoom);
+		}
 
 		message.setReceipt(to);
 		ImageMessageBody body = new ImageMessageBody(new File(filePath));
@@ -807,8 +863,11 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		try {
 			EMMessage message = EMMessage.createSendMessage(EMMessage.Type.VIDEO);
 			// 如果是群聊，设置chattype,默认是单聊
-			if (chatType == CHATTYPE_GROUP)
+			if (chatType == CHATTYPE_GROUP){
 				message.setChatType(ChatType.GroupChat);
+			}else if(chatType == CHATTYPE_CHATROOM){
+			    message.setChatType(ChatType.ChatRoom);
+			}
 			String to = toChatUsername;
 			message.setReceipt(to);
 			VideoMessageBody body = new VideoMessageBody(videoFile, thumbPath, length, videoFile.length());
@@ -871,8 +930,11 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	private void sendLocationMsg(double latitude, double longitude, String imagePath, String locationAddress) {
 		EMMessage message = EMMessage.createSendMessage(EMMessage.Type.LOCATION);
 		// 如果是群聊，设置chattype,默认是单聊
-		if (chatType == CHATTYPE_GROUP)
+		if (chatType == CHATTYPE_GROUP){
 			message.setChatType(ChatType.GroupChat);
+		}else if(chatType == CHATTYPE_CHATROOM){
+		    message.setChatType(ChatType.ChatRoom);
+		}
 		LocationMessageBody locBody = new LocationMessageBody(locationAddress, latitude, longitude);
 		message.addBody(locBody);
 		message.setReceipt(toChatUsername);
@@ -921,8 +983,11 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		// 创建一个文件消息
 		EMMessage message = EMMessage.createSendMessage(EMMessage.Type.FILE);
 		// 如果是群聊，设置chattype,默认是单聊
-		if (chatType == CHATTYPE_GROUP)
+		if (chatType == CHATTYPE_GROUP){
 			message.setChatType(ChatType.GroupChat);
+		}else if(chatType == CHATTYPE_CHATROOM){
+		    message.setChatType(ChatType.ChatRoom);
+		}
 
 		message.setReceipt(toChatUsername);
 		// add message body
@@ -1017,12 +1082,17 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * @param view
 	 */
 	public void toGroupDetails(View view) {
-		if (group == null) {
+		if (room == null && group == null) {
 			Toast.makeText(getApplicationContext(), R.string.gorup_not_found, 0).show();
 			return;
 		}
-		startActivityForResult((new Intent(this, GroupDetailsActivity.class).putExtra("groupId", toChatUsername)),
-				REQUEST_CODE_GROUP_DETAIL);
+		if(chatType == CHATTYPE_GROUP){
+			startActivityForResult((new Intent(this, GroupDetailsActivity.class).putExtra("groupId", toChatUsername)),
+					REQUEST_CODE_GROUP_DETAIL);
+		}else{
+			startActivityForResult((new Intent(this, ChatRoomDetailsActivity.class).putExtra("roomId", toChatUsername)),
+					REQUEST_CODE_GROUP_DETAIL);
+		}
 	}
 
 	/**
@@ -1236,7 +1306,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	protected void onDestroy() {
 		super.onDestroy();
 		activityInstance = null;
-		EMGroupManager.getInstance().removeGroupChangeListener(groupListener);
+		EMChatManager.getInstance().removeGroupChangeListener(groupListener);
 	}
 
 	@Override
@@ -1342,6 +1412,33 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 */
 	public void back(View view) {
 		EMChatManager.getInstance().unregisterEventListener(this);
+		if(chatType == CHATTYPE_CHATROOM){
+			new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					try {
+						EMChatManager.getInstance().leaveChatRoom(toChatUsername);
+						runOnUiThread(new Runnable() {
+							public void run() {
+//								Toast.makeText(ChatActivity.this, "leave success!", 1).show();
+								Log.i("info", "leave success!");
+							}
+						});
+					} catch (final Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						runOnUiThread(new Runnable() {
+							public void run() {
+//								Toast.makeText(ChatActivity.this, "leave failure!", 1).show();
+								Log.i("info", "leave failure = "+e.toString());
+							}
+						});
+					}
+				}
+			}).start();
+		}
 		finish();
 	}
 
@@ -1356,6 +1453,33 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			iv_emoticons_checked.setVisibility(View.INVISIBLE);
 		} else {
 			super.onBackPressed();
+			if(chatType == CHATTYPE_CHATROOM){
+				new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						try {
+							EMChatManager.getInstance().leaveChatRoom(toChatUsername);
+							runOnUiThread(new Runnable() {
+								public void run() {
+//									Toast.makeText(ChatActivity.this, "leave success!", 1).show();
+									Log.i("info", "leave success!");
+								}
+							});
+						} catch (final Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							runOnUiThread(new Runnable() {
+								public void run() {
+//									Toast.makeText(ChatActivity.this, "leave failure!", 1).show();
+									Log.i("info", "leave failure = "+e.toString());
+								}
+							});
+						}
+					}
+				}).start();
+			}
 		}
 	}
 
@@ -1464,7 +1588,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * 监测群组解散或者被T事件
 	 * 
 	 */
-	class GroupListener extends GroupReomveListener {
+	class GroupListener implements EMGroupChangeListener {
 
 		@Override
 		public void onUserRemoved(final String groupId, String groupName) {
@@ -1498,6 +1622,37 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				}
 			});
 		}
+
+        @Override
+        public void onInvitationReceived(String groupId, String groupName,
+                String inviter, String reason) {            
+        }
+
+        @Override
+        public void onApplicationReceived(String groupId, String groupName,
+                String applyer, String reason) {            
+        }
+
+        @Override
+        public void onApplicationAccept(String groupId, String groupName,
+                String accepter) {
+            
+        }
+
+        @Override
+        public void onApplicationDeclined(String groupId, String groupName,
+                String decliner, String reason) {            
+        }
+
+        @Override
+        public void onInvitationAccpted(String groupId, String inviter,
+                String reason) {            
+        }
+
+        @Override
+        public void onInvitationDeclined(String groupId, String invitee,
+                String reason) {            
+        }
 
 	}
 

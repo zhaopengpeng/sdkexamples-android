@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import android.R.integer;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -35,19 +36,20 @@ import android.widget.Toast;
 import com.easemob.EMConnectionListener;
 import com.easemob.EMError;
 import com.easemob.EMEventListener;
+import com.easemob.EMGroupChangeListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactListener;
 import com.easemob.chat.EMContactManager;
+import com.easemob.chat.EMConversation;
+import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
 import com.easemob.chat.EMNotifier;
-import com.easemob.chat.GroupChangeListener;
 import com.easemob.chat.TextMessageBody;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
@@ -60,7 +62,6 @@ import com.easemob.chatuidemo.domain.InviteMessage.InviteMesageStatus;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.util.EMLog;
-import com.easemob.util.EasyUtils;
 import com.easemob.util.HanziToPinyin;
 import com.easemob.util.NetUtils;
 import com.umeng.analytics.MobclickAgent;
@@ -143,7 +144,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		// 注册一个监听连接状态的listener
 		EMChatManager.getInstance().addConnectionListener(new MyConnectionListener());
 		// 注册群聊相关的listener
-		EMGroupManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
+		EMChatManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
 		// 通知sdk，UI 已经初始化完毕，注册了相应的receiver和listener, 可以接受broadcast了
 		EMChat.getInstance().setAppInited();
 	}
@@ -195,11 +196,8 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	}
 
 	/**
-	 * 消息监听可以注册多个，SDK支持事件链的传递，不过一旦消息链中的某个监听返回能够处理某一事件，消息将不会进一步传递。
-	 * 后加入的事件监听会先收到事件的通知
-	 * 
-	 * 如果收到的事件，能够被处理并且不需要其他的监听再处理，可以返回true，否则返回false
-	 */
+	 * 监听事件
+     */
 	@Override
 	public void onEvent(EMNotifierEvent event) {
 		switch (event.getEvent()) {
@@ -306,8 +304,13 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	 */
 	public int getUnreadMsgCountTotal() {
 		int unreadMsgCountTotal = 0;
+		int chatroomUnreadMsgCount = 0;
 		unreadMsgCountTotal = EMChatManager.getInstance().getUnreadMsgsCount();
-		return unreadMsgCountTotal;
+		for(EMConversation conversation:EMChatManager.getInstance().getAllConversations().values()){
+			if(conversation.getType() == EMConversationType.ChatRoom)
+			chatroomUnreadMsgCount=chatroomUnreadMsgCount+conversation.getUnreadMsgCount();
+		}
+		return unreadMsgCountTotal-chatroomUnreadMsgCount;
 	}
 
 	private InviteMessgeDao inviteMessgeDao;
@@ -464,12 +467,12 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	/**
 	 * MyGroupChangeListener
 	 */
-	private class MyGroupChangeListener implements GroupChangeListener {
+	private class MyGroupChangeListener implements EMGroupChangeListener {
 
 		@Override
 		public void onInvitationReceived(String groupId, String groupName, String inviter, String reason) {
 			boolean hasGroup = false;
-			for (EMGroup group : EMGroupManager.getInstance().getAllGroups()) {
+			for (EMGroup group : EMChatManager.getInstance().getAllGroups()) {
 				if (group.getGroupId().equals(groupId)) {
 					hasGroup = true;
 					break;

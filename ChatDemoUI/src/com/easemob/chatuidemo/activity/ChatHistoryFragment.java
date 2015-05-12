@@ -16,7 +16,6 @@ package com.easemob.chatuidemo.activity;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -51,9 +50,7 @@ import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContact;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
-import com.easemob.chat.GroupChangeListener;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ChatHistoryAdapter;
@@ -219,7 +216,7 @@ public class ChatHistoryFragment extends Fragment {
 				resultList.add(user);
 			}
 		}
-		for(EMGroup group : EMGroupManager.getInstance().getAllGroups()){
+		for(EMGroup group : EMChatManager.getInstance().getAllGroups()){
 			EMConversation conversation = EMChatManager.getInstance().getConversation(group.getGroupId());
 			if(conversation.getMsgCount() > 0){
 				resultList.add(group);

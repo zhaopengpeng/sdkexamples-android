@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,20 +42,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMGroupInfo;
 import com.easemob.chat.EMResult;
+import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.NetUtils;
 
-public class PublicGroupsActivity extends BaseActivity {
+public class PublicChatRoomsActivity extends BaseActivity {
 	private ProgressBar pb;
+	private TextView title;
 	private ListView listView;
 	private EditText query;
 	private ImageButton clearSearch;
-	private GroupsAdapter adapter;
+	private ChatRoomAdapter adapter;
 	
-	private List<EMGroupInfo> groupsList;
+	private List<EMChatRoom> chatRoomList;
 	private boolean isLoading;
 	private boolean isFirstLoading = true;
 	private boolean hasMoreData = true;
@@ -75,7 +79,9 @@ public class PublicGroupsActivity extends BaseActivity {
         clearSearch = (ImageButton) findViewById(R.id.search_clear);
 		pb = (ProgressBar) findViewById(R.id.progressBar);
 		listView = (ListView) findViewById(R.id.list);
-		groupsList = new ArrayList<EMGroupInfo>();
+		title = (TextView)findViewById(R.id.tv_title);
+		title.setText(getResources().getString(R.string.chat_room));
+		chatRoomList = new ArrayList<EMChatRoom>();
 		
 		View footView = getLayoutInflater().inflate(R.layout.listview_footer_view, null);
         footLoadingLayout = (LinearLayout) footView.findViewById(R.id.loading_layout);
@@ -92,8 +98,11 @@ public class PublicGroupsActivity extends BaseActivity {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                startActivity(new Intent(PublicGroupsActivity.this, GroupSimpleDetailActivity.class).
-                        putExtra("groupinfo", adapter.getItem(position)));
+                
+                final EMChatRoom room = adapter.getItem(position);
+                startActivity(new Intent(PublicChatRoomsActivity.this, ChatActivity.class).putExtra("chatType", 3).
+                		putExtra("groupId", room.getId()));
+                
             }
         });
         listView.setOnScrollListener(new OnScrollListener() {
@@ -143,32 +152,32 @@ public class PublicGroupsActivity extends BaseActivity {
 	}
 	
 	private void loadAndShowData(){
-	    new Thread(new Runnable() {
+		new Thread(new Runnable() {
 
             public void run() {
                 try {
                     isLoading = true;
-                    final EMResult<EMGroupInfo> data = EMChatManager.getInstance().fetchPublicGroupsFromServer(pagesize, cursor);
+                    final EMResult<EMChatRoom> data = EMChatManager.getInstance().fetchPublicChatRoomsFromServer(pagesize, cursor);
                     //获取group list
-                    final List<EMGroupInfo> returnGroups = data.getList();
+                    final List<EMChatRoom> chatRooms = data.getList();
                     runOnUiThread(new Runnable() {
 
                         public void run() {
-                            groupsList.addAll(returnGroups);
-                            if(returnGroups.size() != 0){
+                            chatRoomList.addAll(chatRooms);
+                            if(chatRooms.size() != 0){
                                 //获取cursor
                                 cursor = data.getCursor();
-                                if(returnGroups.size() == pagesize)
+                                if(chatRooms.size() == pagesize)
                                     footLoadingLayout.setVisibility(View.VISIBLE);
                             }
                             if(isFirstLoading){
                                 pb.setVisibility(View.INVISIBLE);
                                 isFirstLoading = false;
                                 //设置adapter
-                                adapter = new GroupsAdapter(PublicGroupsActivity.this, 1, groupsList);
+                                adapter = new ChatRoomAdapter(PublicChatRoomsActivity.this, 1, chatRoomList);
                                 listView.setAdapter(adapter);
                             }else{
-                                if(returnGroups.size() < pagesize){
+                                if(chatRooms.size() < pagesize){
                                     hasMoreData = false;
                                     footLoadingLayout.setVisibility(View.VISIBLE);
                                     footLoadingPB.setVisibility(View.GONE);
@@ -186,7 +195,7 @@ public class PublicGroupsActivity extends BaseActivity {
                             isLoading = false;
                             pb.setVisibility(View.INVISIBLE);
                             footLoadingLayout.setVisibility(View.GONE);
-                            Toast.makeText(PublicGroupsActivity.this, "加载数据失败，请检查网络或稍后重试", 0).show();
+                            Toast.makeText(PublicChatRoomsActivity.this, "加载数据失败，请检查网络或稍后重试", 0).show();
                         }
                     });
                 }
@@ -197,12 +206,12 @@ public class PublicGroupsActivity extends BaseActivity {
 	 * adapter
 	 *
 	 */
-	private class GroupsAdapter extends ArrayAdapter<EMGroupInfo> {
+	private class ChatRoomAdapter extends ArrayAdapter<EMChatRoom> {
 
 		private LayoutInflater inflater;
 
-		public GroupsAdapter(Context context, int res, List<EMGroupInfo> groups) {
-			super(context, res, groups);
+		public ChatRoomAdapter(Context context, int res, List<EMChatRoom> rooms) {
+			super(context, res, rooms);
 			this.inflater = LayoutInflater.from(context);
 		}
 
@@ -212,7 +221,7 @@ public class PublicGroupsActivity extends BaseActivity {
 				convertView = inflater.inflate(R.layout.row_group, null);
 			}
 
-			((TextView) convertView.findViewById(R.id.name)).setText(getItem(position).getGroupName());
+			((TextView) convertView.findViewById(R.id.name)).setText(getItem(position).getName());
 
 			return convertView;
 		}

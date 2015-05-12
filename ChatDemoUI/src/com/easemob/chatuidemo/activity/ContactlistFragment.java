@@ -140,7 +140,10 @@ public class ContactlistFragment extends Fragment {
 				} else if (Constant.GROUP_USERNAME.equals(username)) {
 					// 进入群聊列表页面
 					startActivity(new Intent(getActivity(), GroupsActivity.class));
-				} else {
+				} else if(Constant.CHAT_ROOM.equals(username)){
+					//进入聊天室列表页面
+				    startActivity(new Intent(getActivity(), PublicChatRoomsActivity.class));
+				}else {
 					// demo中直接进入聊天页面，实际一般是进入用户详情页
 					startActivity(new Intent(getActivity(), ChatActivity.class).putExtra("userId", adapter.getItem(position).getUsername()));
 				}
@@ -323,7 +326,9 @@ public class ContactlistFragment extends Fragment {
 		Iterator<Entry<String, User>> iterator = users.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Entry<String, User> entry = iterator.next();
-			if (!entry.getKey().equals(Constant.NEW_FRIENDS_USERNAME) && !entry.getKey().equals(Constant.GROUP_USERNAME)
+			if (!entry.getKey().equals(Constant.NEW_FRIENDS_USERNAME)
+			        && !entry.getKey().equals(Constant.GROUP_USERNAME)
+			        && !entry.getKey().equals(Constant.CHAT_ROOM)
 					&& !blackList.contains(entry.getKey()))
 				contactList.add(entry.getValue());
 		}
@@ -339,6 +344,11 @@ public class ContactlistFragment extends Fragment {
 		// 加入"申请与通知"和"群聊"
 		if(users.get(Constant.GROUP_USERNAME) != null)
 		    contactList.add(0, users.get(Constant.GROUP_USERNAME));
+		
+		// 加入"申请与通知"和"群聊"
+        if(users.get(Constant.CHAT_ROOM) != null)
+            contactList.add(0, users.get(Constant.CHAT_ROOM));
+        
 		// 把"申请与通知"添加到首位
 		if(users.get(Constant.NEW_FRIENDS_USERNAME) != null)
 		    contactList.add(0, users.get(Constant.NEW_FRIENDS_USERNAME));
