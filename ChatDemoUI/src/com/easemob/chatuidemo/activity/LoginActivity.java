@@ -278,24 +278,24 @@ public class LoginActivity extends BaseActivity {
 		// 添加user"申请与通知"
 		User newFriends = new User();
 		newFriends.setUsername(Constant.NEW_FRIENDS_USERNAME);
-		String strChat = getResources().getString(R.string.Application_and_notify);
+		String strChat = getString(R.string.Application_and_notify);
 		newFriends.setNick(strChat);
 
 		userlist.put(Constant.NEW_FRIENDS_USERNAME, newFriends);
 		
 		// 添加"群聊"
 		User groupUser = new User();
-		String strGroup = getResources().getString(R.string.group_chat);
+		String strGroup = getString(R.string.group_chat);
 		groupUser.setUsername(Constant.GROUP_USERNAME);
 		groupUser.setNick(strGroup);
 		groupUser.setHeader("");
 		userlist.put(Constant.GROUP_USERNAME, groupUser);
 		
-		// 添加"群聊"
+		// 添加"聊天室"
         User chatRoomItem = new User();
-        String chatRoomId = getResources().getString(R.string.chat_room);
+        String strChatRoom = getString(R.string.chat_room);
         chatRoomItem.setUsername(Constant.CHAT_ROOM);
-        chatRoomItem.setNick(chatRoomId);
+        chatRoomItem.setNick(strChatRoom);
         groupUser.setHeader("");
         userlist.put(Constant.CHAT_ROOM, chatRoomItem);
 
@@ -308,9 +308,9 @@ public class LoginActivity extends BaseActivity {
 		dao.saveContactList(users);
 
 		// 获取黑名单列表
-		//List<String> blackList = EMContactManager.getInstance().getBlackListUsernamesFromServer();
+		List<String> blackList = EMContactManager.getInstance().getBlackListUsernamesFromServer();
 		// 保存黑名单
-		//EMContactManager.getInstance().saveBlackList(blackList);
+		EMContactManager.getInstance().saveBlackList(blackList);
 
 		// 获取群聊列表(群聊里只有groupid和groupname等简单信息，不包含members),sdk会把群组存入到内存和db中
 		EMChatManager.getInstance().fetchJoinedGroupsFromServer();

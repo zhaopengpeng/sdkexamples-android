@@ -222,11 +222,8 @@ public class ContactlistFragment extends Fragment {
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		// 不生成MainActivity所在的ContextMenu
-		// super.onCreateContextMenu(menu, v, menuInfo);
-		
-		// 长按前两个不弹menu
-		if (((AdapterContextMenuInfo) menuInfo).position > 1) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		if (((AdapterContextMenuInfo) menuInfo).position > 2) {
 			getActivity().getMenuInflater().inflate(R.menu.context_contact_list, menu);
 		}
 	}
@@ -234,12 +231,16 @@ public class ContactlistFragment extends Fragment {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.delete_contact) {
-			User tobeDeleteUser = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
-			// 删除此联系人
-			deleteContact(tobeDeleteUser);
-			// 删除相关的邀请消息
-			InviteMessgeDao dao = new InviteMessgeDao(getActivity());
-			dao.deleteMessage(tobeDeleteUser.getUsername());
+			try {
+                User tobeDeleteUser = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
+                // 删除此联系人
+                deleteContact(tobeDeleteUser);
+                // 删除相关的邀请消息
+                InviteMessgeDao dao = new InviteMessgeDao(getActivity());
+                dao.deleteMessage(tobeDeleteUser.getUsername());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 			return true;
 		}else if(item.getItemId() == R.id.add_to_blacklist){
 			User user = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
@@ -405,17 +406,17 @@ public class ContactlistFragment extends Fragment {
 			}
 		});
 
-		// 加入"申请与通知"和"群聊"
-		if(users.get(Constant.GROUP_USERNAME) != null)
-		    contactList.add(0, users.get(Constant.GROUP_USERNAME));
-		
-		// 加入"申请与通知"和"群聊"
+		// 加入"群聊"和"聊天室"
         if(users.get(Constant.CHAT_ROOM) != null)
             contactList.add(0, users.get(Constant.CHAT_ROOM));
+        if(users.get(Constant.GROUP_USERNAME) != null)
+            contactList.add(0, users.get(Constant.GROUP_USERNAME));
         
 		// 把"申请与通知"添加到首位
 		if(users.get(Constant.NEW_FRIENDS_USERNAME) != null)
 		    contactList.add(0, users.get(Constant.NEW_FRIENDS_USERNAME));
+		
+		
 	}
 	
 	void hideSoftKeyboard() {
