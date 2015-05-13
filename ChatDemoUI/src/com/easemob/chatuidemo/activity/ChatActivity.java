@@ -67,6 +67,7 @@ import com.easemob.EMError;
 import com.easemob.EMEventListener;
 import com.easemob.EMGroupChangeListener;
 import com.easemob.EMNotifierEvent;
+import com.easemob.EMValueCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
@@ -344,42 +345,37 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			}else{
 				
 				final ProgressDialog pd = ProgressDialog.show(this, "", "Joining......");
-				 new Thread(){
-	               @Override
-	               public void run(){
-	                   try {
-	                	   EMChatManager.getInstance().joinChatRoom(toChatUsername);
-	                       runOnUiThread(new Runnable(){
-	                           @Override
-	                           public void run(){
-	                        	   	pd.dismiss();
-	                        	   	room = EMChatManager.getInstance().getChatRoom(toChatUsername);
-	                        	   	if(room !=null){
-	                        	   		((TextView) findViewById(R.id.name)).setText(room.getName());
-	                        	   	}else{
-	                        	   		((TextView) findViewById(R.id.name)).setText(toChatUsername);
-	                        	   	}
-//	                        	   	Toast.makeText(ChatActivity.this, "join room success : " + room.getName(), Toast.LENGTH_SHORT).show();
-	                        	   	Log.i("info", "join room success!");
+				EMChatManager.getInstance().joinChatRoom(toChatUsername,new EMValueCallBack<EMChatRoom>(){
 
-	                           }
-	                       });
-	                   } catch (EaseMobException e) {
-	                       // TODO Auto-generated catch block
-	                       e.printStackTrace();
-	                       final String error = e.getMessage();
-	                       runOnUiThread(new Runnable(){
-	                           @Override
-	                           public void run(){
-	                        	   pd.dismiss();
-//	                               Toast.makeText(ChatActivity.this, "join room failure : " + error, Toast.LENGTH_SHORT).show();
-	                        	   Log.i("info", "join room failure = "+error);
-	                           }
-	                       });
-	                       finish();
-	                   }
-	               }
-	           }.start();
+                    @Override
+                    public void onSuccess(EMChatRoom value) {
+                        pd.dismiss();
+                        room = EMChatManager.getInstance().getChatRoom(toChatUsername);
+                        if(room !=null){
+                            ((TextView) findViewById(R.id.name)).setText(room.getName());
+                        }else{
+                            ((TextView) findViewById(R.id.name)).setText(toChatUsername);
+                        }
+//                      Toast.makeText(ChatActivity.this, "join room success : " + room.getName(), Toast.LENGTH_SHORT).show();
+                        Log.i("info", "join room success!");
+                        
+                    }
+
+                    @Override
+                    public void onError(int error, final String errorMsg) {
+                        runOnUiThread(new Runnable(){
+                            @Override
+                            public void run(){
+                                pd.dismiss();
+//                              Toast.makeText(ChatActivity.this, "join room failure : " + error, Toast.LENGTH_SHORT).show();
+                                Log.i("info", "join room failure = "+errorMsg);
+                            }
+                        });
+                        finish();
+                        
+                    }
+                       
+                   });
 			}
 			
 			// conversation =
