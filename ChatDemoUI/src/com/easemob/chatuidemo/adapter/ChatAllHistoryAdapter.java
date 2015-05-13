@@ -35,6 +35,7 @@ import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.ImageMessageBody;
 import com.easemob.chat.TextMessageBody;
+import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.utils.SmileUtils;
@@ -90,20 +91,11 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 		EMConversation conversation = getItem(position);
 		// 获取用户username或者群组groupid
 		String username = conversation.getUserName();
-		List<EMGroup> groups = EMChatManager.getInstance().getAllGroups();
-		EMContact contact = null;
-		boolean isGroup = false;
-		for (EMGroup group : groups) {
-			if (group.getGroupId().equals(username)) {
-				isGroup = true;
-				contact = group;
-				break;
-			}
-		}
-		if (isGroup) {
+		if (conversation.getType() == EMConversationType.GroupChat) {
 			// 群聊消息，显示群聊头像
 			holder.avatar.setImageResource(R.drawable.group_icon);
-			holder.name.setText(contact.getNick() != null ? contact.getNick() : username);
+			EMGroup group = EMChatManager.getInstance().getGroup(username);
+			holder.name.setText(group != null ? group.getGroupName() : username);
 		} else {
 		    UserUtils.setUserAvatar(getContext(), username, holder.avatar);
 			if (username.equals(Constant.GROUP_USERNAME)) {
