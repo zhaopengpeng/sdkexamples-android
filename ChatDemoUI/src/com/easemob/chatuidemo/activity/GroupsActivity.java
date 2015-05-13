@@ -19,12 +19,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.WindowManager;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -32,11 +32,13 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.GroupAdapter;
+import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.EMLog;
 
 public class GroupsActivity extends BaseActivity {
@@ -57,6 +59,7 @@ public class GroupsActivity extends BaseActivity {
 			EMLog.d(TAG, "onSyncGroupsFinish success:" + success);
 			runOnUiThread(new Runnable() {
 				public void run() {
+					swipeRefreshLayout.setRefreshing(false);
 					if (success) {
 						handler.postDelayed(new Runnable() {
 							@Override
@@ -88,6 +91,27 @@ public class GroupsActivity extends BaseActivity {
 		inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		grouplist = EMChatManager.getInstance().getAllGroups();
 		groupListView = (ListView) findViewById(R.id.list);
+		
+		swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
+		swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light,
+		                android.R.color.holo_orange_light, android.R.color.holo_red_light);
+		swipeRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
+
+			@Override
+			public void onRefresh() {
+				new Thread() {
+					@Override
+					public void run() {
+						try {
+							HXSDKHelper.getInstance().getGroupsFromServer();
+						} catch (EaseMobException e) {
+							e.printStackTrace();
+						}
+					}
+				}.start();
+			}
+		});
+		
 		groupAdapter = new GroupAdapter(this, 1, grouplist);
 		groupListView.setAdapter(groupAdapter);
 		groupListView.setOnItemClickListener(new OnItemClickListener() {
