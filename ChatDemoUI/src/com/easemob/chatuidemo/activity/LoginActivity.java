@@ -231,12 +231,12 @@ public class LoginActivity extends BaseActivity {
 		groupUser.setHeader("");
 		userlist.put(Constant.GROUP_USERNAME, groupUser);
 		
-		// 添加"群聊"
+		// 添加"聊天室"
         User chatRoomItem = new User();
         String chatRoomId = getResources().getString(R.string.chat_room);
         chatRoomItem.setUsername(Constant.CHAT_ROOM);
         chatRoomItem.setNick(chatRoomId);
-        groupUser.setHeader("");
+        chatRoomItem.setHeader("");
         userlist.put(Constant.CHAT_ROOM, chatRoomItem);
 
 		// 存入内存
