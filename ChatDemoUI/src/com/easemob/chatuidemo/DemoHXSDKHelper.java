@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.easemob.EMCallBack;
@@ -190,7 +191,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
 
                         @Override
                         public void onReceive(Context context, Intent intent) {
-                            Toast.makeText(appContext, intent.getStringExtra("value"), Toast.LENGTH_LONG).show();
+                            Toast.makeText(appContext, intent.getStringExtra("value"), Toast.LENGTH_SHORT).show();
                         }
                         
                     }, filter);
@@ -216,6 +217,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             @Override
             public void onMemberJoined(String roomId, String participant) {
                 showToast("member : " + participant + " join the room : " + roomId);
+                Log.i("info", "onmemberjoined="+participant);
                 
             }
 
@@ -223,6 +225,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             public void onMemberExited(String roomId, String roomName,
                     String participant) {
                 showToast("member : " + participant + " leave the room : " + roomId + " room name : " + roomName);
+                Log.i("info", "onMemberExited="+participant);
                 
             }
 
@@ -230,6 +233,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             public void onMemberKicked(String roomId, String roomName,
                     String participant) {
                 showToast("member : " + participant + " was kicked from the room : " + roomId + " room name : " + roomName);
+                Log.i("info", "onMemberKicked="+participant);
                 
             }
 
