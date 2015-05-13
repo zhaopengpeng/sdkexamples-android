@@ -345,37 +345,62 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			}else{
 				
 				final ProgressDialog pd = ProgressDialog.show(this, "", "Joining......");
-				EMChatManager.getInstance().joinChatRoom(toChatUsername,new EMValueCallBack<EMChatRoom>(){
+				EMChatManager.getInstance().joinChatRoom(toChatUsername, new EMValueCallBack<EMChatRoom>() {
+				
+				@Override
+				public void onSuccess(EMChatRoom value) {
+					// TODO Auto-generated method stub
+					 runOnUiThread(new Runnable(){
+                           @Override
+                           public void run(){
+                        	   	pd.dismiss();
+                        	   	room = EMChatManager.getInstance().getChatRoom(toChatUsername);
+                        	   	if(room !=null){
+                        	   		((TextView) findViewById(R.id.name)).setText(room.getName());
+                        	   	}else{
+                        	   		((TextView) findViewById(R.id.name)).setText(toChatUsername);
+                        	   	}
+//			                    Toast.makeText(ChatActivity.this, "join room success : " + room.getName(), Toast.LENGTH_SHORT).show();
+                        	   	Log.i("info", "join room success!");
+                        	   	conversation = EMChatManager.getInstance().getConversation(toChatUsername);
+                        		// 把此会话的未读数置为0
+                        		conversation.markAllMessagesAsRead();
 
-                    @Override
-                    public void onSuccess(EMChatRoom value) {
-                        pd.dismiss();
-                        room = EMChatManager.getInstance().getChatRoom(toChatUsername);
-                        if(room !=null){
-                            ((TextView) findViewById(R.id.name)).setText(room.getName());
-                        }else{
-                            ((TextView) findViewById(R.id.name)).setText(toChatUsername);
-                        }
-//                      Toast.makeText(ChatActivity.this, "join room success : " + room.getName(), Toast.LENGTH_SHORT).show();
-                        Log.i("info", "join room success!");
-                        
-                    }
+                        		// 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
+                        		// 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
+                        		final List<EMMessage> msgs = conversation.getAllMessages();
+                        		int msgCount = msgs != null ? msgs.size() : 0;
+                        		if (msgCount < conversation.getAllMsgCount() && msgCount < pagesize) {
+                        			String msgId = null;
+                        			if (msgs != null && msgs.size() > 0) {
+                        				msgId = msgs.get(0).getMsgId();
+                        			}
+                    				conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
+                        		}
+                        		adapter = new MessageAdapter(ChatActivity.this, toChatUsername, chatType);
+                        		// 显示消息
+                        		listView.setAdapter(adapter);
+                        		adapter.refreshSelectLast();
 
-                    @Override
-                    public void onError(int error, final String errorMsg) {
-                        runOnUiThread(new Runnable(){
-                            @Override
-                            public void run(){
-                                pd.dismiss();
-//                              Toast.makeText(ChatActivity.this, "join room failure : " + error, Toast.LENGTH_SHORT).show();
-                                Log.i("info", "join room failure = "+errorMsg);
-                            }
-                        });
-                        finish();
-                        
-                    }
-                       
+                           }
+                       });
+				}
+				
+				@Override
+				public void onError(final int error, String errorMsg) {
+					// TODO Auto-generated method stub
+                   runOnUiThread(new Runnable(){
+                       @Override
+                       public void run(){
+                    	   pd.dismiss();
+//			                   Toast.makeText(ChatActivity.this, "join room failure : " + error, Toast.LENGTH_SHORT).show();
+                    	   Log.i("info", "join room failure = "+error);
+                       }
                    });
+                   finish();
+				}
+			});
+	                      
 			}
 			
 			// conversation =
@@ -1489,7 +1514,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		public void onScrollStateChanged(AbsListView view, int scrollState) {
 			switch (scrollState) {
 			case OnScrollListener.SCROLL_STATE_IDLE:
-				if (view.getFirstVisiblePosition() == 0 && !isloading && haveMoreData) {
+				if (view.getFirstVisiblePosition() == 0 && !isloading && haveMoreData && conversation.getAllMessages().size() != 0) {
 					isloading = true;
 					loadmorePB.setVisibility(View.VISIBLE);
 					// sdk初始化加载的聊天记录为20条，到顶时去db里获取更多					
