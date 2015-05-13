@@ -179,8 +179,8 @@ public class ContactlistFragment extends Fragment {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
-		// 长按前两个不弹menu
-		if (((AdapterContextMenuInfo) menuInfo).position > 1) {
+		// 长按前三个不弹menu
+		if (((AdapterContextMenuInfo) menuInfo).position > 2) {
 			getActivity().getMenuInflater().inflate(R.menu.context_contact_list, menu);
 		}
 	}
@@ -188,12 +188,16 @@ public class ContactlistFragment extends Fragment {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.delete_contact) {
-			User tobeDeleteUser = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
-			// 删除此联系人
-			deleteContact(tobeDeleteUser);
-			// 删除相关的邀请消息
-			InviteMessgeDao dao = new InviteMessgeDao(getActivity());
-			dao.deleteMessage(tobeDeleteUser.getUsername());
+			try {
+                User tobeDeleteUser = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
+                // 删除此联系人
+                deleteContact(tobeDeleteUser);
+                // 删除相关的邀请消息
+                InviteMessgeDao dao = new InviteMessgeDao(getActivity());
+                dao.deleteMessage(tobeDeleteUser.getUsername());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 			return true;
 		}else if(item.getItemId() == R.id.add_to_blacklist){
 			User user = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);

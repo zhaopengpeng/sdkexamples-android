@@ -54,8 +54,6 @@ public class PublicChatRoomsActivity extends BaseActivity {
 	private ProgressBar pb;
 	private TextView title;
 	private ListView listView;
-	private EditText query;
-	private ImageButton clearSearch;
 	private ChatRoomAdapter adapter;
 	
 	private List<EMChatRoom> chatRoomList;
@@ -74,9 +72,6 @@ public class PublicChatRoomsActivity extends BaseActivity {
 		setContentView(R.layout.activity_public_groups);
 
 		// 搜索框
-        query = (EditText) findViewById(R.id.query);
-        // 搜索框中清除button
-        clearSearch = (ImageButton) findViewById(R.id.search_clear);
 		pb = (ProgressBar) findViewById(R.id.progressBar);
 		listView = (ListView) findViewById(R.id.list);
 		title = (TextView)findViewById(R.id.tv_title);
@@ -125,30 +120,6 @@ public class PublicChatRoomsActivity extends BaseActivity {
             }
         });
         
-        query.addTextChangedListener(new TextWatcher() {
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                
-                adapter.getFilter().filter(s);
-                if (s.length() > 0) {
-                    clearSearch.setVisibility(View.VISIBLE);
-                } else {
-                    clearSearch.setVisibility(View.INVISIBLE);
-                }
-            }
-
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            public void afterTextChanged(Editable s) {
-            }
-        });
-        clearSearch.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                query.getText().clear();
-
-            }
-        });
 	}
 	
 	private void loadAndShowData(){
