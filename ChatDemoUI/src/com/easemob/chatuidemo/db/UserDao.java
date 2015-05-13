@@ -90,7 +90,8 @@ public class UserDao {
 					headerName = user.getUsername();
 				}
 				
-				if (username.equals(Constant.NEW_FRIENDS_USERNAME) || username.equals(Constant.GROUP_USERNAME)) {
+				if (username.equals(Constant.NEW_FRIENDS_USERNAME) || username.equals(Constant.GROUP_USERNAME)
+				        || username.equals(Constant.CHAT_ROOM)) {
 					user.setHeader("");
 				} else if (Character.isDigit(headerName.charAt(0))) {
 					user.setHeader("#");
