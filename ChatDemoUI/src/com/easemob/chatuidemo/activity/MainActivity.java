@@ -986,7 +986,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		@Override
 		public void onSyncSucess(final boolean success) {
 			if (success && HXSDKHelper.getInstance().isSyncReady()) {
-				init();
+				HXSDKHelper.getInstance().handlePendingMessages();
 			}
 		}
 	}
