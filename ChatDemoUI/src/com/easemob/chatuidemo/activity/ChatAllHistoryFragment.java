@@ -211,24 +211,21 @@ public class ChatAllHistoryFragment extends Fragment implements View.OnClickList
 		});
 		
 		HXSDKHelper.getInstance().addSyncGroupListener(new GroupSyncListener());
-		HXSDKHelper.getInstance().addSyncContactListener(
-				new ContactSyncListener());
-		HXSDKHelper.getInstance().addSyncBlackListListener(
-				new BlackListSyncListener());
+		HXSDKHelper.getInstance().addSyncContactListener(new ContactSyncListener());
+		HXSDKHelper.getInstance().addSyncBlackListListener(new BlackListSyncListener());
 
-		if (HXPreferenceUtils.getInstance().getSettingSyncGroupsFinished() == false
-				&& HXSDKHelper.getInstance().isSyncingGroupsFromServer() == false) {
+//		if (HXPreferenceUtils.getInstance().getSettingSyncGroupsFinished() == false
+		if (HXSDKHelper.getInstance().syncGroupsFromServerFailed() == true) {
 			showSyncGroupError(true);
 		}
-		if (HXPreferenceUtils.getInstance().getSettingSyncContactsFinished() == false
-				&& HXSDKHelper.getInstance().isSyncingContactsFromServer() == false) {
+//		if (HXPreferenceUtils.getInstance().getSettingSyncContactsFinished() == false
+		if (HXSDKHelper.getInstance().syncContactsFromServerFailed() == true) {
 			showSyncContactError(true);
 		}
-		if (HXPreferenceUtils.getInstance().getSettingSyncBlackListFinished() == false
-				&& HXSDKHelper.getInstance().isSyncingBlackListFromServer() == false) {
+//		if (HXPreferenceUtils.getInstance().getSettingSyncBlackListFinished() == false
+		if (HXSDKHelper.getInstance().syncBlackListFromServerFailed() == true) {
 			showSyncBlackListError(true);
 		}
-
 	}
 
 	void hideSoftKeyboard() {

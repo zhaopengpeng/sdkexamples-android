@@ -121,11 +121,23 @@ public abstract class HXSDKHelper {
 	 */
 	private List<SyncListener> syncBlackListListeners;
 
-	private boolean syncingGroupsFromServer = false;
+	private boolean isSyncingGroupsFromServer = false;
 
-	private boolean syncingContactsFromServer = false;
+	private boolean isSyncingContactsFromServer = false;
 
-	private boolean syncingBlackListFromServer = false;
+	private boolean isSyncingBlackListFromServer = false;
+	
+	private boolean syncGroupsFromServerFailed = false;
+
+	private boolean syncContactsFromServerFailed = false;
+
+	private boolean syncBlackListFromServerFailed = false;
+
+//	private boolean syncGroupsFromServerFailed = false;
+//
+//	private boolean syncContactsFromServerFailed = false;
+//
+//	private boolean syncBlackListFromServerFailed = false;
 
 	private List<SyncPendingMessage> messages = null;
 
@@ -485,15 +497,17 @@ public abstract class HXSDKHelper {
      */
     public synchronized void getGroupsFromServer() throws EaseMobException {
 	    try {
-		    syncingGroupsFromServer = true;
+	    	isSyncingGroupsFromServer = true;
 		    EMGroupManager.getInstance().getGroupsFromServer();
 		    HXPreferenceUtils.getInstance().setSettingSyncGroupsFinished(true);		 	
-		    syncingGroupsFromServer = false;
+	    	isSyncingGroupsFromServer = false;
+		    syncGroupsFromServerFailed = false;
 		    for (SyncListener listener : syncGroupsListeners) {
 			    listener.onSyncSucess(true);
 		    }
 	    } catch (EaseMobException e) {
-		    syncingGroupsFromServer = false;
+	    	isSyncingGroupsFromServer = false;
+		    syncGroupsFromServerFailed = true;
 		    for (SyncListener listener : syncGroupsListeners) {
 			    listener.onSyncSucess(false);
 		    }
@@ -505,15 +519,17 @@ public abstract class HXSDKHelper {
     public synchronized List<String> getContactsFromServer() throws EaseMobException {
 	    List<String> usernames = null;
 	    try {
-		    syncingContactsFromServer = true;
+	    	isSyncingContactsFromServer = true;
 		    usernames = EMContactManager.getInstance().getContactUserNames();
-		    HXPreferenceUtils.getInstance().setSettingSyncContactsFinished(true);		 	
-		    syncingContactsFromServer = false;
+		    HXPreferenceUtils.getInstance().setSettingSyncContactsFinished(true);
+	    	isSyncingContactsFromServer = false;
+		    syncContactsFromServerFailed = false;
 		    for (SyncListener listener : syncContactsListeners) {
 			    listener.onSyncSucess(true);
 		    }
 	    } catch (EaseMobException e) {
-		    syncingContactsFromServer = false;
+	    	isSyncingContactsFromServer = false;
+		    syncContactsFromServerFailed = true;
 		    for (SyncListener listener : syncContactsListeners) {
 			    listener.onSyncSucess(false);
 		    }
@@ -526,15 +542,17 @@ public abstract class HXSDKHelper {
     public synchronized List<String> getBlackListFromServer() throws EaseMobException {
 	    List<String> usernames = null; 
 	    try {
-		    syncingBlackListFromServer = true;
+	    	isSyncingBlackListFromServer = true;
 		    usernames = EMContactManager.getInstance().getBlackListUsernamesFromServer();
 		    HXPreferenceUtils.getInstance().setSettingSyncBlackListFinished(true);
-		    syncingBlackListFromServer = false;
+	    	isSyncingBlackListFromServer = false;
+		    syncBlackListFromServerFailed = false;
 		    for (SyncListener listener : syncBlackListListeners) {
 			    listener.onSyncSucess(true);
 		    }
 	    } catch (EaseMobException e) {
-		    syncingBlackListFromServer = false;
+	    	isSyncingBlackListFromServer = false;
+		    syncBlackListFromServerFailed = true;
 		    for (SyncListener listener : syncBlackListListeners) {
 			    listener.onSyncSucess(false);
 		    }
@@ -545,15 +563,27 @@ public abstract class HXSDKHelper {
     }
 
     public boolean isSyncingGroupsFromServer() {
-	    return syncingGroupsFromServer;
+	    return isSyncingGroupsFromServer;
     }
 
     public boolean isSyncingContactsFromServer() {
-	    return syncingContactsFromServer;
+	    return isSyncingContactsFromServer;
     }
 
     public boolean isSyncingBlackListFromServer() {
-	    return syncingBlackListFromServer;
+	    return isSyncingBlackListFromServer;
+    }
+    
+    public boolean syncGroupsFromServerFailed() {
+	    return syncGroupsFromServerFailed;
+    }
+
+    public boolean syncContactsFromServerFailed() {
+	    return syncContactsFromServerFailed;
+    }
+
+    public boolean syncBlackListFromServerFailed() {
+	    return syncBlackListFromServerFailed;
     }
 
     public enum EMSyncPendingMessage {

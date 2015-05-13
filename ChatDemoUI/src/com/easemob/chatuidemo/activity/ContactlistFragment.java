@@ -25,6 +25,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -46,7 +48,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.easemob.applib.controller.HXSDKHelper;
@@ -79,6 +80,7 @@ public class ContactlistFragment extends Fragment {
 	EditText query;
 	SyncListener syncListener;
 	View progressBar;
+	Handler handler = new Handler();
 
 	class SyncListener implements HXSDKHelper.SyncListener {
 		@Override
@@ -87,12 +89,19 @@ public class ContactlistFragment extends Fragment {
 			ContactlistFragment.this.getActivity().runOnUiThread(new Runnable() {
 				public void run() {
 					if (success) {
-						refresh();
+						// 等待数据写入本地联系人数据库
+						handler.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								refresh();
+								progressBar.setVisibility(View.GONE);
+							}
+						}, 1000);
 					} else {
 						String s1 = getResources().getString(R.string.get_failed_please_check);
 						Toast.makeText(getActivity(), s1, 1).show();
+						progressBar.setVisibility(View.GONE);
 					}
-					progressBar.setVisibility(View.GONE);
 				}
 			});
 		}
@@ -199,6 +208,9 @@ public class ContactlistFragment extends Fragment {
 		registerForContextMenu(listView);
 		
 		progressBar = (View) getView().findViewById(R.id.progress_bar);
+
+		syncListener = new SyncListener();
+		HXSDKHelper.getInstance().addSyncContactListener(syncListener);
 		
 		if (HXSDKHelper.getInstance().isSyncingContactsFromServer()) {
 			progressBar.setVisibility(View.VISIBLE);
@@ -206,8 +218,6 @@ public class ContactlistFragment extends Fragment {
 			progressBar.setVisibility(View.GONE);
 		}
 		
-		syncListener = new SyncListener();
-		HXSDKHelper.getInstance().addSyncContactListener(syncListener);
 	}
 
 	@Override

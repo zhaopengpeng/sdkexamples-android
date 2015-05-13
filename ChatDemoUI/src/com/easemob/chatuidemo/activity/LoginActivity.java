@@ -189,10 +189,28 @@ public class LoginActivity extends BaseActivity {
 				intent.putExtra(Constant.FROM_LOGIN, true);
 				startActivity(intent);
 				// 处理好友和群组
-				try {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							loadGroups();
+						} catch (EaseMobException e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							loadBlackList();
+						} catch (EaseMobException e) {
+							e.printStackTrace();
+						}
+					}
+				}).start();
+				try {					
 					loadContacts(LoginActivity.this);
-					loadBlackList();
-					loadGroups();
 				} catch (EaseMobException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
