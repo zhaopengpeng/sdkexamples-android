@@ -635,7 +635,7 @@ public abstract class HXSDKHelper {
      * 异步执行，处理在同步联系人和群组过程中收到的服务器通知    
      */
     @SuppressWarnings("unchecked")
-	    public void handlePendingMessages() {
+	   /* public void handlePendingMessages() {
 		    EMContactListener contactListener = EMContactManager.getInstance().getContactListener();
 		    List<GroupChangeListener> groupListeners = EMGroupManager.getInstance().getGroupChangeListener();
 
@@ -764,7 +764,7 @@ public abstract class HXSDKHelper {
 		    // release message queue
 		    messages.clear();
 		    messages = null;
-	    }
+	    }*/
 
     public boolean isSyncReady() {
 	    return HXPreferenceUtils.getInstance().getSettingSyncGroupsFinished() && 
