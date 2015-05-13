@@ -157,15 +157,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                         };
                         
                       //注册通话广播接收者
-                        appContext.registerReceiver(new BroadcastReceiver(){
-
-                            @Override
-                            public void onReceive(Context context, Intent intent) {
-                                // TODO Auto-generated method stub
-                                Toast.makeText(appContext, intent.getStringExtra("cmd_value"), Toast.LENGTH_SHORT).show();
-                            }
-                            
-                        }, cmdFilter);
+                        appContext.registerReceiver(broadCastReceiver,cmdFilter);
                     }
 
                     Intent broadcastIntent = new Intent(CMD_TOAST_BROADCAST);
