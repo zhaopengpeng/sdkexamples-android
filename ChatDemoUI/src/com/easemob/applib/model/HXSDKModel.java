@@ -83,7 +83,7 @@ public abstract class HXSDKModel {
      * @return
      */
     public boolean getRequireDeliveryAck(){
-        return true;
+        return false;
     }
     
     /**
@@ -92,7 +92,7 @@ public abstract class HXSDKModel {
      * 建议开发者开发时设置此模式
      */
     public boolean isSandboxMode(){
-        return true;
+        return false;
     }
     
     /**
