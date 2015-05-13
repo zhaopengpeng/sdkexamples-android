@@ -179,7 +179,6 @@ public class ContactlistFragment extends Fragment {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
-		// 长按前三个不弹menu
 		if (((AdapterContextMenuInfo) menuInfo).position > 2) {
 			getActivity().getMenuInflater().inflate(R.menu.context_contact_list, menu);
 		}
@@ -354,6 +353,8 @@ public class ContactlistFragment extends Fragment {
 		// 把"申请与通知"添加到首位
 		if(users.get(Constant.NEW_FRIENDS_USERNAME) != null)
 		    contactList.add(0, users.get(Constant.NEW_FRIENDS_USERNAME));
+		
+		
 	}
 	
 	void hideSoftKeyboard() {
