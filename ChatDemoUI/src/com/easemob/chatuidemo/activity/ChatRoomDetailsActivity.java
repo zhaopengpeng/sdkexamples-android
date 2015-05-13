@@ -90,6 +90,7 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 		st = getResources().getString(R.string.people);
 		clearAllHistory = (RelativeLayout) findViewById(R.id.clear_all_history);
 		userGridview = (ExpandGridView) findViewById(R.id.gridview);
+		userGridview.setVisibility(View.GONE);
 		loadingPB = (ProgressBar) findViewById(R.id.progressBar);
 		exitBtn = (Button) findViewById(R.id.btn_exit_grp);
 		deleteBtn = (Button) findViewById(R.id.btn_exitdel_grp);
@@ -123,7 +124,7 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 		// 如果自己是群主，显示解散按钮
 		if (EMChatManager.getInstance().getCurrentUser().equals(room.getOwner())) {
 			exitBtn.setVisibility(View.GONE);
-			deleteBtn.setVisibility(View.VISIBLE);
+			deleteBtn.setVisibility(View.GONE);
 		}
 		
 		((TextView) findViewById(R.id.group_name)).setText(room.getName() + "(" + room.getAffiliationsCount() + st);
@@ -278,10 +279,10 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 							if (EMChatManager.getInstance().getCurrentUser().equals(returnRoom.getOwner())) {
 								// 显示解散按钮
 								exitBtn.setVisibility(View.GONE);
-								deleteBtn.setVisibility(View.VISIBLE);
+								deleteBtn.setVisibility(View.GONE);
 							} else {
 								// 显示退出按钮
-								exitBtn.setVisibility(View.VISIBLE);
+								exitBtn.setVisibility(View.GONE);
 								deleteBtn.setVisibility(View.GONE);
 
 							}
