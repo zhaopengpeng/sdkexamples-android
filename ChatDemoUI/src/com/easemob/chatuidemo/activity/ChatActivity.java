@@ -1344,7 +1344,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		EMChatManager.getInstance().registerEventListener(
 				this,
 				new EMNotifierEvent.Event[] { EMNotifierEvent.Event.EventNewMessage,
-						EMNotifierEvent.Event.EventDeliveryAck, EMNotifierEvent.Event.EventReadAck });
+						EMNotifierEvent.Event.EventDeliveryAck, EMNotifierEvent.Event.EventReadAck ,EMNotifierEvent.Event.EventOfflineMessage});
 	}
 
 	@Override

@@ -37,6 +37,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,6 +70,8 @@ public class PublicGroupsActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_public_groups);
 
+		RelativeLayout layout = (RelativeLayout)findViewById(R.id.search);
+		layout.setVisibility(View.GONE);
 		// 搜索框
         query = (EditText) findViewById(R.id.query);
         // 搜索框中清除button
