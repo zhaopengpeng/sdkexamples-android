@@ -51,8 +51,6 @@ import com.easemob.util.NetUtils;
 public class PublicGroupsActivity extends BaseActivity {
 	private ProgressBar pb;
 	private ListView listView;
-	private EditText query;
-	private ImageButton clearSearch;
 	private GroupsAdapter adapter;
 	
 	private List<EMGroupInfo> groupsList;
@@ -64,6 +62,7 @@ public class PublicGroupsActivity extends BaseActivity {
     private LinearLayout footLoadingLayout;
     private ProgressBar footLoadingPB;
     private TextView footLoadingText;
+    
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +71,6 @@ public class PublicGroupsActivity extends BaseActivity {
 
 		RelativeLayout layout = (RelativeLayout)findViewById(R.id.search);
 		layout.setVisibility(View.GONE);
-		// 搜索框
-        query = (EditText) findViewById(R.id.query);
-        // 搜索框中清除button
-        clearSearch = (ImageButton) findViewById(R.id.search_clear);
 		pb = (ProgressBar) findViewById(R.id.progressBar);
 		listView = (ListView) findViewById(R.id.list);
 		groupsList = new ArrayList<EMGroupInfo>();
@@ -119,30 +114,6 @@ public class PublicGroupsActivity extends BaseActivity {
             }
         });
         
-        query.addTextChangedListener(new TextWatcher() {
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                
-                adapter.getFilter().filter(s);
-                if (s.length() > 0) {
-                    clearSearch.setVisibility(View.VISIBLE);
-                } else {
-                    clearSearch.setVisibility(View.INVISIBLE);
-                }
-            }
-
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            public void afterTextChanged(Editable s) {
-            }
-        });
-        clearSearch.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                query.getText().clear();
-
-            }
-        });
 	}
 	
 	private void loadAndShowData(){

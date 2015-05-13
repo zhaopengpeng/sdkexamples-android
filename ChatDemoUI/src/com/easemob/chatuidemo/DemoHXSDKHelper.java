@@ -111,6 +111,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
      */
     protected void initEventListener() {
         eventListener = new EMEventListener() {
+            private BroadcastReceiver broadCastReceiver = null;
             
             @Override
             public void onEvent(EMNotifierEvent event) {
@@ -145,17 +146,27 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                     final String CMD_TOAST_BROADCAST = "easemob.demo.cmd.toast";
                     IntentFilter cmdFilter = new IntentFilter(CMD_TOAST_BROADCAST);
                     
-                    //注册通话广播接收者
-                    appContext.registerReceiver(new BroadcastReceiver(){
+                    if(broadCastReceiver == null){
+                        broadCastReceiver = new BroadcastReceiver(){
 
-                        @Override
-                        public void onReceive(Context context, Intent intent) {
-                            // TODO Auto-generated method stub
-                            Toast.makeText(appContext, intent.getStringExtra("cmd_value"), Toast.LENGTH_SHORT).show();
-                        }
+                            @Override
+                            public void onReceive(Context context, Intent intent) {
+                                // TODO Auto-generated method stub
+                                Toast.makeText(appContext, intent.getStringExtra("cmd_value"), Toast.LENGTH_SHORT).show();
+                            }
+                        };
                         
-                    }, cmdFilter); 
-                    
+                      //注册通话广播接收者
+                        appContext.registerReceiver(new BroadcastReceiver(){
+
+                            @Override
+                            public void onReceive(Context context, Intent intent) {
+                                // TODO Auto-generated method stub
+                                Toast.makeText(appContext, intent.getStringExtra("cmd_value"), Toast.LENGTH_SHORT).show();
+                            }
+                            
+                        }, cmdFilter);
+                    }
 
                     Intent broadcastIntent = new Intent(CMD_TOAST_BROADCAST);
                     broadcastIntent.putExtra("cmd_value", str+action);
@@ -195,6 +206,8 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                         }
                         
                     }, filter);
+                    
+                    registered = true;
                 }
                 
                 Intent broadcastIntent = new Intent(ROOM_CHANGE_BROADCAST);
