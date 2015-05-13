@@ -69,8 +69,6 @@ public class PublicGroupsActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_public_groups);
 
-		RelativeLayout layout = (RelativeLayout)findViewById(R.id.search);
-		layout.setVisibility(View.GONE);
 		pb = (ProgressBar) findViewById(R.id.progressBar);
 		listView = (ListView) findViewById(R.id.list);
 		groupsList = new ArrayList<EMGroupInfo>();

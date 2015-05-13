@@ -6,8 +6,7 @@
     android:paddingBottom="7dp"
     android:background="#ededed"
     android:paddingLeft="@dimen/padding_search_bar"
-    android:paddingRight="@dimen/padding_search_bar" 
-    android:id="@+id/search">
+    android:paddingRight="@dimen/padding_search_bar">
 
     <EditText
       	android:paddingTop="5dp"
