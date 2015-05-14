@@ -15,6 +15,7 @@ package com.easemob.chatuidemo.activity;
 
 import java.util.List;
 
+import android.R.raw;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -64,16 +65,6 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 	private int referenceHeight;
 	private ProgressDialog progressDialog;
 
-	private RelativeLayout rl_switch_block_groupmsg;
-	/**
-	 * 屏蔽群消息imageView
-	 */
-	private ImageView iv_switch_block_groupmsg;
-	/**
-	 * 关闭屏蔽群消息imageview
-	 */
-	private ImageView iv_switch_unblock_groupmsg;
-
 	public static ChatRoomDetailsActivity instance;
 	
 	String st = "";
@@ -81,6 +72,10 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 	private RelativeLayout clearAllHistory;
 	private RelativeLayout blacklistLayout;
 	private RelativeLayout changeGroupNameLayout;
+	
+	private RelativeLayout blockGroupMsgLayout;
+	private RelativeLayout showChatRoomIdLayout;
+	private TextView chatRoomIdTextView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -97,12 +92,9 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 		blacklistLayout = (RelativeLayout) findViewById(R.id.rl_blacklist);
 		changeGroupNameLayout = (RelativeLayout) findViewById(R.id.rl_change_group_name);
 
-		rl_switch_block_groupmsg = (RelativeLayout) findViewById(R.id.rl_switch_block_groupmsg);
-
-		iv_switch_block_groupmsg = (ImageView) findViewById(R.id.iv_switch_block_groupmsg);
-		iv_switch_unblock_groupmsg = (ImageView) findViewById(R.id.iv_switch_unblock_groupmsg);
-
-		rl_switch_block_groupmsg.setOnClickListener(this);
+		blockGroupMsgLayout = (RelativeLayout)findViewById(R.id.rl_switch_block_groupmsg);
+		showChatRoomIdLayout = (RelativeLayout)findViewById(R.id.relative_chatroom_id);
+		chatRoomIdTextView = (TextView)findViewById(R.id.tv_chatroom_id);
 
 		Drawable referenceDrawable = getResources().getDrawable(R.drawable.smiley_add_btn);
 		referenceWidth = referenceDrawable.getIntrinsicWidth();
@@ -111,16 +103,17 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 		 // 获取传过来的groupid
 		 roomId = getIntent().getStringExtra("roomId");
 		 
-		 rl_switch_block_groupmsg.setVisibility(View.GONE);
+		 showChatRoomIdLayout.setVisibility(View.VISIBLE);
+		 chatRoomIdTextView.setText("聊天室ID："+roomId);
+		 
 		 room = EMChatManager.getInstance().getChatRoom(roomId);
 
-		if (room.getOwner() == null || "".equals(room.getOwner())
-				|| !room.getOwner().equals(EMChatManager.getInstance().getCurrentUser())) {
-			exitBtn.setVisibility(View.GONE);
-			deleteBtn.setVisibility(View.GONE);
-			blacklistLayout.setVisibility(View.GONE);
-			changeGroupNameLayout.setVisibility(View.GONE);
-		}
+		exitBtn.setVisibility(View.GONE);
+		deleteBtn.setVisibility(View.GONE);
+		blacklistLayout.setVisibility(View.GONE);
+		changeGroupNameLayout.setVisibility(View.GONE);
+		blockGroupMsgLayout.setVisibility(View.GONE);
+		
 		// 如果自己是群主，显示解散按钮
 		if (EMChatManager.getInstance().getCurrentUser().equals(room.getOwner())) {
 			exitBtn.setVisibility(View.GONE);

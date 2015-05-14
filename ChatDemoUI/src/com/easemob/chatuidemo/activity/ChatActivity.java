@@ -486,7 +486,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				Intent intent = new Intent(this, ForwardMessageActivity.class);
 				intent.putExtra("forward_msg_id", forwardMsg.getMsgId());
 				startActivity(intent);
-
+				
 				break;
 
 			default:
@@ -1580,7 +1580,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * @param forward_msg_id
 	 */
 	protected void forwardMessage(String forward_msg_id) {
-		EMMessage forward_msg = EMChatManager.getInstance().getMessage(forward_msg_id);
+		final EMMessage forward_msg = EMChatManager.getInstance().getMessage(forward_msg_id);
 		EMMessage.Type type = forward_msg.getType();
 		switch (type) {
 		case TXT:
@@ -1602,6 +1602,33 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			break;
 		default:
 			break;
+		}
+		
+		if(forward_msg.getChatType() == EMMessage.ChatType.ChatRoom){
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					try {
+						EMChatManager.getInstance().leaveChatRoom(forward_msg.getTo());
+						runOnUiThread(new Runnable() {
+							public void run() {
+//								Toast.makeText(ChatActivity.this, "leave success!", 1).show();
+								Log.i("info", "leave success!");
+							}
+						});
+					} catch (final Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						runOnUiThread(new Runnable() {
+							public void run() {
+//								Toast.makeText(ChatActivity.this, "leave failure!", 1).show();
+								Log.i("info", "leave failure = "+e.toString());
+							}
+						});
+					}
+				}
+			}).start();
 		}
 	}
 
