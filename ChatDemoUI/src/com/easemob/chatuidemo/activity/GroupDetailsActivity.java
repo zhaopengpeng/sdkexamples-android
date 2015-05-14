@@ -85,6 +85,8 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	private RelativeLayout clearAllHistory;
 	private RelativeLayout blacklistLayout;
 	private RelativeLayout changeGroupNameLayout;
+    private RelativeLayout idLayout;
+    private TextView idText;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +101,10 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		deleteBtn = (Button) findViewById(R.id.btn_exitdel_grp);
 		blacklistLayout = (RelativeLayout) findViewById(R.id.rl_blacklist);
 		changeGroupNameLayout = (RelativeLayout) findViewById(R.id.rl_change_group_name);
-
+		idLayout = (RelativeLayout) findViewById(R.id.rl_group_id);
+		idLayout.setVisibility(View.VISIBLE);
+		idText = (TextView) findViewById(R.id.tv_group_id_value);
+		
 		rl_switch_block_groupmsg = (RelativeLayout) findViewById(R.id.rl_switch_block_groupmsg);
 
 		iv_switch_block_groupmsg = (ImageView) findViewById(R.id.iv_switch_block_groupmsg);
@@ -115,6 +120,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		groupId = getIntent().getStringExtra("groupId");
 		group = EMChatManager.getInstance().getGroup(groupId);
 
+		idText.setText(groupId);
 		if (group.getOwner() == null || "".equals(group.getOwner())
 				|| !group.getOwner().equals(EMChatManager.getInstance().getCurrentUser())) {
 			exitBtn.setVisibility(View.GONE);
