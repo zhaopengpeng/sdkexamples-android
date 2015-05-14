@@ -236,7 +236,7 @@ public class LoginActivity extends BaseActivity {
         String strChatRoom = getString(R.string.chat_room);
         chatRoomItem.setUsername(Constant.CHAT_ROOM);
         chatRoomItem.setNick(strChatRoom);
-        groupUser.setHeader("");
+        chatRoomItem.setHeader("");
         userlist.put(Constant.CHAT_ROOM, chatRoomItem);
 
 		// 存入内存
