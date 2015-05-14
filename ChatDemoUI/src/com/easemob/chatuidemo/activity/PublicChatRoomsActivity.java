@@ -43,8 +43,8 @@ import android.widget.Toast;
 
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
+import com.easemob.chat.EMCursorResult;
 import com.easemob.chat.EMGroupInfo;
-import com.easemob.chat.EMResult;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
@@ -128,16 +128,16 @@ public class PublicChatRoomsActivity extends BaseActivity {
             public void run() {
                 try {
                     isLoading = true;
-                    final EMResult<EMChatRoom> data = EMChatManager.getInstance().fetchPublicChatRoomsFromServer(pagesize, cursor);
+                    final EMCursorResult<EMChatRoom> result = EMChatManager.getInstance().fetchPublicChatRoomsFromServer(pagesize, cursor);
                     //获取group list
-                    final List<EMChatRoom> chatRooms = data.getList();
+                    final List<EMChatRoom> chatRooms = result.getData();
                     runOnUiThread(new Runnable() {
 
                         public void run() {
                             chatRoomList.addAll(chatRooms);
                             if(chatRooms.size() != 0){
                                 //获取cursor
-                                cursor = data.getCursor();
+                                cursor = result.getCursor();
                                 if(chatRooms.size() == pagesize)
                                     footLoadingLayout.setVisibility(View.VISIBLE);
                             }

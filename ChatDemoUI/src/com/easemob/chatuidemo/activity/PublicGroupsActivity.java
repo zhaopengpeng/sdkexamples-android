@@ -42,8 +42,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMCursorResult;
 import com.easemob.chat.EMGroupInfo;
-import com.easemob.chat.EMResult;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.NetUtils;
@@ -120,16 +120,16 @@ public class PublicGroupsActivity extends BaseActivity {
             public void run() {
                 try {
                     isLoading = true;
-                    final EMResult<EMGroupInfo> data = EMChatManager.getInstance().fetchPublicGroupsFromServer(pagesize, cursor);
+                    final EMCursorResult<EMGroupInfo> result = EMChatManager.getInstance().fetchPublicGroupsFromServer(pagesize, cursor);
                     //获取group list
-                    final List<EMGroupInfo> returnGroups = data.getList();
+                    final List<EMGroupInfo> returnGroups = result.getData();
                     runOnUiThread(new Runnable() {
 
                         public void run() {
                             groupsList.addAll(returnGroups);
                             if(returnGroups.size() != 0){
                                 //获取cursor
-                                cursor = data.getCursor();
+                                cursor = result.getCursor();
                                 if(returnGroups.size() == pagesize)
                                     footLoadingLayout.setVisibility(View.VISIBLE);
                             }
