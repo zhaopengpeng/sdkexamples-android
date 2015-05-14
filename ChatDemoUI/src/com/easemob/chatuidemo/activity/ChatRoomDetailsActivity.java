@@ -93,8 +93,8 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 		changeGroupNameLayout = (RelativeLayout) findViewById(R.id.rl_change_group_name);
 
 		blockGroupMsgLayout = (RelativeLayout)findViewById(R.id.rl_switch_block_groupmsg);
-		showChatRoomIdLayout = (RelativeLayout)findViewById(R.id.relative_chatroom_id);
-		chatRoomIdTextView = (TextView)findViewById(R.id.tv_chatroom_id);
+		showChatRoomIdLayout = (RelativeLayout)findViewById(R.id.rl_group_id);
+		chatRoomIdTextView = (TextView)findViewById(R.id.tv_group_id);
 
 		Drawable referenceDrawable = getResources().getDrawable(R.drawable.smiley_add_btn);
 		referenceWidth = referenceDrawable.getIntrinsicWidth();
