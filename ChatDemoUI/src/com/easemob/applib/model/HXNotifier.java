@@ -247,8 +247,10 @@ public class HXNotifier {
      * 手机震动和声音提示
      */
     public void viberateAndPlayTone(EMMessage message) {
-        if(EMChatManager.getInstance().isSlientMessage(message)){
-            return;
+        if(message != null){
+            if(EMChatManager.getInstance().isSlientMessage(message)){
+                return;
+            } 
         }
         
         HXSDKModel model = HXSDKHelper.getInstance().getModel();
