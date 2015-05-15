@@ -682,7 +682,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
 		// register the event listener when enter the foreground
 		EMChatManager.getInstance().registerEventListener(this,
-				new EMNotifierEvent.Event[] { EMNotifierEvent.Event.EventNewMessage });
+				new EMNotifierEvent.Event[] { EMNotifierEvent.Event.EventNewMessage ,EMNotifierEvent.Event.EventOfflineMessage});
 	}
 
 	@Override
