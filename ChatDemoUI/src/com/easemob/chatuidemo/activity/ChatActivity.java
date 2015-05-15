@@ -344,6 +344,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				}
 			}else{
 				
+				findViewById(R.id.container_to_group).setVisibility(View.GONE);
 				final ProgressDialog pd = ProgressDialog.show(this, "", "Joining......");
 				EMChatManager.getInstance().joinChatRoom(toChatUsername, new EMValueCallBack<EMChatRoom>() {
 				
