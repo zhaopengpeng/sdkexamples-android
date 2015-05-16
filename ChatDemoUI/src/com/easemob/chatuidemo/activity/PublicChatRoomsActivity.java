@@ -105,11 +105,11 @@ public class PublicChatRoomsActivity extends BaseActivity {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
                 if(scrollState == OnScrollListener.SCROLL_STATE_IDLE){
-                    if(listView.getCount() != 0){
-                        int lasPos = view.getLastVisiblePosition();
-                        if(hasMoreData && !isLoading && lasPos == listView.getCount()-1){
+                    if(cursor != null){
+//                        int lasPos = view.getLastVisiblePosition();
+//                        if(hasMoreData && !isLoading && lasPos == listView.getCount()-1){
                             loadAndShowData();
-                        }
+//                        }
                     }
                 }
             }
