@@ -106,10 +106,10 @@ public class PublicChatRoomsActivity extends BaseActivity {
             public void onScrollStateChanged(AbsListView view, int scrollState) {
                 if(scrollState == OnScrollListener.SCROLL_STATE_IDLE){
                     if(cursor != null){
-//                        int lasPos = view.getLastVisiblePosition();
-//                        if(hasMoreData && !isLoading && lasPos == listView.getCount()-1){
+                        int lasPos = view.getLastVisiblePosition();
+                        if(hasMoreData && !isLoading && lasPos == listView.getCount()-1){
                             loadAndShowData();
-//                        }
+                        }
                     }
                 }
             }
@@ -138,8 +138,8 @@ public class PublicChatRoomsActivity extends BaseActivity {
                             if(chatRooms.size() != 0){
                                 //获取cursor
                                 cursor = result.getCursor();
-                                if(chatRooms.size() == pagesize)
-                                    footLoadingLayout.setVisibility(View.VISIBLE);
+//                                if(chatRooms.size() == pagesize)
+//                                    footLoadingLayout.setVisibility(View.VISIBLE);
                             }
                             if(isFirstLoading){
                                 pb.setVisibility(View.INVISIBLE);
