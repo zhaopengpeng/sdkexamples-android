@@ -18,14 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import android.R.integer;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -49,7 +47,6 @@ import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
-import com.easemob.chat.EMNotifier;
 import com.easemob.chat.TextMessageBody;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
@@ -492,7 +489,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 			// 保存邀请消息
 			EMChatManager.getInstance().saveMessage(msg);
 			// 提醒新消息
-			EMNotifier.getInstance(getApplicationContext()).notifyOnNewMsg();
+			HXSDKHelper.getInstance().getNotifier().viberateAndPlayTone(msg);
 
 			runOnUiThread(new Runnable() {
 				public void run() {
@@ -583,7 +580,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 			// 保存同意消息
 			EMChatManager.getInstance().saveMessage(msg);
 			// 提醒新消息
-			EMNotifier.getInstance(getApplicationContext()).notifyOnNewMsg();
+			HXSDKHelper.getInstance().getNotifier().viberateAndPlayTone(msg);
 
 			runOnUiThread(new Runnable() {
 				public void run() {
@@ -613,7 +610,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	private void notifyNewIviteMessage(InviteMessage msg) {
 		saveInviteMsg(msg);
 		// 提示有新消息
-		EMNotifier.getInstance(getApplicationContext()).notifyOnNewMsg();
+		HXSDKHelper.getInstance().getNotifier().viberateAndPlayTone(null);
 
 		// 刷新bottom bar消息未读数
 		updateUnreadAddressLable();
@@ -682,7 +679,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
 		// register the event listener when enter the foreground
 		EMChatManager.getInstance().registerEventListener(this,
-				new EMNotifierEvent.Event[] { EMNotifierEvent.Event.EventNewMessage });
+				new EMNotifierEvent.Event[] { EMNotifierEvent.Event.EventNewMessage ,EMNotifierEvent.Event.EventOfflineMessage});
 	}
 
 	@Override
