@@ -447,6 +447,9 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 					} else if (error == EMError.CONNECTION_CONFLICT) {
 						// 显示帐号在其他设备登陆dialog
 						showConflictDialog();
+						if (ChatActivity.activityInstance != null) {
+							ChatActivity.activityInstance.finish();
+						}
 					} else {
 						chatHistoryFragment.errorItem.setVisibility(View.VISIBLE);
 						if (NetUtils.hasNetwork(MainActivity.this))

@@ -1333,7 +1333,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 	@Override
 	protected void onResume() {
-		Log.i("ChatActivity", "onResume");
 		super.onResume();
 		if (group != null)
 			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
@@ -1350,8 +1349,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 	@Override
 	protected void onStop() {
-		Log.i("ChatActivity", "onStop");
-
 		// unregister this event listener when this activity enters the
 		// background
 		EMChatManager.getInstance().unregisterEventListener(this);
@@ -1360,6 +1357,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 		// 把此activity 从foreground activity 列表里移除
 		sdkHelper.popActivity(this);
+		
+		if(chatType == CHATTYPE_CHATROOM){
+			leaveChatroom(toChatUsername);
+		}
 
 		super.onStop();
 	}
@@ -1435,31 +1436,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	public void back(View view) {
 		EMChatManager.getInstance().unregisterEventListener(this);
 		if(chatType == CHATTYPE_CHATROOM){
-			new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					try {
-						EMChatManager.getInstance().leaveChatRoom(toChatUsername);
-						runOnUiThread(new Runnable() {
-							public void run() {
-//								Toast.makeText(ChatActivity.this, "leave success!", 1).show();
-								Log.i("info", "leave success!");
-							}
-						});
-					} catch (final Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						runOnUiThread(new Runnable() {
-							public void run() {
-//								Toast.makeText(ChatActivity.this, "leave failure!", 1).show();
-								Log.i("info", "leave failure = "+e.toString());
-							}
-						});
-					}
-				}
-			}).start();
+			leaveChatroom(toChatUsername);
 		}
 		finish();
 	}
@@ -1476,31 +1453,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		} else {
 			super.onBackPressed();
 			if(chatType == CHATTYPE_CHATROOM){
-				new Thread(new Runnable() {
-					
-					@Override
-					public void run() {
-						// TODO Auto-generated method stub
-						try {
-							EMChatManager.getInstance().leaveChatRoom(toChatUsername);
-							runOnUiThread(new Runnable() {
-								public void run() {
-//									Toast.makeText(ChatActivity.this, "leave success!", 1).show();
-									Log.i("info", "leave success!");
-								}
-							});
-						} catch (final Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							runOnUiThread(new Runnable() {
-								public void run() {
-//									Toast.makeText(ChatActivity.this, "leave failure!", 1).show();
-									Log.i("info", "leave failure = "+e.toString());
-								}
-							});
-						}
-					}
-				}).start();
+				leaveChatroom(toChatUsername);
 			}
 		}
 	}
@@ -1606,31 +1559,36 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		}
 		
 		if(forward_msg.getChatType() == EMMessage.ChatType.ChatRoom){
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					try {
-						EMChatManager.getInstance().leaveChatRoom(forward_msg.getTo());
-						runOnUiThread(new Runnable() {
-							public void run() {
-//								Toast.makeText(ChatActivity.this, "leave success!", 1).show();
-								Log.i("info", "leave success!");
-							}
-						});
-					} catch (final Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						runOnUiThread(new Runnable() {
-							public void run() {
-//								Toast.makeText(ChatActivity.this, "leave failure!", 1).show();
-								Log.i("info", "leave failure = "+e.toString());
-							}
-						});
-					}
-				}
-			}).start();
+			leaveChatroom(forward_msg.getTo());
 		}
+	}
+	
+	private void leaveChatroom(final String username){
+		
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				try {
+					EMChatManager.getInstance().leaveChatRoom(username);
+					runOnUiThread(new Runnable() {
+						public void run() {
+//								Toast.makeText(ChatActivity.this, "leave success!", 1).show();
+							Log.i("info", "leave success!");
+						}
+					});
+				} catch (final Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					runOnUiThread(new Runnable() {
+						public void run() {
+//								Toast.makeText(ChatActivity.this, "leave failure!", 1).show();
+							Log.i("info", "leave failure = "+e.toString());
+						}
+					});
+				}
+			}
+		}).start();
 	}
 
 	/**
