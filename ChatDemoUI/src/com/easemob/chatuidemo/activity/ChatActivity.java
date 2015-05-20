@@ -41,7 +41,6 @@ import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -96,7 +95,6 @@ import com.easemob.chatuidemo.widget.ExpandGridView;
 import com.easemob.chatuidemo.widget.PasteEditText;
 import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.EMLog;
-import com.easemob.util.EasyUtils;
 import com.easemob.util.PathUtil;
 import com.easemob.util.VoiceRecorder;
 
@@ -361,8 +359,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
                         	   	}else{
                         	   		((TextView) findViewById(R.id.name)).setText(toChatUsername);
                         	   	}
-//			                    Toast.makeText(ChatActivity.this, "join room success : " + room.getName(), Toast.LENGTH_SHORT).show();
-                        	   	Log.i("info", "join room success!");
+                        	   	EMLog.d(TAG, "join room success : " + room.getName());
                         	   	conversation = EMChatManager.getInstance().getConversation(toChatUsername);
                         		// 把此会话的未读数置为0
                         		conversation.markAllMessagesAsRead();
@@ -390,12 +387,11 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				@Override
 				public void onError(final int error, String errorMsg) {
 					// TODO Auto-generated method stub
+					EMLog.d(TAG, "join room failure : " + error);
                    runOnUiThread(new Runnable(){
                        @Override
                        public void run(){
                     	   pd.dismiss();
-//			                   Toast.makeText(ChatActivity.this, "join room failure : " + error, Toast.LENGTH_SHORT).show();
-                    	   Log.i("info", "join room failure = "+error);
                        }
                    });
                    finish();
@@ -407,30 +403,34 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			// conversation =
 			// EMChatManager.getInstance().getConversation(toChatUsername,true);
 		}
-		conversation = EMChatManager.getInstance().getConversation(toChatUsername);
-		// 把此会话的未读数置为0
-		conversation.markAllMessagesAsRead();
+		
+		
+		if(chatType != CHATTYPE_CHATROOM){
+			conversation = EMChatManager.getInstance().getConversation(toChatUsername);
+			// 把此会话的未读数置为0
+			conversation.markAllMessagesAsRead();
 
-		// 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
-		// 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
-		final List<EMMessage> msgs = conversation.getAllMessages();
-		int msgCount = msgs != null ? msgs.size() : 0;
-		if (msgCount < conversation.getAllMsgCount() && msgCount < pagesize) {
-			String msgId = null;
-			if (msgs != null && msgs.size() > 0) {
-				msgId = msgs.get(0).getMsgId();
+			// 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
+			// 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
+			final List<EMMessage> msgs = conversation.getAllMessages();
+			int msgCount = msgs != null ? msgs.size() : 0;
+			if (msgCount < conversation.getAllMsgCount() && msgCount < pagesize) {
+				String msgId = null;
+				if (msgs != null && msgs.size() > 0) {
+					msgId = msgs.get(0).getMsgId();
+				}
+				if (chatType == CHATTYPE_SINGLE) {
+					conversation.loadMoreMsgFromDB(msgId, pagesize);
+				} else {
+					conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
+				}
 			}
-			if (chatType == CHATTYPE_SINGLE) {
-				conversation.loadMoreMsgFromDB(msgId, pagesize);
-			} else {
-				conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
-			}
+			adapter = new MessageAdapter(this, toChatUsername, chatType);
+			// 显示消息
+			listView.setAdapter(adapter);
+			listView.setOnScrollListener(new ListScrollListener());
+			adapter.refreshSelectLast();
 		}
-		adapter = new MessageAdapter(this, toChatUsername, chatType);
-		// 显示消息
-		listView.setAdapter(adapter);
-		listView.setOnScrollListener(new ListScrollListener());
-		adapter.refreshSelectLast();
 
 		listView.setOnTouchListener(new OnTouchListener() {
 
@@ -1336,7 +1336,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		super.onResume();
 		if (group != null)
 			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
-		adapter.refresh();
+		if(chatType != CHATTYPE_CHATROOM)
+			adapter.refresh();
 
 		DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
 		sdkHelper.pushActivity(this);
