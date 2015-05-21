@@ -420,8 +420,8 @@ public class MessageAdapter extends BaseAdapter{
 				}
 			}
 		} else {
-			// 如果是文本或者地图消息并且不是group messgae，显示的时候给对方发送已读回执
-			if ((message.getType() == Type.TXT || message.getType() == Type.LOCATION) && !message.isAcked && chatType != ChatType.GroupChat) {
+			// 如果是文本或者地图消息并且不是group messgae,chatroom message，显示的时候给对方发送已读回执
+			if ((message.getType() == Type.TXT || message.getType() == Type.LOCATION) && !message.isAcked && (chatType != ChatType.GroupChat || chatType != ChatType.ChatRoom)) {
 				// 不是语音通话记录
 				if (!message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL, false)) {
 					try {
