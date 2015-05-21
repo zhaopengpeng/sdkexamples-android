@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import u.aly.ad;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -73,6 +74,8 @@ public class ContactlistFragment extends Fragment {
 	private List<String> blackList;
 	ImageButton clearSearch;
 	EditText query;
+    private User toBeProcessUser;
+    private String toBeProcessUsername;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -180,6 +183,8 @@ public class ContactlistFragment extends Fragment {
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		if (((AdapterContextMenuInfo) menuInfo).position > 2) {
+		    toBeProcessUser = adapter.getItem(((AdapterContextMenuInfo) menuInfo).position);
+		    toBeProcessUsername = toBeProcessUser.getUsername();
 			getActivity().getMenuInflater().inflate(R.menu.context_contact_list, menu);
 		}
 	}
@@ -188,19 +193,17 @@ public class ContactlistFragment extends Fragment {
 	public boolean onContextItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.delete_contact) {
 			try {
-                User tobeDeleteUser = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
                 // 删除此联系人
-                deleteContact(tobeDeleteUser);
+                deleteContact(toBeProcessUser);
                 // 删除相关的邀请消息
                 InviteMessgeDao dao = new InviteMessgeDao(getActivity());
-                dao.deleteMessage(tobeDeleteUser.getUsername());
+                dao.deleteMessage(toBeProcessUser.getUsername());
             } catch (Exception e) {
                 e.printStackTrace();
             }
 			return true;
 		}else if(item.getItemId() == R.id.add_to_blacklist){
-			User user = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
-			moveToBlacklist(user.getUsername());
+			moveToBlacklist(toBeProcessUsername);
 			return true;
 		}
 		return super.onContextItemSelected(item);
