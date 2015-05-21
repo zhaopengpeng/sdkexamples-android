@@ -333,131 +333,140 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			toChatUsername = getIntent().getStringExtra("groupId");
 
 			if(chatType == CHATTYPE_GROUP){
-				group = EMChatManager.getInstance().getGroup(toChatUsername);
-				
-				if (group != null){
-					((TextView) findViewById(R.id.name)).setText(group.getGroupName());
-				}else{
-					((TextView) findViewById(R.id.name)).setText(toChatUsername);
-				}
-			}else{
-				
-				findViewById(R.id.container_to_group).setVisibility(View.GONE);
-				final ProgressDialog pd = ProgressDialog.show(this, "", "Joining......");
-				EMChatManager.getInstance().joinChatRoom(toChatUsername, new EMValueCallBack<EMChatRoom>() {
-				
-				@Override
-				public void onSuccess(EMChatRoom value) {
-					// TODO Auto-generated method stub
-					 runOnUiThread(new Runnable(){
-                           @Override
-                           public void run(){
-                        	   	pd.dismiss();
-                        	   	room = EMChatManager.getInstance().getChatRoom(toChatUsername);
-                        	   	if(room !=null){
-                        	   		((TextView) findViewById(R.id.name)).setText(room.getName());
-                        	   	}else{
-                        	   		((TextView) findViewById(R.id.name)).setText(toChatUsername);
-                        	   	}
-                        	   	EMLog.d(TAG, "join room success : " + room.getName());
-                        	   	conversation = EMChatManager.getInstance().getConversation(toChatUsername);
-                        		// 把此会话的未读数置为0
-                        		conversation.markAllMessagesAsRead();
-
-                        		// 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
-                        		// 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
-                        		final List<EMMessage> msgs = conversation.getAllMessages();
-                        		int msgCount = msgs != null ? msgs.size() : 0;
-                        		if (msgCount < conversation.getAllMsgCount() && msgCount < pagesize) {
-                        			String msgId = null;
-                        			if (msgs != null && msgs.size() > 0) {
-                        				msgId = msgs.get(0).getMsgId();
-                        			}
-                    				conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
-                        		}
-                        		adapter = new MessageAdapter(ChatActivity.this, toChatUsername, chatType);
-                        		// 显示消息
-                        		listView.setAdapter(adapter);
-                        		adapter.refreshSelectLast();
-
-                           }
-                       });
-				}
-				
-				@Override
-				public void onError(final int error, String errorMsg) {
-					// TODO Auto-generated method stub
-					EMLog.d(TAG, "join room failure : " + error);
-                   runOnUiThread(new Runnable(){
-                       @Override
-                       public void run(){
-                    	   pd.dismiss();
-                       }
-                   });
-                   finish();
-				}
-			});
-	                      
+			    onGroupViewCreation();
+			}else{ 
+			    onChatRoomViewCreation();
 			}
-			
-			// conversation =
-			// EMChatManager.getInstance().getConversation(toChatUsername,true);
 		}
-		
-		
-		if(chatType != CHATTYPE_CHATROOM){
-			conversation = EMChatManager.getInstance().getConversation(toChatUsername);
-			// 把此会话的未读数置为0
-			conversation.markAllMessagesAsRead();
-
-			// 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
-			// 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
-			final List<EMMessage> msgs = conversation.getAllMessages();
-			int msgCount = msgs != null ? msgs.size() : 0;
-			if (msgCount < conversation.getAllMsgCount() && msgCount < pagesize) {
-				String msgId = null;
-				if (msgs != null && msgs.size() > 0) {
-					msgId = msgs.get(0).getMsgId();
-				}
-				if (chatType == CHATTYPE_SINGLE) {
-					conversation.loadMoreMsgFromDB(msgId, pagesize);
-				} else {
-					conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
-				}
-			}
-			adapter = new MessageAdapter(this, toChatUsername, chatType);
-			// 显示消息
-			listView.setAdapter(adapter);
-			listView.setOnScrollListener(new ListScrollListener());
-			adapter.refreshSelectLast();
-		}
-
-		listView.setOnTouchListener(new OnTouchListener() {
-
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				hideKeyboard();
-				more.setVisibility(View.GONE);
-				iv_emoticons_normal.setVisibility(View.VISIBLE);
-				iv_emoticons_checked.setVisibility(View.INVISIBLE);
-				emojiIconContainer.setVisibility(View.GONE);
-				btnContainer.setVisibility(View.GONE);
-				return false;
-			}
-		});
-
-		// 监听当前会话的群聊解散被T事件
-		groupListener = new GroupListener();
-		EMChatManager.getInstance().addGroupChangeListener(groupListener);
-
-		// show forward message if the message is not null
-		String forward_msg_id = getIntent().getStringExtra("forward_msg_id");
-		if (forward_msg_id != null) {
-			// 显示发送要转发的消息
-			forwardMessage(forward_msg_id);
-		}
+        
+		onConversationInit();
+		onListViewCreation();
 	}
 
+	protected void onConversationInit(){
+	    conversation = EMChatManager.getInstance().getConversation(toChatUsername);
+        // 把此会话的未读数置为0
+        conversation.markAllMessagesAsRead();
+
+        // 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
+        // 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
+        final List<EMMessage> msgs = conversation.getAllMessages();
+        int msgCount = msgs != null ? msgs.size() : 0;
+        if (msgCount < conversation.getAllMsgCount() && msgCount < pagesize) {
+            String msgId = null;
+            if (msgs != null && msgs.size() > 0) {
+                msgId = msgs.get(0).getMsgId();
+            }
+            if (chatType == CHATTYPE_SINGLE) {
+                conversation.loadMoreMsgFromDB(msgId, pagesize);
+            } else {
+                conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
+            }
+        }
+
+	}
+	
+	protected void onListViewCreation(){
+        adapter = new MessageAdapter(ChatActivity.this, toChatUsername, chatType);
+        // 显示消息
+        listView.setAdapter(adapter);
+        
+        listView.setOnScrollListener(new ListScrollListener());
+        adapter.refreshSelectLast();
+
+        listView.setOnTouchListener(new OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                hideKeyboard();
+                more.setVisibility(View.GONE);
+                iv_emoticons_normal.setVisibility(View.VISIBLE);
+                iv_emoticons_checked.setVisibility(View.INVISIBLE);
+                emojiIconContainer.setVisibility(View.GONE);
+                btnContainer.setVisibility(View.GONE);
+                return false;
+            }
+        });
+	}
+	
+	protected void onGroupViewCreation(){
+	    group = EMChatManager.getInstance().getGroup(toChatUsername);
+        
+        if (group != null){
+            ((TextView) findViewById(R.id.name)).setText(group.getGroupName());
+        }else{
+            ((TextView) findViewById(R.id.name)).setText(toChatUsername);
+        }
+        
+        // 监听当前会话的群聊解散被T事件
+        groupListener = new GroupListener();
+        EMChatManager.getInstance().addGroupChangeListener(groupListener);
+
+        // show forward message if the message is not null
+        String forward_msg_id = getIntent().getStringExtra("forward_msg_id");
+        if (forward_msg_id != null) {
+            // 显示发送要转发的消息
+            forwardMessage(forward_msg_id);
+        }
+	}
+	
+	protected void onChatRoomViewCreation(){
+        findViewById(R.id.container_to_group).setVisibility(View.GONE);
+        
+        final ProgressDialog pd = ProgressDialog.show(this, "", "Joining......");
+        EMChatManager.getInstance().joinChatRoom(toChatUsername, new EMValueCallBack<EMChatRoom>() {
+        
+        @Override
+        public void onSuccess(EMChatRoom value) {
+            // TODO Auto-generated method stub
+             runOnUiThread(new Runnable(){
+                   @Override
+                   public void run(){
+                        pd.dismiss();
+                        room = EMChatManager.getInstance().getChatRoom(toChatUsername);
+                        if(room !=null){
+                            ((TextView) findViewById(R.id.name)).setText(room.getName());
+                        }else{
+                            ((TextView) findViewById(R.id.name)).setText(toChatUsername);
+                        }
+                        EMLog.d(TAG, "join room success : " + room.getName());
+                        conversation = EMChatManager.getInstance().getConversation(toChatUsername);
+                        // 把此会话的未读数置为0
+                        conversation.markAllMessagesAsRead();
+
+                        // 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
+                        // 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
+                        final List<EMMessage> msgs = conversation.getAllMessages();
+                        int msgCount = msgs != null ? msgs.size() : 0;
+                        if (msgCount < conversation.getAllMsgCount() && msgCount < pagesize) {
+                            String msgId = null;
+                            if (msgs != null && msgs.size() > 0) {
+                                msgId = msgs.get(0).getMsgId();
+                            }
+                            conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
+                        }
+                        
+                        adapter.refreshSelectLast();
+
+                   }
+               });
+        }
+        
+        @Override
+        public void onError(final int error, String errorMsg) {
+                // TODO Auto-generated method stub
+                EMLog.d(TAG, "join room failure : " + error);
+               runOnUiThread(new Runnable(){
+                   @Override
+                   public void run(){
+                       pd.dismiss();
+                   }
+               });
+               finish();
+            }
+        });
+	}
+	
 	/**
 	 * onActivityResult
 	 */
@@ -1328,7 +1337,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	protected void onDestroy() {
 		super.onDestroy();
 		activityInstance = null;
-		EMChatManager.getInstance().removeGroupChangeListener(groupListener);
+		if(groupListener != null){
+		    EMChatManager.getInstance().removeGroupChangeListener(groupListener);
+		}
 	}
 
 	@Override

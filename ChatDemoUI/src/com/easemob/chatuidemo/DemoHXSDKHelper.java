@@ -294,7 +294,12 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 } else { // 群聊信息
                     // message.getTo()为群聊id
                     intent.putExtra("groupId", message.getTo());
-                    intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+                    if(chatType == ChatType.GroupChat){
+                        intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+                    }else{
+                        intent.putExtra("chatType", ChatActivity.CHATTYPE_CHATROOM);
+                    }
+                    
                 }
                 return intent;
             }
