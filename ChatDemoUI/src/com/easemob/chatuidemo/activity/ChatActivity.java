@@ -340,10 +340,18 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				}else{
 					((TextView) findViewById(R.id.name)).setText(toChatUsername);
 				}
+				
+				// 监听当前会话的群聊解散被T事件
+				groupListener = new GroupListener();
+				EMChatManager.getInstance().addGroupChangeListener(groupListener);
+				
 			}else{
 				
 				findViewById(R.id.container_to_group).setVisibility(View.GONE);
 				final ProgressDialog pd = ProgressDialog.show(this, "", "Joining......");
+				conversation = EMChatManager.getInstance().getConversation(toChatUsername);
+				adapter = new MessageAdapter(ChatActivity.this, toChatUsername, chatType);
+				listView.setAdapter(adapter);
 				EMChatManager.getInstance().joinChatRoom(toChatUsername, new EMValueCallBack<EMChatRoom>() {
 				
 				@Override
@@ -360,7 +368,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
                         	   		((TextView) findViewById(R.id.name)).setText(toChatUsername);
                         	   	}
                         	   	EMLog.d(TAG, "join room success : " + room.getName());
-                        	   	conversation = EMChatManager.getInstance().getConversation(toChatUsername);
                         		// 把此会话的未读数置为0
                         		conversation.markAllMessagesAsRead();
 
@@ -375,9 +382,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
                         			}
                     				conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
                         		}
-                        		adapter = new MessageAdapter(ChatActivity.this, toChatUsername, chatType);
                         		// 显示消息
-                        		listView.setAdapter(adapter);
                         		adapter.refreshSelectLast();
 
                            }
@@ -385,12 +390,13 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				}
 				
 				@Override
-				public void onError(final int error, String errorMsg) {
+				public void onError(final int error, final String errorMsg) {
 					// TODO Auto-generated method stub
 					EMLog.d(TAG, "join room failure : " + error);
                    runOnUiThread(new Runnable(){
                        @Override
                        public void run(){
+                    	   Toast.makeText(ChatActivity.this, "join room failure : " + errorMsg, Toast.LENGTH_SHORT).show();
                     	   pd.dismiss();
                        }
                    });
@@ -446,9 +452,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			}
 		});
 
-		// 监听当前会话的群聊解散被T事件
-		groupListener = new GroupListener();
-		EMChatManager.getInstance().addGroupChangeListener(groupListener);
 
 		// show forward message if the message is not null
 		String forward_msg_id = getIntent().getStringExtra("forward_msg_id");
@@ -1328,7 +1331,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	protected void onDestroy() {
 		super.onDestroy();
 		activityInstance = null;
-		EMChatManager.getInstance().removeGroupChangeListener(groupListener);
+		if(chatType == CHATTYPE_GROUP)
+			EMChatManager.getInstance().removeGroupChangeListener(groupListener);
 	}
 
 	@Override
