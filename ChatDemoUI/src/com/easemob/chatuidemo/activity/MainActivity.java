@@ -214,6 +214,11 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 			break;
 		}
 
+		case EventConversationListChanged: {
+		    refreshUI();
+		    break;
+		}
+		
 		default:
 			break;
 		}
@@ -679,7 +684,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
 		// register the event listener when enter the foreground
 		EMChatManager.getInstance().registerEventListener(this,
-				new EMNotifierEvent.Event[] { EMNotifierEvent.Event.EventNewMessage ,EMNotifierEvent.Event.EventOfflineMessage});
+				new EMNotifierEvent.Event[] { EMNotifierEvent.Event.EventNewMessage ,EMNotifierEvent.Event.EventOfflineMessage, EMNotifierEvent.Event.EventConversationListChanged});
 	}
 
 	@Override

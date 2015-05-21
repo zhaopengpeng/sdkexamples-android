@@ -72,6 +72,7 @@ import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMConversation;
+import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
@@ -322,8 +323,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		if (chatType == CHATTYPE_SINGLE) { // 单聊
 			toChatUsername = getIntent().getStringExtra("userId");
 			((TextView) findViewById(R.id.name)).setText(toChatUsername);
-			// conversation =
-			// EMChatManager.getInstance().getConversation(toChatUsername,false);
 		} else {
 			// 群聊
 			findViewById(R.id.container_to_group).setVisibility(View.VISIBLE);
@@ -340,11 +339,19 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		}
         
 		onConversationInit();
+		
 		onListViewCreation();
 	}
 
 	protected void onConversationInit(){
-	    conversation = EMChatManager.getInstance().getConversation(toChatUsername);
+	    if(chatType == CHATTYPE_SINGLE){
+	        conversation = EMChatManager.getInstance().getConversationByType(toChatUsername,EMConversationType.Chat);
+	    }else if(chatType == CHATTYPE_GROUP){
+	        conversation = EMChatManager.getInstance().getConversationByType(toChatUsername,EMConversationType.GroupChat);
+	    }else if(chatType == CHATTYPE_CHATROOM){
+	        conversation = EMChatManager.getInstance().getConversationByType(toChatUsername,EMConversationType.ChatRoom);
+	    }
+	    
         // 把此会话的未读数置为0
         conversation.markAllMessagesAsRead();
 
@@ -430,21 +437,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
                             ((TextView) findViewById(R.id.name)).setText(toChatUsername);
                         }
                         EMLog.d(TAG, "join room success : " + room.getName());
-                        conversation = EMChatManager.getInstance().getConversation(toChatUsername);
-                        // 把此会话的未读数置为0
-                        conversation.markAllMessagesAsRead();
-
-                        // 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
-                        // 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
-                        final List<EMMessage> msgs = conversation.getAllMessages();
-                        int msgCount = msgs != null ? msgs.size() : 0;
-                        if (msgCount < conversation.getAllMsgCount() && msgCount < pagesize) {
-                            String msgId = null;
-                            if (msgs != null && msgs.size() > 0) {
-                                msgId = msgs.get(0).getMsgId();
-                            }
-                            conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
-                        }
                         
                         adapter.refreshSelectLast();
 

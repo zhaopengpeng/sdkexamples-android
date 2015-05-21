@@ -38,7 +38,6 @@ import android.widget.Toast;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMConversation.EMConversationType;
-import com.easemob.chat.EMMessage;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
