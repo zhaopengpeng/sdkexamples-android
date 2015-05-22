@@ -344,6 +344,13 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		    onConversationInit();
 	        
 	        onListViewCreation();
+	        
+	        // show forward message if the message is not null
+	        String forward_msg_id = getIntent().getStringExtra("forward_msg_id");
+	        if (forward_msg_id != null) {
+	            // 显示发送要转发的消息
+	            forwardMessage(forward_msg_id);
+	        }
 		}
 	}
 
@@ -445,13 +452,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
         // 监听当前会话的群聊解散被T事件
         groupListener = new GroupListener();
         EMChatManager.getInstance().addGroupChangeListener(groupListener);
-
-        // show forward message if the message is not null
-        String forward_msg_id = getIntent().getStringExtra("forward_msg_id");
-        if (forward_msg_id != null) {
-            // 显示发送要转发的消息
-            forwardMessage(forward_msg_id);
-        }
 	}
 	
 	protected void onChatRoomViewCreation(){

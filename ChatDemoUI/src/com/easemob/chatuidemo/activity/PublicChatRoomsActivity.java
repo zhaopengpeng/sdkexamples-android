@@ -98,7 +98,20 @@ public class PublicChatRoomsActivity extends BaseActivity {
 
             @Override
             public void onChatRoomDestroyed(String roomId, String roomName) {
-                loadAndShowData();
+                chatRoomList.clear();
+                if(adapter != null){
+                    runOnUiThread(new Runnable(){
+
+                        @Override
+                        public void run() {
+                            if(adapter != null){
+                                adapter.notifyDataSetChanged();
+                                loadAndShowData();
+                            }
+                        }
+                        
+                    });
+                }
             }
 
             @Override
