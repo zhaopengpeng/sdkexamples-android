@@ -3,6 +3,7 @@ package com.easemob.chatuidemo.activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -38,6 +39,10 @@ public class PublicGroupsSeachActivity extends BaseActivity{
      * @param v
      */
     public void searchGroup(View v){
+        if(TextUtils.isEmpty(idET.getText())){
+            return;
+        }
+        
         final ProgressDialog pd = new ProgressDialog(this);
         pd.setMessage("正在搜索...");
         pd.setCancelable(false);
