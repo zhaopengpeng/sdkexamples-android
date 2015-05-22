@@ -13,6 +13,7 @@
  */
 package com.easemob.chatuidemo.activity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.ProgressDialog;
@@ -135,7 +136,11 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		}
 		
 		((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getAffiliationsCount() + st);
-		adapter = new GridAdapter(this, R.layout.grid, group.getMembers());
+		
+		List<String> members = new ArrayList<String>();
+		members.addAll(group.getMembers());
+		
+		adapter = new GridAdapter(this, R.layout.grid, members);
 		userGridview.setAdapter(adapter);
 
 		// 保证每次进详情看到的都是最新的group
@@ -252,7 +257,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 						    EMChatManager.getInstance().blockGroupUser(groupId, longClickUsername);
 							runOnUiThread(new Runnable() {
 								public void run() {
-									adapter.notifyDataSetChanged();
+								    refreshMembers();
 									progressDialog.dismiss();
 									Toast.makeText(getApplicationContext(), stsuccess, 0).show();
 								}
@@ -275,6 +280,16 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		}
 	}
 
+	private void refreshMembers(){
+	    adapter.clear();
+        
+        List<String> members = new ArrayList<String>();
+        members.addAll(group.getMembers());
+        adapter.addAll(members);
+        
+        adapter.notifyDataSetChanged();
+	}
+	
 	/**
 	 * 点击退出群组按钮
 	 * 
@@ -391,7 +406,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 					}
 					runOnUiThread(new Runnable() {
 						public void run() {
-							adapter.notifyDataSetChanged();
+						    refreshMembers();
 							((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getAffiliationsCount()
 									+ st);
 							progressDialog.dismiss();
@@ -664,7 +679,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 										@Override
 										public void run() {
 											deleteDialog.dismiss();
-											notifyDataSetChanged();
+											refreshMembers();
 											((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "("
 													+ group.getAffiliationsCount() + st);
 										}
@@ -713,7 +728,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		new Thread(new Runnable() {
 			public void run() {
 				try {
-					EMGroup returnGroup = EMChatManager.getInstance().fetchGroupFromServer(groupId);
+					final EMGroup returnGroup = EMChatManager.getInstance().fetchGroupFromServer(groupId);
 					// 更新本地数据
 					EMChatManager.getInstance().createOrUpdateLocalGroup(returnGroup);
 
@@ -722,7 +737,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 							((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getAffiliationsCount()
 									+ "人)");
 							loadingPB.setVisibility(View.INVISIBLE);
-							adapter.notifyDataSetChanged();
+							refreshMembers();
 							if (EMChatManager.getInstance().getCurrentUser().equals(group.getOwner())) {
 								// 显示解散按钮
 								exitBtn.setVisibility(View.GONE);
@@ -731,7 +746,6 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 								// 显示退出按钮
 								exitBtn.setVisibility(View.VISIBLE);
 								deleteBtn.setVisibility(View.GONE);
-
 							}
 
 							// update block
