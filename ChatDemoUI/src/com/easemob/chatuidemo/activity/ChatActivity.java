@@ -62,6 +62,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.EMChatRoomChangeListener;
 import com.easemob.EMError;
 import com.easemob.EMEventListener;
 import com.easemob.EMGroupChangeListener;
@@ -338,9 +339,19 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			}
 		}
         
-		onConversationInit();
-		
-		onListViewCreation();
+		// for chatroom type, we only init conversation and create view adapter on success
+		if(chatType != CHATTYPE_CHATROOM){
+		    onConversationInit();
+	        
+	        onListViewCreation();
+	        
+	        // show forward message if the message is not null
+	        String forward_msg_id = getIntent().getStringExtra("forward_msg_id");
+	        if (forward_msg_id != null) {
+	            // 显示发送要转发的消息
+	            forwardMessage(forward_msg_id);
+	        }
+		}
 	}
 
 	protected void onConversationInit(){
@@ -351,7 +362,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	    }else if(chatType == CHATTYPE_CHATROOM){
 	        conversation = EMChatManager.getInstance().getConversationByType(toChatUsername,EMConversationType.ChatRoom);
 	    }
-	    
+	     
         // 把此会话的未读数置为0
         conversation.markAllMessagesAsRead();
 
@@ -370,6 +381,40 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
                 conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
             }
         }
+        
+        EMChatManager.getInstance().addChatRoomChangeListener(new EMChatRoomChangeListener(){
+
+            @Override
+            public void onInvitationReceived(String roomId, String roomName,
+                    String inviter, String reason) {                
+            }
+
+            @Override
+            public void onChatRoomDestroyed(String roomId, String roomName) {
+                if(roomId.equals(toChatUsername)){
+                    finish();
+                }
+            }
+
+            @Override
+            public void onMemberJoined(String roomId, String participant) {                
+            }
+
+            @Override
+            public void onMemberExited(String roomId, String roomName,
+                    String participant) {
+                
+            }
+
+            @Override
+            public void onMemberKicked(String roomId, String roomName,
+                    String participant) {
+                if(roomId.equals(toChatUsername)){
+                    finish();
+                }
+            }
+            
+        });
 	}
 	
 	protected void onListViewCreation(){
@@ -407,13 +452,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
         // 监听当前会话的群聊解散被T事件
         groupListener = new GroupListener();
         EMChatManager.getInstance().addGroupChangeListener(groupListener);
-
-        // show forward message if the message is not null
-        String forward_msg_id = getIntent().getStringExtra("forward_msg_id");
-        if (forward_msg_id != null) {
-            // 显示发送要转发的消息
-            forwardMessage(forward_msg_id);
-        }
 	}
 	
 	protected void onChatRoomViewCreation(){
@@ -437,8 +475,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
                         }
                         EMLog.d(TAG, "join room success : " + room.getName());
                         
-                        adapter.refreshSelectLast();
-
+                        onConversationInit();
+                        
+                        onListViewCreation();
                    }
                });
         }
@@ -711,6 +750,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	
 	
 	private void refreshUIWithNewMessage(){
+	    if(adapter == null){
+	        return;
+	    }
+	    
 	    runOnUiThread(new Runnable() {
             public void run() {
                 adapter.refreshSelectLast();
@@ -719,6 +762,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	}
 
 	private void refreshUI() {
+	    if(adapter == null){
+            return;
+        }
+	    
 		runOnUiThread(new Runnable() {
 			public void run() {
 				adapter.refresh();
@@ -1338,8 +1385,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		super.onResume();
 		if (group != null)
 			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
-		if(chatType != CHATTYPE_CHATROOM)
-			adapter.refresh();
+
+		 if(adapter != null){
+		     adapter.refresh();
+	     }
 
 		DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
 		sdkHelper.pushActivity(this);
