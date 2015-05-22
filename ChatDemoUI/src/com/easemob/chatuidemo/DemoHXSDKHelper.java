@@ -217,7 +217,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             @Override
             public void onChatRoomDestroyed(String roomId, String roomName) {
                 showToast(" room : " + roomId + " with room name : " + roomName + " was destroyed");
-                
+                Log.i("info","onChatRoomDestroyed="+roomName);
             }
 
             @Override
