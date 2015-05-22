@@ -338,9 +338,12 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			}
 		}
         
-		onConversationInit();
-		
-		onListViewCreation();
+		// for chatroom type, we only init conversation and create view adapter on success
+		if(chatType != CHATTYPE_CHATROOM){
+		    onConversationInit();
+	        
+	        onListViewCreation();
+		}
 	}
 
 	protected void onConversationInit(){
@@ -351,7 +354,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	    }else if(chatType == CHATTYPE_CHATROOM){
 	        conversation = EMChatManager.getInstance().getConversationByType(toChatUsername,EMConversationType.ChatRoom);
 	    }
-	    
+	     
         // 把此会话的未读数置为0
         conversation.markAllMessagesAsRead();
 
@@ -370,7 +373,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
                 conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
             }
         }
-
 	}
 	
 	protected void onListViewCreation(){
@@ -438,8 +440,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
                         }
                         EMLog.d(TAG, "join room success : " + room.getName());
                         
-                        adapter.refreshSelectLast();
-
+                        onConversationInit();
+                        
+                        onListViewCreation();
                    }
                });
         }
@@ -712,6 +715,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	
 	
 	private void refreshUIWithNewMessage(){
+	    if(adapter == null){
+	        return;
+	    }
+	    
 	    runOnUiThread(new Runnable() {
             public void run() {
                 adapter.refreshSelectLast();
@@ -720,6 +727,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	}
 
 	private void refreshUI() {
+	    if(adapter == null){
+            return;
+        }
+	    
 		runOnUiThread(new Runnable() {
 			public void run() {
 				adapter.refresh();
@@ -1339,8 +1350,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		super.onResume();
 		if (group != null)
 			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
-		if(chatType != CHATTYPE_CHATROOM)
-			adapter.refresh();
+
+		 if(adapter != null){
+		     adapter.refresh();
+	     }
 
 		DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
 		sdkHelper.pushActivity(this);
