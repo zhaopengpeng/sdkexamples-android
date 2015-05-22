@@ -62,6 +62,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.EMChatRoomChangeListener;
 import com.easemob.EMError;
 import com.easemob.EMEventListener;
 import com.easemob.EMGroupChangeListener;
@@ -373,6 +374,40 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
                 conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
             }
         }
+        
+        EMChatManager.getInstance().addChatRoomChangeListener(new EMChatRoomChangeListener(){
+
+            @Override
+            public void onInvitationReceived(String roomId, String roomName,
+                    String inviter, String reason) {                
+            }
+
+            @Override
+            public void onChatRoomDestroyed(String roomId, String roomName) {
+                if(roomId.equals(toChatUsername)){
+                    finish();
+                }
+            }
+
+            @Override
+            public void onMemberJoined(String roomId, String participant) {                
+            }
+
+            @Override
+            public void onMemberExited(String roomId, String roomName,
+                    String participant) {
+                
+            }
+
+            @Override
+            public void onMemberKicked(String roomId, String roomName,
+                    String participant) {
+                if(roomId.equals(toChatUsername)){
+                    finish();
+                }
+            }
+            
+        });
 	}
 	
 	protected void onListViewCreation(){

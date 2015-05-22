@@ -41,6 +41,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.EMChatRoomChangeListener;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMCursorResult;
@@ -87,6 +88,35 @@ public class PublicChatRoomsActivity extends BaseActivity {
         
         //获取及显示数据
         loadAndShowData();
+        
+        EMChatManager.getInstance().addChatRoomChangeListener(new EMChatRoomChangeListener(){
+
+            @Override
+            public void onInvitationReceived(String roomId, String roomName,
+                    String inviter, String reason) {                
+            }
+
+            @Override
+            public void onChatRoomDestroyed(String roomId, String roomName) {
+                loadAndShowData();
+            }
+
+            @Override
+            public void onMemberJoined(String roomId, String participant) {                
+            }
+
+            @Override
+            public void onMemberExited(String roomId, String roomName,
+                    String participant) {
+                
+            }
+
+            @Override
+            public void onMemberKicked(String roomId, String roomName,
+                    String participant) {
+            }
+            
+        });
         
         //设置item点击事件
         listView.setOnItemClickListener(new OnItemClickListener() {
