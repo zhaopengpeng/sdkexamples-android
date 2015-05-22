@@ -35,6 +35,7 @@ import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
 import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMChatOptions;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
@@ -86,8 +87,8 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         super.initHXOptions();
 
         // you can also get EMChatOptions to set related SDK options
-        // EMChatOptions options = EMChatManager.getInstance().getChatOptions();
-        
+        EMChatOptions options = EMChatManager.getInstance().getChatOptions();
+        options.allowChatroomOwnerLeave(getModel().isChatroomOwnerLeaveAllowed());  
     }
 
     @Override
@@ -294,7 +295,12 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 } else { // 群聊信息
                     // message.getTo()为群聊id
                     intent.putExtra("groupId", message.getTo());
-                    intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+                    if(chatType == ChatType.GroupChat){
+                        intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+                    }else{
+                        intent.putExtra("chatType", ChatActivity.CHATTYPE_CHATROOM);
+                    }
+                    
                 }
                 return intent;
             }

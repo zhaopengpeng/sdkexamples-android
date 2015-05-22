@@ -198,6 +198,14 @@ public class DefaultHXSDKModel extends HXSDKModel{
        
         return (List<String>) val;
     }
+   
+    public void allowChatroomOwnerLeave(boolean value){
+        HXPreferenceUtils.getInstance().setSettingAllowChatroomOwnerLeave(value);
+    }
+    
+    public boolean isChatroomOwnerLeaveAllowed(){
+        return HXPreferenceUtils.getInstance().getSettingAllowChatroomOwnerLeave();
+    }
     
     enum Key{
         VibrateAndPlayToneOn,

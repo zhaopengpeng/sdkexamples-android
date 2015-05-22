@@ -38,7 +38,6 @@ import android.widget.Toast;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMConversation.EMConversationType;
-import com.easemob.chat.EMMessage;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
@@ -95,9 +94,16 @@ public class ChatAllHistoryFragment extends Fragment {
 				    // 进入聊天页面
 				    Intent intent = new Intent(getActivity(), ChatActivity.class);
 				    if(conversation.isGroup()){
-				        // it is group chat
-                        intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
-                        intent.putExtra("groupId", username);
+				        if(conversation.getType() == EMConversationType.ChatRoom){
+				         // it is group chat
+	                        intent.putExtra("chatType", ChatActivity.CHATTYPE_CHATROOM);
+	                        intent.putExtra("groupId", username);
+				        }else{
+				         // it is group chat
+	                        intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+	                        intent.putExtra("groupId", username);
+				        }
+				        
 				    }else{
 				        // it is single chat
                         intent.putExtra("userId", username);
@@ -221,9 +227,9 @@ public class ChatAllHistoryFragment extends Fragment {
 		synchronized (conversations) {
 			for (EMConversation conversation : conversations.values()) {
 				if (conversation.getAllMessages().size() != 0) {
-					if(conversation.getType() != EMConversationType.ChatRoom){
+					//if(conversation.getType() != EMConversationType.ChatRoom){
 						sortList.add(new Pair<Long, EMConversation>(conversation.getLastMessage().getMsgTime(), conversation));
-					}
+					//}
 				}
 			}
 		}
