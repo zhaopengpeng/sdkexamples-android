@@ -84,6 +84,7 @@
         <activity
             android:name=".activity.AddContactActivity"
             android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateVisible"
             android:theme="@style/horizontal_slide" >
         </activity>
         <!-- 群组详情 -->
@@ -221,6 +222,11 @@
         <!-- 群组黑名单用户列表 -->
         <activity
             android:name=".activity.GroupBlacklistActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/horizontal_slide" >
+        </activity>
+        <activity
+            android:name=".activity.PublicGroupsSeachActivity"
             android:screenOrientation="portrait"
             android:theme="@style/horizontal_slide" >
         </activity>
