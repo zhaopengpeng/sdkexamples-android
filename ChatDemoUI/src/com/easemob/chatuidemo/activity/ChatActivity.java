@@ -385,11 +385,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
         EMChatManager.getInstance().addChatRoomChangeListener(new EMChatRoomChangeListener(){
 
             @Override
-            public void onInvitationReceived(String roomId, String roomName,
-                    String inviter, String reason) {                
-            }
-
-            @Override
             public void onChatRoomDestroyed(String roomId, String roomName) {
                 if(roomId.equals(toChatUsername)){
                     finish();
@@ -410,7 +405,11 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
             public void onMemberKicked(String roomId, String roomName,
                     String participant) {
                 if(roomId.equals(toChatUsername)){
-                    finish();
+                    String curUser = EMChatManager.getInstance().getCurrentUser();
+                    if(curUser.equals(participant)){
+                        EMChatManager.getInstance().leaveChatRoom(toChatUsername);
+                        finish();
+                    }
                 }
             }
             

@@ -248,9 +248,9 @@ public class LoginActivity extends BaseActivity {
 		dao.saveContactList(users);
 
 		// 获取黑名单列表
-		//List<String> blackList = EMContactManager.getInstance().getBlackListUsernamesFromServer();
+		List<String> blackList = EMContactManager.getInstance().getBlackListUsernamesFromServer();
 		// 保存黑名单
-		//EMContactManager.getInstance().saveBlackList(blackList);
+		EMContactManager.getInstance().saveBlackList(blackList);
 
 		// 获取群聊列表(群聊里只有groupid和groupname等简单信息，不包含members),sdk会把群组存入到内存和db中
 		EMChatManager.getInstance().fetchJoinedGroupsFromServer();

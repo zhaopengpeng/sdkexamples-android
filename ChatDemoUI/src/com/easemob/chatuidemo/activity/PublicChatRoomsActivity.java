@@ -90,12 +90,6 @@ public class PublicChatRoomsActivity extends BaseActivity {
         loadAndShowData();
         
         EMChatManager.getInstance().addChatRoomChangeListener(new EMChatRoomChangeListener(){
-
-            @Override
-            public void onInvitationReceived(String roomId, String roomName,
-                    String inviter, String reason) {                
-            }
-
             @Override
             public void onChatRoomDestroyed(String roomId, String roomName) {
                 chatRoomList.clear();

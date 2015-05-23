@@ -217,12 +217,6 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             }
             
             @Override
-            public void onInvitationReceived(String roomId, String roomName,
-                    String inviter, String reason) {
-                showToast(" Invitation was received from : " + inviter + " to the room : " + roomName + " with roomID : " + roomName + " reason : " + reason);
-            }
- 
-            @Override
             public void onChatRoomDestroyed(String roomId, String roomName) {
                 showToast(" room : " + roomId + " with room name : " + roomName + " was destroyed");
                 Log.i("info","onChatRoomDestroyed="+roomName);
