@@ -32,6 +32,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -62,6 +63,7 @@ public class PublicGroupsActivity extends BaseActivity {
     private LinearLayout footLoadingLayout;
     private ProgressBar footLoadingPB;
     private TextView footLoadingText;
+    private Button searchBtn;
     
 
 	@Override
@@ -72,6 +74,7 @@ public class PublicGroupsActivity extends BaseActivity {
 		pb = (ProgressBar) findViewById(R.id.progressBar);
 		listView = (ListView) findViewById(R.id.list);
 		groupsList = new ArrayList<EMGroupInfo>();
+		searchBtn = (Button) findViewById(R.id.btn_search);
 		
 		View footView = getLayoutInflater().inflate(R.layout.listview_footer_view, null);
         footLoadingLayout = (LinearLayout) footView.findViewById(R.id.loading_layout);
@@ -114,6 +117,14 @@ public class PublicGroupsActivity extends BaseActivity {
         
 	}
 	
+	/**
+	 * 搜索
+	 * @param view
+	 */
+	public void search(View view){
+	    startActivity(new Intent(this, PublicGroupsSeachActivity.class));
+	}
+	
 	private void loadAndShowData(){
 	    new Thread(new Runnable() {
 
@@ -126,6 +137,7 @@ public class PublicGroupsActivity extends BaseActivity {
                     runOnUiThread(new Runnable() {
 
                         public void run() {
+                            searchBtn.setVisibility(View.VISIBLE);
                             groupsList.addAll(returnGroups);
                             if(returnGroups.size() != 0){
                                 //获取cursor
