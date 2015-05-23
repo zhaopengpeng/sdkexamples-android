@@ -38,6 +38,7 @@ public class HXPreferenceUtils {
 	private String SHARED_KEY_SETTING_SPEAKER = "shared_key_setting_speaker";
 	private String SHARED_KEY_SETTING_DISABLED_GROUPS =  "shared_key__setting_disabled_groups";
 	private String SHARED_KEY_SETTING_DISABLED_IDS =  "shared_key_setting_disabled_ids";
+	private static String SHARED_KEY_SETTING_CHATROOM_OWNER_LEAVE = "shared_key_setting_chatroom_owner_leave";
 
 	private HXPreferenceUtils(Context cxt) {
 		mSharedPreferences = cxt.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
@@ -100,4 +101,13 @@ public class HXPreferenceUtils {
 	public boolean getSettingMsgSpeaker() {
 		return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_SPEAKER, true);
 	}
+	
+	public void setSettingAllowChatroomOwnerLeave(boolean value) {
+        editor.putBoolean(SHARED_KEY_SETTING_CHATROOM_OWNER_LEAVE, value);
+        editor.commit();
+    }
+	
+	public boolean getSettingAllowChatroomOwnerLeave() {
+        return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_CHATROOM_OWNER_LEAVE, true);
+    }
 }

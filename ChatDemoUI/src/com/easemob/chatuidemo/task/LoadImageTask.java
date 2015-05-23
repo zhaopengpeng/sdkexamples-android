@@ -91,7 +91,7 @@ public class LoadImageTask extends AsyncTask<Object, Void, Bitmap> {
 						if (message.getChatType() != ChatType.Chat) {
 							// delete the image from server after download
 						}
-						if (message != null && message.direct == EMMessage.Direct.RECEIVE && !message.isAcked) {
+						if (message != null && message.direct == EMMessage.Direct.RECEIVE && !message.isAcked && message.getChatType() != ChatType.GroupChat && message.getChatType() != ChatType.ChatRoom) {
 							message.isAcked = true;
 							try {
 								// 看了大图后发个已读回执给对方
