@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -115,19 +116,26 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             
             @Override
             public void onEvent(EMNotifierEvent event) {
-                EMMessage message = (EMMessage)event.getData();
-                EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
+                EMMessage message = null;
+                if(event.getData() instanceof EMMessage){
+                    message = (EMMessage)event.getData();
+                    EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
+                }
                 
                 switch (event.getEvent()) {
                 case EventNewMessage:
-                {
                     //应用在后台，不需要刷新UI,通知栏提示新消息
                     if(activityList.size() <= 0){
                         HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
                     }
-
                     break;
-                }
+                case EventOfflineMessage:
+                    if(activityList.size() <= 0){
+                        EMLog.d(TAG, "received offline messages");
+                        List<EMMessage> messages = (List<EMMessage>) event.getData();
+                        HXSDKHelper.getInstance().getNotifier().onNewMesg(messages);
+                    }
+                    break;
                 // below is just giving a example to show a cmd toast, the app should not follow this
                 // so be careful of this
                 case EventNewCMDMessage:

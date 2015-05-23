@@ -12,6 +12,7 @@
 package com.easemob.applib.model;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 
 import android.app.Notification;
@@ -121,7 +122,7 @@ public class HXNotifier {
      * 
      * @param message
      */
-    public synchronized void onNewMsg(final EMMessage message) {
+    public synchronized void onNewMsg(EMMessage message) {
         if(EMChatManager.getInstance().isSlientMessage(message)){
             return;
         }
@@ -137,13 +138,47 @@ public class HXNotifier {
         
         viberateAndPlayTone(message);
     }
+    
+    public synchronized void onNewMesg(List<EMMessage> messages) {
+        if(EMChatManager.getInstance().isSlientMessage(messages.get(messages.size()-1))){
+            return;
+        }
+        // 判断app是否在后台
+        if (!EasyUtils.isAppRunningForeground(appContext)) {
+            EMLog.d(TAG, "app is running in backgroud");
+            sendNotification(messages, false);
+        } else {
+            sendNotification(messages, true);
+        }
+        viberateAndPlayTone(messages.get(messages.size()-1));
+    }
 
+    /**
+     * 发送通知栏提示
+     * This can be override by subclass to provide customer implementation
+     * @param messages
+     * @param isForeground
+     */
+    protected void sendNotification (List<EMMessage> messages, boolean isForeground){
+        for(EMMessage message : messages){
+            if(!isForeground){
+                notificationNum++;
+                fromUsers.add(message.getFrom());
+            }
+        }
+        sendNotification(messages.get(messages.size()-1), isForeground, false);
+    }
+    
+    protected void sendNotification (EMMessage message, boolean isForeground){
+        sendNotification(message, isForeground, true);
+    }
+    
     /**
      * 发送通知栏提示
      * This can be override by subclass to provide customer implementation
      * @param message
      */
-    protected void sendNotification(EMMessage message, boolean isForeground) {
+    protected void sendNotification(EMMessage message, boolean isForeground, boolean numIncrease) {
         String username = message.getFrom();
         try {
             String notifyText = username + " ";
@@ -202,10 +237,13 @@ public class HXNotifier {
 
             PendingIntent pendingIntent = PendingIntent.getActivity(appContext, notifyID, msgIntent,PendingIntent.FLAG_UPDATE_CURRENT);
 
-            // prepare latest event info section
-            if(!isForeground)
-                notificationNum++;
-            fromUsers.add(message.getFrom());
+            if(numIncrease){
+                // prepare latest event info section
+                if(!isForeground){
+                    notificationNum++;
+                    fromUsers.add(message.getFrom());
+                }
+            }
 
             int fromUsersNum = fromUsers.size();
             String summaryBody = msgs[6].replaceFirst("%1", Integer.toString(fromUsersNum)).replaceFirst("%2",Integer.toString(notificationNum));
