@@ -392,12 +392,12 @@ public class MessageAdapter extends BaseAdapter{
 		}
 
 		// 群聊时，显示接收的消息的发送人的名称
-		if (chatType == ChatType.GroupChat && message.direct == EMMessage.Direct.RECEIVE){
+		if ((chatType == ChatType.GroupChat || chatType == chatType.ChatRoom) && message.direct == EMMessage.Direct.RECEIVE){
 		    //demo里使用username代码nick
 			holder.tv_usernick.setText(message.getFrom());
 		}
 		// 如果是发送的消息并且不是群聊消息，显示已读textview
-		if (message.direct == EMMessage.Direct.SEND && chatType != ChatType.GroupChat) {
+		if (!(chatType == ChatType.GroupChat || chatType == chatType.ChatRoom) && message.direct == EMMessage.Direct.SEND) {
 			holder.tv_ack = (TextView) convertView.findViewById(R.id.tv_ack);
 			holder.tv_delivered = (TextView) convertView.findViewById(R.id.tv_delivered);
 			if (holder.tv_ack != null) {
@@ -420,8 +420,8 @@ public class MessageAdapter extends BaseAdapter{
 				}
 			}
 		} else {
-			// 如果是文本或者地图消息并且不是group messgae，显示的时候给对方发送已读回执
-			if ((message.getType() == Type.TXT || message.getType() == Type.LOCATION) && !message.isAcked && chatType != ChatType.GroupChat) {
+			// 如果是文本或者地图消息并且不是group messgae,chatroom message，显示的时候给对方发送已读回执
+			if ((message.getType() == Type.TXT || message.getType() == Type.LOCATION) && !message.isAcked && chatType != ChatType.GroupChat && chatType != ChatType.ChatRoom) {
 				// 不是语音通话记录
 				if (!message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL, false)) {
 					try {
@@ -498,19 +498,21 @@ public class MessageAdapter extends BaseAdapter{
 
 		} else {
 			final String st = context.getResources().getString(R.string.Into_the_blacklist);
-			// 长按头像，移入黑名单
-			holder.iv_avatar.setOnLongClickListener(new OnLongClickListener() {
+			if(chatType != ChatType.ChatRoom){
+				// 长按头像，移入黑名单
+				holder.iv_avatar.setOnLongClickListener(new OnLongClickListener() {
 
-				@Override
-				public boolean onLongClick(View v) {
-					Intent intent = new Intent(activity, AlertDialog.class);
-					intent.putExtra("msg", st);
-					intent.putExtra("cancel", true);
-					intent.putExtra("position", position);
-					activity.startActivityForResult(intent, ChatActivity.REQUEST_CODE_ADD_TO_BLACKLIST);
-					return true;
-				}
-			});
+					@Override
+					public boolean onLongClick(View v) {
+						Intent intent = new Intent(activity, AlertDialog.class);
+						intent.putExtra("msg", st);
+						intent.putExtra("cancel", true);
+						intent.putExtra("position", position);
+						activity.startActivityForResult(intent, ChatActivity.REQUEST_CODE_ADD_TO_BLACKLIST);
+						return true;
+					}
+				});
+			}
 		}
 
 		TextView timestamp = (TextView) convertView.findViewById(R.id.timestamp);
@@ -894,10 +896,10 @@ public class MessageAdapter extends BaseAdapter{
 			} else {
 				holder.iv_read_status.setVisibility(View.VISIBLE);
 			}
-			System.err.println("it is receive msg");
+			EMLog.d(TAG, "it is receive msg");
 			if (message.status == EMMessage.Status.INPROGRESS) {
 				holder.pb.setVisibility(View.VISIBLE);
-				System.err.println("!!!! back receive");
+				EMLog.d(TAG, "!!!! back receive");
 				((FileMessageBody) message.getBody()).setDownloadCallback(new EMCallBack() {
 
 					@Override
@@ -981,7 +983,7 @@ public class MessageAdapter extends BaseAdapter{
 					// 下载
 					context.startActivity(new Intent(context, ShowNormalFileActivity.class).putExtra("msgbody", fileMessageBody));
 				}
-				if (message.direct == EMMessage.Direct.RECEIVE && !message.isAcked) {
+				if (message.direct == EMMessage.Direct.RECEIVE && !message.isAcked && message.getChatType() != ChatType.GroupChat && message.getChatType() != ChatType.ChatRoom) {
 					try {
 						EMChatManager.getInstance().ackMessageRead(message.getFrom(), message.getMsgId());
 						message.isAcked = true;
@@ -995,7 +997,7 @@ public class MessageAdapter extends BaseAdapter{
 		String st1 = context.getResources().getString(R.string.Have_downloaded);
 		String st2 = context.getResources().getString(R.string.Did_not_download);
 		if (message.direct == EMMessage.Direct.RECEIVE) { // 接收的消息
-			System.err.println("it is receive msg");
+			EMLog.d(TAG, "it is receive msg");
 			File file = new File(filePath);
 			if (file != null && file.exists()) {
 				holder.tv_file_download_state.setText(st1);
@@ -1146,7 +1148,7 @@ public class MessageAdapter extends BaseAdapter{
 	 * need to register callback show the download progress
 	 */
 	private void showDownloadImageProgress(final EMMessage message, final ViewHolder holder) {
-		System.err.println("!!! show download image progress");
+		EMLog.d(TAG, "!!! show download image progress");
 		// final ImageMessageBody msgbody = (ImageMessageBody)
 		// message.getBody();
 		final FileMessageBody msgbody = (FileMessageBody) message.getBody();
@@ -1267,7 +1269,7 @@ public class MessageAdapter extends BaseAdapter{
 				if (message.getType() == EMMessage.Type.VIDEO) {
 					holder.tv.setVisibility(View.GONE);
 				}
-				System.out.println("message status : " + message.status);
+				EMLog.d(TAG, "message status : " + message.status);
 				if (message.status == EMMessage.Status.SUCCESS) {
 					// if (message.getType() == EMMessage.Type.FILE) {
 					// holder.pb.setVisibility(View.INVISIBLE);
@@ -1319,13 +1321,13 @@ public class MessageAdapter extends BaseAdapter{
 			iv.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					System.err.println("image view on click");
+					EMLog.d(TAG, "image view on click");
 					Intent intent = new Intent(activity, ShowBigImage.class);
 					File file = new File(localFullSizePath);
 					if (file.exists()) {
 						Uri uri = Uri.fromFile(file);
 						intent.putExtra("uri", uri);
-						System.err.println("here need to check why download everytime");
+						EMLog.d(TAG, "here need to check why download everytime");
 					} else {
 						// The local full size pic does not exist yet.
 						// ShowBigImage needs to download it from the server
@@ -1336,7 +1338,7 @@ public class MessageAdapter extends BaseAdapter{
 						intent.putExtra("remotepath", remote);
 					}
 					if (message != null && message.direct == EMMessage.Direct.RECEIVE && !message.isAcked
-							&& message.getChatType() != ChatType.GroupChat) {
+							&& message.getChatType() != ChatType.GroupChat && message.getChatType() != ChatType.ChatRoom) {
 						try {
 							EMChatManager.getInstance().ackMessageRead(message.getFrom(), message.getMsgId());
 							message.isAcked = true;
@@ -1378,13 +1380,13 @@ public class MessageAdapter extends BaseAdapter{
 				@Override
 				public void onClick(View v) {
 					VideoMessageBody videoBody = (VideoMessageBody) message.getBody();
-					System.err.println("video view is on click");
+					EMLog.d(TAG, "video view is on click");
 					Intent intent = new Intent(activity, ShowVideoActivity.class);
 					intent.putExtra("localpath", videoBody.getLocalUrl());
 					intent.putExtra("secret", videoBody.getSecret());
 					intent.putExtra("remotepath", videoBody.getRemoteUrl());
 					if (message != null && message.direct == EMMessage.Direct.RECEIVE && !message.isAcked
-							&& message.getChatType() != ChatType.GroupChat) {
+							&& message.getChatType() != ChatType.GroupChat && message.getChatType() != ChatType.ChatRoom) {
 						message.isAcked = true;
 						try {
 							EMChatManager.getInstance().ackMessageRead(message.getFrom(), message.getMsgId());

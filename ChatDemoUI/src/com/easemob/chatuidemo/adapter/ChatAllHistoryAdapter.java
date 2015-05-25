@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,18 +29,21 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.BufferType;
 
+import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMContact;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.ImageMessageBody;
 import com.easemob.chat.TextMessageBody;
+import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.utils.SmileUtils;
 import com.easemob.chatuidemo.utils.UserUtils;
 import com.easemob.util.DateUtils;
+import com.easemob.util.EMLog;
 
 /**
  * 显示所有聊天记录adpater
@@ -47,6 +51,7 @@ import com.easemob.util.DateUtils;
  */
 public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 
+	private static final String TAG = "ChatAllHistoryAdapter";
 	private LayoutInflater inflater;
 	private List<EMConversation> conversationList;
 	private List<EMConversation> copyConversationList;
@@ -88,21 +93,16 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 		EMConversation conversation = getItem(position);
 		// 获取用户username或者群组groupid
 		String username = conversation.getUserName();
-		List<EMGroup> groups = EMGroupManager.getInstance().getAllGroups();
-		EMContact contact = null;
-		boolean isGroup = false;
-		for (EMGroup group : groups) {
-			if (group.getGroupId().equals(username)) {
-				isGroup = true;
-				contact = group;
-				break;
-			}
-		}
-		if (isGroup) {
+		if (conversation.getType() == EMConversationType.GroupChat) {
 			// 群聊消息，显示群聊头像
 			holder.avatar.setImageResource(R.drawable.group_icon);
-			holder.name.setText(contact.getNick() != null ? contact.getNick() : username);
-		} else {
+			EMGroup group = EMChatManager.getInstance().getGroup(username);
+			holder.name.setText(group != null ? group.getGroupName() : username);
+		} else if(conversation.getType() == EMConversationType.ChatRoom){
+		    holder.avatar.setImageResource(R.drawable.group_icon);
+            EMChatRoom room = EMChatManager.getInstance().getChatRoom(username);
+            holder.name.setText(room != null && !TextUtils.isEmpty(room.getName()) ? room.getName() : username);
+		}else {
 		    UserUtils.setUserAvatar(getContext(), username, holder.avatar);
 			if (username.equals(Constant.GROUP_USERNAME)) {
 				holder.name.setText("群聊");
@@ -185,7 +185,7 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 			digest = getStrng(context, R.string.file);
 			break;
 		default:
-			System.err.println("error, unknow type");
+			EMLog.e(TAG, "unknow type");
 			return "";
 		}
 
@@ -250,7 +250,7 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 					final EMConversation value = mOriginalValues.get(i);
 					String username = value.getUserName();
 					
-					EMGroup group = EMGroupManager.getInstance().getGroup(username);
+					EMGroup group = EMChatManager.getInstance().getGroup(username);
 					if(group != null){
 						username = group.getGroupName();
 					}

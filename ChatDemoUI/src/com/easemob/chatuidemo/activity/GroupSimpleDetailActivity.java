@@ -14,7 +14,6 @@
 
 package com.easemob.chatuidemo.activity;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.View;
@@ -26,7 +25,6 @@ import android.widget.Toast;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMGroupInfo;
-import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
 
@@ -50,27 +48,34 @@ public class GroupSimpleDetailActivity extends BaseActivity {
 		progressBar = (ProgressBar) findViewById(R.id.loading);
 
 		EMGroupInfo groupInfo = (EMGroupInfo) getIntent().getSerializableExtra("groupinfo");
-		String groupname = groupInfo.getGroupName();
-		groupid = groupInfo.getGroupId();
+		String groupname = null;
+		if(groupInfo != null){
+		    groupname = groupInfo.getGroupName();
+		    groupid = groupInfo.getGroupId();
+		}else{
+		    group = PublicGroupsSeachActivity.searchedGroup;
+		    if(group == null)
+		        return;
+		    groupname = group.getGroupName();
+		    groupid = group.getGroupId();
+		}
 		
 		tv_name.setText(groupname);
 		
 		
+		if(group != null){
+		    showGroupDetail();
+		    return;
+		}
 		new Thread(new Runnable() {
 
 			public void run() {
 				//从服务器获取详情
 				try {
-					group = EMGroupManager.getInstance().getGroupFromServer(groupid);
+					group = EMChatManager.getInstance().fetchGroupFromServer(groupid);
 					runOnUiThread(new Runnable() {
 						public void run() {
-							progressBar.setVisibility(View.INVISIBLE);
-							//获取详情成功，并且自己不在群中，才让加入群聊按钮可点击
-							if(!group.getMembers().contains(EMChatManager.getInstance().getCurrentUser()))
-								btn_add_group.setEnabled(true);
-							tv_name.setText(group.getGroupName());
-							tv_admin.setText(group.getOwner());
-							tv_introduction.setText(group.getDescription());
+							showGroupDetail();
 						}
 					});
 				} catch (final EaseMobException e) {
@@ -106,9 +111,9 @@ public class GroupSimpleDetailActivity extends BaseActivity {
 				try {
 					//如果是membersOnly的群，需要申请加入，不能直接join
 					if(group.isMembersOnly()){
-						EMGroupManager.getInstance().applyJoinToGroup(groupid, st2);
+					    EMChatManager.getInstance().applyJoinToGroup(groupid, st2);
 					}else{
-						EMGroupManager.getInstance().joinGroup(groupid);
+					    EMChatManager.getInstance().joinGroup(groupid);
 					}
 					runOnUiThread(new Runnable() {
 						public void run() {
@@ -132,6 +137,16 @@ public class GroupSimpleDetailActivity extends BaseActivity {
 			}
 		}).start();
 	}
+	
+     private void showGroupDetail() {
+         progressBar.setVisibility(View.INVISIBLE);
+         //获取详情成功，并且自己不在群中，才让加入群聊按钮可点击
+         if(!group.getMembers().contains(EMChatManager.getInstance().getCurrentUser()))
+             btn_add_group.setEnabled(true);
+         tv_name.setText(group.getGroupName());
+         tv_admin.setText(group.getOwner());
+         tv_introduction.setText(group.getDescription());
+     }
 	
 	public void back(View view){
 		finish();

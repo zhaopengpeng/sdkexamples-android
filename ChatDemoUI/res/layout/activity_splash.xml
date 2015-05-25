@@ -1,50 +1,52 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/splash_root"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@drawable/splash_gradient"
-    android:gravity="center"
-    android:orientation="vertical" >
+    android:background="@drawable/splash" >
 
     <ImageView
-        android:id="@+id/logo"
+        android:id="@+id/iv_splash_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="20dip"
-        android:paddingRight="20dip"
-        android:scaleType="centerInside"
-        android:src="@drawable/logo_uidemo" >
-    </ImageView>
+        android:layout_centerInParent="true"
+        android:src="@drawable/splash_logo" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/iv_splash_logo"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="20dip"
-        android:gravity="bottom"
-        android:shadowColor="#FFFFFF"
-        android:shadowDx="0"
-        android:shadowDy="2"
-        android:shadowRadius="1"
-        android:text="环信DEMO"
-        android:textColor="#444444"
-        android:textSize="35dip"
-        android:typeface="serif" >
-    </TextView>
+        android:text="即时通讯云领导者"
+        android:textColor="#fff"
+        android:textSize="30sp" />
 
-
-    <TextView
-        android:id="@+id/tv_version"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dip"
-        android:gravity="bottom"
-        android:shadowColor="#FFFFFF"
-        android:shadowDx="0"
-        android:shadowDy="2"
-        android:shadowRadius="1"
-        android:textColor="#444444"
-        android:textSize="20dip"
-        android:typeface="serif" >
-    </TextView>
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="50dip"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal" >
 
-</LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="环信DEMO"
+            android:textColor="#fff"
+            android:textSize="20dip"
+            android:typeface="normal" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/tv_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dip"
+            android:text="2.1.7"
+            android:textColor="#fff"
+            android:textSize="20sp" >
+        </TextView>
+    </LinearLayout>
+
+</RelativeLayout>

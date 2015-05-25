@@ -36,6 +36,7 @@ import com.easemob.chat.EMChatOptions;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.DemoHXSDKHelper;
+import com.easemob.chatuidemo.DemoHXSDKModel;
 import com.easemob.chatuidemo.R;
 
 /**
@@ -108,12 +109,23 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 	 */
 	private Button logoutBtn;
 
+	private RelativeLayout rl_switch_chatroom_leave;
+	private ImageView iv_switch_room_owner_leave_allow;
+	private ImageView iv_switch_room_owner_leave_disallow;
+	
 	private EMChatOptions chatOptions;
  
 	/**
 	 * 诊断
 	 */
 	private LinearLayout llDiagnose;
+	/**
+	 * iOS离线推送昵称
+	 */
+	private LinearLayout pushNick;
+	
+	DemoHXSDKModel model;
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_conversation_settings, container, false);
@@ -128,6 +140,7 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 		rl_switch_sound = (RelativeLayout) getView().findViewById(R.id.rl_switch_sound);
 		rl_switch_vibrate = (RelativeLayout) getView().findViewById(R.id.rl_switch_vibrate);
 		rl_switch_speaker = (RelativeLayout) getView().findViewById(R.id.rl_switch_speaker);
+		rl_switch_chatroom_leave = (RelativeLayout) getView().findViewById(R.id.rl_switch_chatroom_owner_leave);
 
 		iv_switch_open_notification = (ImageView) getView().findViewById(R.id.iv_switch_open_notification);
 		iv_switch_close_notification = (ImageView) getView().findViewById(R.id.iv_switch_close_notification);
@@ -137,6 +150,11 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 		iv_switch_close_vibrate = (ImageView) getView().findViewById(R.id.iv_switch_close_vibrate);
 		iv_switch_open_speaker = (ImageView) getView().findViewById(R.id.iv_switch_open_speaker);
 		iv_switch_close_speaker = (ImageView) getView().findViewById(R.id.iv_switch_close_speaker);
+		
+		iv_switch_room_owner_leave_allow = (ImageView) getView().findViewById(R.id.iv_switch_chatroom_owner_leave_allow);
+		iv_switch_room_owner_leave_disallow = (ImageView) getView().findViewById(R.id.iv_switch_chatroom_owner_leave_not_allow);
+		
+		
 		logoutBtn = (Button) getView().findViewById(R.id.btn_logout);
 		if(!TextUtils.isEmpty(EMChatManager.getInstance().getCurrentUser())){
 			logoutBtn.setText(getString(R.string.button_logout) + "(" + EMChatManager.getInstance().getCurrentUser() + ")");
@@ -147,6 +165,8 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 		
 		blacklistContainer = (LinearLayout) getView().findViewById(R.id.ll_black_list);
 		llDiagnose=(LinearLayout) getView().findViewById(R.id.ll_diagnose);
+		pushNick=(LinearLayout) getView().findViewById(R.id.ll_set_push_nick);
+		
 		blacklistContainer.setOnClickListener(this);
 		rl_switch_notification.setOnClickListener(this);
 		rl_switch_sound.setOnClickListener(this);
@@ -154,10 +174,12 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 		rl_switch_speaker.setOnClickListener(this);
 		logoutBtn.setOnClickListener(this);
 		llDiagnose.setOnClickListener(this);
+		pushNick.setOnClickListener(this);
+		rl_switch_chatroom_leave.setOnClickListener(this);
 		
 		chatOptions = EMChatManager.getInstance().getChatOptions();
 		
-		HXSDKModel model = HXSDKHelper.getInstance().getModel();
+		model = (DemoHXSDKModel) HXSDKHelper.getInstance().getModel();
 		
 		// 震动和声音总开关，来消息时，是否允许此开关打开
 		// the vibrate and sound notification are allowed or not?
@@ -199,6 +221,14 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 			iv_switch_close_speaker.setVisibility(View.VISIBLE);
 		}
 
+		// 是否允许聊天室owner leave
+		if(model.isChatroomOwnerLeaveAllowed()){
+		    iv_switch_room_owner_leave_allow.setVisibility(View.VISIBLE);
+		    iv_switch_room_owner_leave_disallow.setVisibility(View.INVISIBLE);
+		}else{
+		    iv_switch_room_owner_leave_allow.setVisibility(View.INVISIBLE);
+            iv_switch_room_owner_leave_disallow.setVisibility(View.VISIBLE);
+		}
 	}
 
 	
@@ -274,6 +304,22 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 				HXSDKHelper.getInstance().getModel().setSettingMsgVibrate(true);
 			}
 			break;
+		case R.id.rl_switch_chatroom_owner_leave:
+		    if(this.iv_switch_room_owner_leave_allow.getVisibility() == View.VISIBLE){
+		        iv_switch_room_owner_leave_allow.setVisibility(View.INVISIBLE);
+                iv_switch_room_owner_leave_disallow.setVisibility(View.VISIBLE);
+                chatOptions.allowChatroomOwnerLeave(false);
+                EMChatManager.getInstance().setChatOptions(chatOptions);
+                model.allowChatroomOwnerLeave(false);
+
+		    }else{
+		        iv_switch_room_owner_leave_allow.setVisibility(View.VISIBLE);
+                iv_switch_room_owner_leave_disallow.setVisibility(View.INVISIBLE);
+                chatOptions.allowChatroomOwnerLeave(true);
+                EMChatManager.getInstance().setChatOptions(chatOptions);
+                model.allowChatroomOwnerLeave(true);
+		    }
+		    break;
 		case R.id.btn_logout: //退出登陆
 			logout();
 			break;
@@ -283,10 +329,13 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 		case R.id.ll_diagnose:
 			startActivity(new Intent(getActivity(), DiagnoseActivity.class));
 			break;
+		case R.id.ll_set_push_nick:
+			startActivity(new Intent(getActivity(), OfflinePushNickActivity.class));
+			break;
 		default:
 			break;
 		}
-
+		
 	}
 
 	void logout() {

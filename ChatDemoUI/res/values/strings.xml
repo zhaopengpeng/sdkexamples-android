@@ -76,11 +76,13 @@
     <string name="setting">setting</string>
     <string name="now_refresh_list">refreshing contact list</string>
     <string name="Application_and_notify">invitation and notification</string>
+    <string name="save_new_nickname">save new nickname</string>
     <string name="group_chat">group chat</string>
     <string name="add_friend">add friends</string>
     <string name="search">search</string>
     <string name="black_item">black list</string>
     <string name="diagnose">diagnose</string>
+    <string name="push_nick">iOS offline push nick</string>
     <string name="Current_version">current version</string>
     <string name="Not_Set">not set</string>
     <string name="Upload_the_log">uploading the log</string>
@@ -113,6 +115,7 @@
     <string name="newchat">the new chat</string>
     <string name="agree">agree</string>
     <string name="Group_chat">group chat:</string>
+    <string name="chat_room">Chat room</string>
     <string name="not_download">Did not download:</string>
     <string name="is_down_please_wait">downloading video, please try again later</string>
     <string name="Exit_the_group_chat">exit the group</string>
@@ -254,4 +257,6 @@
     <string name="The_dissolution_of_chatting_new">The dissolution of chatting</string>
     
     <string name="gorup_not_found">Can not find this group</string>
+    <string name="add_public_group_chat">add chat room</string>
+    <string name= "chatroom_allow_owner_leave"> allow chatroom owner leave</string>
 </resources>

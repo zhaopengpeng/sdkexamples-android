@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -31,8 +30,8 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ListView;
 
+import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMGroup;
-import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
@@ -61,7 +60,7 @@ public class GroupPickContactsActivity extends BaseActivity {
 			isCreatingNewGroup = true;
 		} else {
 			// 获取此群组的成员列表
-			EMGroup group = EMGroupManager.getInstance().getGroup(groupId);
+			EMGroup group = EMChatManager.getInstance().getGroup(groupId);
 			exitingMembers = group.getMembers();
 		}
 		if(exitingMembers == null)
@@ -69,7 +68,7 @@ public class GroupPickContactsActivity extends BaseActivity {
 		// 获取好友列表
 		final List<User> alluserList = new ArrayList<User>();
 		for (User user : DemoApplication.getInstance().getContactList().values()) {
-			if (!user.getUsername().equals(Constant.NEW_FRIENDS_USERNAME) & !user.getUsername().equals(Constant.GROUP_USERNAME))
+			if (!user.getUsername().equals(Constant.NEW_FRIENDS_USERNAME) & !user.getUsername().equals(Constant.GROUP_USERNAME) & !user.getUsername().equals(Constant.CHAT_ROOM))
 				alluserList.add(user);
 		}
 		// 对list进行排序

@@ -87,7 +87,7 @@ public abstract class HXSDKHelper {
      */
     protected HXNotifier notifier = null;
     
-    public HXSDKHelper(){
+    protected HXSDKHelper(){
         me = this;
     }
     

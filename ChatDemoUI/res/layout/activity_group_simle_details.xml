@@ -8,7 +8,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/height_top_bar"
-        android:background="@color/common_top_bar_blue"
+        android:background="@color/top_bar_normal_bg"
         android:gravity="center_vertical" >
 		
         <include 
@@ -46,7 +46,7 @@
             android:layout_height="55dp"
             android:layout_alignParentLeft="true"
             android:padding="5dp"
-            android:src="@drawable/group_icon" />
+            android:src="@drawable/groups_icon" />
 
         <TextView
             android:id="@+id/name"

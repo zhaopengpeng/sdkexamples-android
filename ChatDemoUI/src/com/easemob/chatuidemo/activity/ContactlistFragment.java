@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import u.aly.ad;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -73,6 +74,8 @@ public class ContactlistFragment extends Fragment {
 	private List<String> blackList;
 	ImageButton clearSearch;
 	EditText query;
+    private User toBeProcessUser;
+    private String toBeProcessUsername;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -140,7 +143,10 @@ public class ContactlistFragment extends Fragment {
 				} else if (Constant.GROUP_USERNAME.equals(username)) {
 					// 进入群聊列表页面
 					startActivity(new Intent(getActivity(), GroupsActivity.class));
-				} else {
+				} else if(Constant.CHAT_ROOM.equals(username)){
+					//进入聊天室列表页面
+				    startActivity(new Intent(getActivity(), PublicChatRoomsActivity.class));
+				}else {
 					// demo中直接进入聊天页面，实际一般是进入用户详情页
 					startActivity(new Intent(getActivity(), ChatActivity.class).putExtra("userId", adapter.getItem(position).getUsername()));
 				}
@@ -176,8 +182,9 @@ public class ContactlistFragment extends Fragment {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
-		// 长按前两个不弹menu
-		if (((AdapterContextMenuInfo) menuInfo).position > 1) {
+		if (((AdapterContextMenuInfo) menuInfo).position > 2) {
+		    toBeProcessUser = adapter.getItem(((AdapterContextMenuInfo) menuInfo).position);
+		    toBeProcessUsername = toBeProcessUser.getUsername();
 			getActivity().getMenuInflater().inflate(R.menu.context_contact_list, menu);
 		}
 	}
@@ -185,16 +192,18 @@ public class ContactlistFragment extends Fragment {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.delete_contact) {
-			User tobeDeleteUser = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
-			// 删除此联系人
-			deleteContact(tobeDeleteUser);
-			// 删除相关的邀请消息
-			InviteMessgeDao dao = new InviteMessgeDao(getActivity());
-			dao.deleteMessage(tobeDeleteUser.getUsername());
+			try {
+                // 删除此联系人
+                deleteContact(toBeProcessUser);
+                // 删除相关的邀请消息
+                InviteMessgeDao dao = new InviteMessgeDao(getActivity());
+                dao.deleteMessage(toBeProcessUser.getUsername());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 			return true;
 		}else if(item.getItemId() == R.id.add_to_blacklist){
-			User user = adapter.getItem(((AdapterContextMenuInfo) item.getMenuInfo()).position);
-			moveToBlacklist(user.getUsername());
+			moveToBlacklist(toBeProcessUsername);
 			return true;
 		}
 		return super.onContextItemSelected(item);
@@ -323,7 +332,9 @@ public class ContactlistFragment extends Fragment {
 		Iterator<Entry<String, User>> iterator = users.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Entry<String, User> entry = iterator.next();
-			if (!entry.getKey().equals(Constant.NEW_FRIENDS_USERNAME) && !entry.getKey().equals(Constant.GROUP_USERNAME)
+			if (!entry.getKey().equals(Constant.NEW_FRIENDS_USERNAME)
+			        && !entry.getKey().equals(Constant.GROUP_USERNAME)
+			        && !entry.getKey().equals(Constant.CHAT_ROOM)
 					&& !blackList.contains(entry.getKey()))
 				contactList.add(entry.getValue());
 		}
@@ -336,12 +347,17 @@ public class ContactlistFragment extends Fragment {
 			}
 		});
 
-		// 加入"申请与通知"和"群聊"
-		if(users.get(Constant.GROUP_USERNAME) != null)
-		    contactList.add(0, users.get(Constant.GROUP_USERNAME));
+		// 加入"群聊"和"聊天室"
+        if(users.get(Constant.CHAT_ROOM) != null)
+            contactList.add(0, users.get(Constant.CHAT_ROOM));
+        if(users.get(Constant.GROUP_USERNAME) != null)
+            contactList.add(0, users.get(Constant.GROUP_USERNAME));
+        
 		// 把"申请与通知"添加到首位
 		if(users.get(Constant.NEW_FRIENDS_USERNAME) != null)
 		    contactList.add(0, users.get(Constant.NEW_FRIENDS_USERNAME));
+		
+		
 	}
 	
 	void hideSoftKeyboard() {

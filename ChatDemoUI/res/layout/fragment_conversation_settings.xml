@@ -287,8 +287,73 @@
                         android:textColor="@android:color/black"
                         android:textSize="14sp" />
                 </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dip"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="@color/btn_gray_normal" />
+                 <LinearLayout
+                     android:id="@+id/ll_set_push_nick"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dip"
+                    android:background="@drawable/btn_bottom_selector"
+                    android:padding="10dip" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:paddingLeft="10dip"
+                        android:text="@string/push_nick"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp" />
+                </LinearLayout>
             </LinearLayout>
 
+            <TextView
+                    android:id="@+id/textview4"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dip"
+                    android:layout_marginLeft="10dip"
+                    android:layout_marginRight="10dip"
+                    android:background="#E6E6E6" />
+
+                <RelativeLayout
+                    android:id="@+id/rl_switch_chatroom_owner_leave"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dip"
+                    android:background="@drawable/btn_bottom_selector"
+                    android:padding="10dip" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:paddingLeft="10dip"
+                        android:text="@string/chatroom_allow_owner_leave"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp"
+                        android:typeface="serif" />
+
+                    <ImageView
+                        android:id="@+id/iv_switch_chatroom_owner_leave_allow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/open_icon"
+                        android:visibility="visible" />
+
+                    <ImageView
+                        android:id="@+id/iv_switch_chatroom_owner_leave_not_allow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/close_icon"
+                        android:visibility="invisible" />
+                </RelativeLayout>
             <!--
                  <TextView
                 android:layout_width="match_parent"

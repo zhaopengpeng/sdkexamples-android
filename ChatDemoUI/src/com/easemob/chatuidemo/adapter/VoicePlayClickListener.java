@@ -22,22 +22,21 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.view.View;
-import android.webkit.WebView.FindListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.easemob.applib.controller.HXSDKHelper;
-import com.easemob.chat.EMChatDB;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.VoiceMessageBody;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.activity.ChatActivity;
+import com.easemob.util.EMLog;
 
 public class VoicePlayClickListener implements View.OnClickListener {
-
+	private static final String TAG = "VoicePlayClickListener";
 	EMMessage message;
 	VoiceMessageBody voiceBody;
 	ImageView voiceIconView;
@@ -183,7 +182,7 @@ public class VoicePlayClickListener implements View.OnClickListener {
 				if (file.exists() && file.isFile())
 					playVoice(voiceBody.getLocalUrl());
 				else
-					System.err.println("file not exist");
+					EMLog.e(TAG, "file not exist");
 
 			} else if (message.status == EMMessage.Status.INPROGRESS) {
 				String s=new String();

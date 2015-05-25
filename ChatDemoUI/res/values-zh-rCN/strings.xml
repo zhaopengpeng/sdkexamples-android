@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">环信UI演示</string>
+    <string name="app_name">环信DEMO</string>
     <string name="text_ack_msg">已读</string>
     <string name="text_delivered_msg">送达</string>
     <string name="back">返回</string>
@@ -76,15 +76,21 @@
     <string name="setting">设置</string>
     <string name="now_refresh_list">正在刷新联系人</string>
     <string name="Application_and_notify">申请与通知</string>
+    <string name="save_new_nickname">保存</string>
+    <string name="nickname_description">设置此昵称以后，在与iOS客户端demo聊天过程中，iOS一侧会显示此昵称而不是环信ID，如果对方使用安卓客户端则此设置不生效</string>
     <string name="group_chat">群聊</string>
+    <string name="chat_room">聊天室</string>
     <string name="add_friend">添加好友</string>
     <string name="search">搜索</string>
     <string name="black_item">黑名单</string>
     <string name="diagnose">诊断</string>
+    <string name="push_nick">iOS离线推送昵称</string>
     <string name="Current_version">当前版本</string>
     <string name="Not_Set">未设置</string>
     <string name="Upload_the_log">上传日志中</string>
     <string name="The_new_group_chat">新建群组</string>
+    <string name="add_public_group_chat">添加公开群</string>
+    <string name="add_public_chat_room">添加聊天室</string>
     <string name="group_name">群聊名称</string>
     <string name="Group_chat_profile">群聊简介</string>
     <string name="Whether_the_public">是否公开</string>
@@ -254,4 +260,5 @@
     <string name="The_dissolution_of_chatting_new">解散群聊</string>
     
     <string name="gorup_not_found">找不到这个群组</string>
+    <string name= "chatroom_allow_owner_leave"> 允许聊天室群主离开</string>
 </resources>

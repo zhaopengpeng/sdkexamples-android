@@ -15,10 +15,13 @@ import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
+import com.easemob.EMCallBack;
 import com.easemob.chat.EMChatConfig;
+import com.easemob.chat.EMChatManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.cloud.CloudOperationCallback;
 import com.easemob.cloud.HttpFileManager;
+import com.easemob.util.EMLog;
 import com.easemob.util.PathUtil;
 
 /**
@@ -28,7 +31,8 @@ import com.easemob.util.PathUtil;
  * 
  */
 public class ShowVideoActivity extends BaseActivity{
-
+	private static final String TAG = "ShowVideoActivity";
+	
 	private RelativeLayout loadingLayout;
 	private ProgressBar progressBar;
 	private String localFilePath;
@@ -45,7 +49,7 @@ public class ShowVideoActivity extends BaseActivity{
 		localFilePath = getIntent().getStringExtra("localpath");
 		String remotepath = getIntent().getStringExtra("remotepath");
 		String secret = getIntent().getStringExtra("secret");
-		System.err.println("show video view file:" + localFilePath
+		EMLog.d(TAG, "show video view file:" + localFilePath
 				+ " remotepath:" + remotepath + " secret:" + secret);
 		if (localFilePath != null && new File(localFilePath).exists()) {
 			Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -54,7 +58,7 @@ public class ShowVideoActivity extends BaseActivity{
 			startActivity(intent);
 			finish();
 		} else if (!TextUtils.isEmpty(remotepath) && !remotepath.equals("null")) {
-			System.err.println("download remote video file");
+			EMLog.d(TAG, "download remote video file");
 			Map<String, String> maps = new HashMap<String, String>();
 			if (!TextUtils.isEmpty(secret)) {
 				maps.put("share-secret", secret);
@@ -107,12 +111,11 @@ public class ShowVideoActivity extends BaseActivity{
 			return;
 		}
 		loadingLayout.setVisibility(View.VISIBLE);
-		final HttpFileManager httpFileMgr = new HttpFileManager(this,
-				EMChatConfig.getInstance().getStorageUrl());
-		final CloudOperationCallback callback = new CloudOperationCallback() {
+		
+		EMCallBack callback = new EMCallBack() {
 
 			@Override
-			public void onSuccess(String result) {
+			public void onSuccess() {
 				runOnUiThread(new Runnable() {
 
 					@Override
@@ -125,7 +128,7 @@ public class ShowVideoActivity extends BaseActivity{
 			}
 
 			@Override
-			public void onProgress(final int progress) {
+			public void onProgress(final int progress,String status) {
 				Log.d("ease", "video progress:" + progress);
 				runOnUiThread(new Runnable() {
 
@@ -138,7 +141,7 @@ public class ShowVideoActivity extends BaseActivity{
 			}
 
 			@Override
-			public void onError(String msg) {
+			public void onError(int error, String msg) {
 				Log.e("###", "offline file transfer error:" + msg);
 				File file = new File(localFilePath);
 				if (file.exists()) {
@@ -147,15 +150,7 @@ public class ShowVideoActivity extends BaseActivity{
 			}
 		};
 
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				httpFileMgr.downloadFile(remoteUrl, localFilePath, header,
-						callback);
-			}
-		}).start();
-
+		EMChatManager.getInstance().downloadFile(remoteUrl, localFilePath, header, callback);
 	}
 
 	@Override

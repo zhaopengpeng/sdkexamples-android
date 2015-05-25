@@ -18,23 +18,25 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Message;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.easemob.EMCallBack;
+import com.easemob.EMChatRoomChangeListener;
 import com.easemob.EMEventListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.applib.model.HXNotifier;
-import com.easemob.applib.model.HXSDKModel;
 import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
+import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMChatOptions;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
@@ -86,8 +88,8 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         super.initHXOptions();
 
         // you can also get EMChatOptions to set related SDK options
-        // EMChatOptions options = EMChatManager.getInstance().getChatOptions();
-        
+        EMChatOptions options = EMChatManager.getInstance().getChatOptions();
+        options.allowChatroomOwnerLeave(getModel().isChatroomOwnerLeaveAllowed());  
     }
 
     @Override
@@ -111,29 +113,34 @@ public class DemoHXSDKHelper extends HXSDKHelper{
      */
     protected void initEventListener() {
         eventListener = new EMEventListener() {
+            private BroadcastReceiver broadCastReceiver = null;
             
             @Override
             public void onEvent(EMNotifierEvent event) {
+                EMMessage message = null;
+                if(event.getData() instanceof EMMessage){
+                    message = (EMMessage)event.getData();
+                    EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
+                }
                 
                 switch (event.getEvent()) {
                 case EventNewMessage:
-                {
-                    EMMessage message = (EMMessage)event.getData();
-                    EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
-                    
                     //应用在后台，不需要刷新UI,通知栏提示新消息
                     if(activityList.size() <= 0){
                         HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
                     }
-
                     break;
-                }
+                case EventOfflineMessage:
+                    if(activityList.size() <= 0){
+                        EMLog.d(TAG, "received offline messages");
+                        List<EMMessage> messages = (List<EMMessage>) event.getData();
+                        HXSDKHelper.getInstance().getNotifier().onNewMesg(messages);
+                    }
+                    break;
                 // below is just giving a example to show a cmd toast, the app should not follow this
                 // so be careful of this
                 case EventNewCMDMessage:
                 {
-                    EMMessage message = (EMMessage)event.getData();
-                    EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
                     
                     EMLog.d(TAG, "收到透传消息");
                     //获取消息body
@@ -148,17 +155,19 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                     final String CMD_TOAST_BROADCAST = "easemob.demo.cmd.toast";
                     IntentFilter cmdFilter = new IntentFilter(CMD_TOAST_BROADCAST);
                     
-                    //注册通话广播接收者
-                    appContext.registerReceiver(new BroadcastReceiver(){
+                    if(broadCastReceiver == null){
+                        broadCastReceiver = new BroadcastReceiver(){
 
-                        @Override
-                        public void onReceive(Context context, Intent intent) {
-                            // TODO Auto-generated method stub
-                            Toast.makeText(appContext, intent.getStringExtra("cmd_value"), Toast.LENGTH_SHORT).show();
-                        }
+                            @Override
+                            public void onReceive(Context context, Intent intent) {
+                                // TODO Auto-generated method stub
+                                Toast.makeText(appContext, intent.getStringExtra("cmd_value"), Toast.LENGTH_SHORT).show();
+                            }
+                        };
                         
-                    }, cmdFilter); 
-                    
+                      //注册通话广播接收者
+                        appContext.registerReceiver(broadCastReceiver,cmdFilter);
+                    }
 
                     Intent broadcastIntent = new Intent(CMD_TOAST_BROADCAST);
                     broadcastIntent.putExtra("cmd_value", str+action);
@@ -166,6 +175,12 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                     
                     break;
                 }
+                case EventDeliveryAck:
+                    message.setDelivered(true);
+                    break;
+                case EventReadAck:
+                    message.setAcked(true);
+                    break;
                 // add other events in case you are interested in
                 default:
                     break;
@@ -175,6 +190,62 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         };
         
         EMChatManager.getInstance().registerEventListener(eventListener);
+        
+        EMChatManager.getInstance().addChatRoomChangeListener(new EMChatRoomChangeListener(){
+            private final static String ROOM_CHANGE_BROADCAST = "easemob.demo.chatroom.changeevent.toast";
+            private final IntentFilter filter = new IntentFilter(ROOM_CHANGE_BROADCAST);
+            private boolean registered = false;
+            
+            private void showToast(String value){
+                if(!registered){
+                  //注册通话广播接收者
+                    appContext.registerReceiver(new BroadcastReceiver(){
+
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            Toast.makeText(appContext, intent.getStringExtra("value"), Toast.LENGTH_SHORT).show();
+                        }
+                        
+                    }, filter);
+                    
+                    registered = true;
+                }
+                
+                Intent broadcastIntent = new Intent(ROOM_CHANGE_BROADCAST);
+                broadcastIntent.putExtra("value", value);
+                appContext.sendBroadcast(broadcastIntent, null);
+            }
+            
+            @Override
+            public void onChatRoomDestroyed(String roomId, String roomName) {
+                showToast(" room : " + roomId + " with room name : " + roomName + " was destroyed");
+                Log.i("info","onChatRoomDestroyed="+roomName);
+            }
+
+            @Override
+            public void onMemberJoined(String roomId, String participant) {
+                showToast("member : " + participant + " join the room : " + roomId);
+                Log.i("info", "onmemberjoined="+participant);
+                
+            }
+
+            @Override
+            public void onMemberExited(String roomId, String roomName,
+                    String participant) {
+                showToast("member : " + participant + " leave the room : " + roomId + " room name : " + roomName);
+                Log.i("info", "onMemberExited="+participant);
+                
+            }
+
+            @Override
+            public void onMemberKicked(String roomId, String roomName,
+                    String participant) {
+                showToast("member : " + participant + " was kicked from the room : " + roomId + " room name : " + roomName);
+                Log.i("info", "onMemberKicked="+participant);
+                
+            }
+
+        });
     }
 
     /**
@@ -226,7 +297,12 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 } else { // 群聊信息
                     // message.getTo()为群聊id
                     intent.putExtra("groupId", message.getTo());
-                    intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+                    if(chatType == ChatType.GroupChat){
+                        intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+                    }else{
+                        intent.putExtra("chatType", ChatActivity.CHATTYPE_CHATROOM);
+                    }
+                    
                 }
                 return intent;
             }

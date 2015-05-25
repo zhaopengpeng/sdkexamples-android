@@ -6,11 +6,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.view.animation.AlphaAnimation;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.easemob.chat.EMChatManager;
-import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 
@@ -19,7 +18,7 @@ import com.easemob.chatuidemo.R;
  *
  */
 public class SplashActivity extends BaseActivity {
-	private LinearLayout rootLayout;
+	private RelativeLayout rootLayout;
 	private TextView versionText;
 	
 	private static final int sleepTime = 2000;
@@ -29,7 +28,7 @@ public class SplashActivity extends BaseActivity {
 		setContentView(R.layout.activity_splash);
 		super.onCreate(arg0);
 
-		rootLayout = (LinearLayout) findViewById(R.id.splash_root);
+		rootLayout = (RelativeLayout) findViewById(R.id.splash_root);
 		versionText = (TextView) findViewById(R.id.tv_version);
 
 		versionText.setText(getVersion());
@@ -49,7 +48,7 @@ public class SplashActivity extends BaseActivity {
 					//不是必须的，不加sdk也会自动异步去加载(不会重复加载)；
 					//加上的话保证进了主页面会话和群组都已经load完毕
 					long start = System.currentTimeMillis();
-					EMGroupManager.getInstance().loadAllGroups();
+					EMChatManager.getInstance().loadAllLocalGroups();
 					EMChatManager.getInstance().loadAllConversations();
 					long costTime = System.currentTimeMillis() - start;
 					//等待sleeptime时长
