@@ -49,6 +49,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.easemob.applib.controller.HXSDKHelper;
@@ -84,6 +86,7 @@ public class ContactlistFragment extends Fragment {
 	Handler handler = new Handler();
     private User toBeProcessUser;
     private String toBeProcessUsername;
+    private RelativeLayout errorUpdateContacts = null;
 
 	class SyncListener implements HXSDKHelper.SyncListener {
 		@Override
@@ -125,6 +128,12 @@ public class ContactlistFragment extends Fragment {
 		listView = (ListView) getView().findViewById(R.id.list);
 		sidebar = (Sidebar) getView().findViewById(R.id.sidebar);
 		sidebar.setListView(listView);
+		
+		TextView text = null;
+		errorUpdateContacts = (RelativeLayout) getView().findViewById(R.id.rl_sync_contacts_error);
+        text = (TextView) errorUpdateContacts.findViewById(R.id.tv_connect_errormsg);
+        text.setText(getActivity().getResources().getString(R.string.update_contact_list_failed));
+        
 		//黑名单列表
 		blackList = EMContactManager.getInstance().getBlackListUsernames();
 		contactList = new ArrayList<User>();
@@ -215,12 +224,11 @@ public class ContactlistFragment extends Fragment {
 		syncListener = new SyncListener();
 		HXSDKHelper.getInstance().addSyncContactListener(syncListener);
 		
-		if (HXSDKHelper.getInstance().isSyncingContactsFromServer()) {
+		if (!HXSDKHelper.getInstance().isContactsSyncedWithServer()) {
 			progressBar.setVisibility(View.VISIBLE);
 		} else {
 			progressBar.setVisibility(View.GONE);
 		}
-		
 	}
 
 	@Override

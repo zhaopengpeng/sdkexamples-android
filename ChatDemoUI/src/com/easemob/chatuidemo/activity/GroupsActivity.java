@@ -99,16 +99,7 @@ public class GroupsActivity extends BaseActivity {
 
 			@Override
 			public void onRefresh() {
-				new Thread() {
-					@Override
-					public void run() {
-						try {
-							HXSDKHelper.getInstance().getGroupsFromServer();
-						} catch (EaseMobException e) {
-							e.printStackTrace();
-						}
-					}
-				}.start();
+			    MainActivity.asyncFetchGroupsFromServer();
 			}
 		});
 		
@@ -149,13 +140,11 @@ public class GroupsActivity extends BaseActivity {
 		});
 		
 		progressBar = (View)findViewById(R.id.progress_bar);
-
-		EMLog.d(TAG, "isSyncingGroupsFromServer:" + HXSDKHelper.getInstance().isSyncingGroupsFromServer());
 		
 		syncListener = new SyncListener();
 		HXSDKHelper.getInstance().addSyncGroupListener(syncListener);
 
-		if (HXSDKHelper.getInstance().isSyncingGroupsFromServer()) {
+		if (!HXSDKHelper.getInstance().isGroupsSyncedWithServer()) {
 			progressBar.setVisibility(View.VISIBLE);
 		} else {
 			progressBar.setVisibility(View.GONE);

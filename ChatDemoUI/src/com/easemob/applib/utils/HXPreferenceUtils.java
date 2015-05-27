@@ -107,39 +107,6 @@ public class HXPreferenceUtils {
 	public boolean getSettingMsgSpeaker() {
 		return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_SPEAKER, true);
 	}
-
-	public void setSettingSyncGroupsFinished(boolean paramBoolean) {
-		String username = DemoApplication.getInstance().getUserName();
-		editor.putBoolean(SHARED_KEY_SETTING_SYNC_GROUPS_FINISHED + " " + username, paramBoolean);
-		editor.commit();
-	}
-	
-	public boolean getSettingSyncGroupsFinished() {
-		String username = DemoApplication.getInstance().getUserName();
-		return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_SYNC_GROUPS_FINISHED + " " + username, false);		
-	}
-
-	public void setSettingSyncContactsFinished(boolean paramBoolean) {
-		String username = DemoApplication.getInstance().getUserName();
-		editor.putBoolean(SHARED_KEY_SETTING_SYNC_CONTACTS_FINISHED + " " + username, paramBoolean);
-		editor.commit();
-	}
-	
-	public boolean getSettingSyncContactsFinished() {
-		String username = DemoApplication.getInstance().getUserName();
-		return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_SYNC_CONTACTS_FINISHED + " " + username, false);		
-	}
-
-	public void setSettingSyncBlackListFinished(boolean paramBoolean) {
-		String username = DemoApplication.getInstance().getUserName();
-		editor.putBoolean(SHARED_KEY_SETTING_SYNC_BLACK_LIST_FINISHED + " " + username, paramBoolean);
-		editor.commit();
-	}
-	
-	public boolean getSettingSyncBlackListFinished() {
-		String username = DemoApplication.getInstance().getUserName();
-		return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_SYNC_BLACK_LIST_FINISHED + " " + username, false);		
-	}
 	
 	public void setSettingAllowChatroomOwnerLeave(boolean value) {
         editor.putBoolean(SHARED_KEY_SETTING_CHATROOM_OWNER_LEAVE, value);

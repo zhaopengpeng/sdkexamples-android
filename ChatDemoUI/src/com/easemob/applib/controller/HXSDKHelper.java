@@ -14,6 +14,7 @@
 package com.easemob.applib.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import android.util.Log;
 import com.easemob.EMCallBack;
 import com.easemob.EMConnectionListener;
 import com.easemob.EMError;
+import com.easemob.EMValueCallBack;
 import com.easemob.applib.model.DefaultHXSDKModel;
 import com.easemob.applib.model.HXNotifier;
 import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
@@ -34,6 +36,11 @@ import com.easemob.applib.model.HXSDKModel;
 import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatConfig.EMEnvMode;
+import com.easemob.chatuidemo.Constant;
+import com.easemob.chatuidemo.DemoApplication;
+import com.easemob.chatuidemo.R;
+import com.easemob.chatuidemo.db.UserDao;
+import com.easemob.chatuidemo.domain.User;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
 import com.easemob.chat.EMContactListener;
@@ -41,6 +48,7 @@ import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.GroupChangeListener;
 import com.easemob.exceptions.EaseMobException;
+import com.easemob.util.EMLog;
 
 /**
  * The developer can derive from this class to talk with HuanXin SDK
@@ -121,25 +129,17 @@ public abstract class HXSDKHelper {
 	 */
 	private List<SyncListener> syncBlackListListeners;
 
-	private boolean isSyncingGroupsFromServer = false;
+	private boolean isSyncingGroupsWithServer = false;
 
-	private boolean isSyncingContactsFromServer = false;
+	private boolean isSyncingContactsWithServer = false;
 
-	private boolean isSyncingBlackListFromServer = false;
+	private boolean isSyncingBlackListWithServer = false;
 	
-	private boolean syncGroupsFromServerFailed = false;
+	private boolean isGroupsSyncedWithServer = false;
 
-	private boolean syncContactsFromServerFailed = false;
+	private boolean isContactsSyncedWithServer = false;
 
-	private boolean syncBlackListFromServerFailed = false;
-
-//	private boolean syncGroupsFromServerFailed = false;
-//
-//	private boolean syncContactsFromServerFailed = false;
-//
-//	private boolean syncBlackListFromServerFailed = false;
-
-	private List<SyncPendingMessage> messages = null;
+	private boolean isBlackListSyncedWithServer = false;
 
     protected HXSDKHelper(){
         me = this;
@@ -225,6 +225,10 @@ public abstract class HXSDKHelper {
      */
     public static HXSDKHelper getInstance(){
         return me;
+    }
+    
+    public Context getAppContext(){
+        return appContext;
     }
     
     public HXSDKModel getModel(){
@@ -317,9 +321,6 @@ public abstract class HXSDKHelper {
                 if(callback != null){
                     callback.onSuccess();
                 }
-				HXPreferenceUtils.getInstance().setSettingSyncGroupsFinished(false);
-				HXPreferenceUtils.getInstance().setSettingSyncContactsFinished(false);
-       		 	HXPreferenceUtils.getInstance().setSettingSyncBlackListFinished(false);
             }
 
             @Override
@@ -486,287 +487,143 @@ public abstract class HXSDKHelper {
 		    syncBlackListListeners.remove(listener);
 	    }
     }
-
+   
     /**
      * 同步操作，从服务器获取群组列表
      * 该方法会记录更新状态，可以通过isSyncingGroupsFromServer获取是否正在更新
      * 和HXPreferenceUtils.getInstance().getSettingSyncGroupsFinished()获取是否更新已经完成
      * @throws EaseMobException
      */
-    public synchronized void getGroupsFromServer() throws EaseMobException {
-	    try {
-	    	isSyncingGroupsFromServer = true;
-		    EMGroupManager.getInstance().getGroupsFromServer();
-		    HXPreferenceUtils.getInstance().setSettingSyncGroupsFinished(true);		 	
-	    	isSyncingGroupsFromServer = false;
-		    syncGroupsFromServerFailed = false;
-		    for (SyncListener listener : syncGroupsListeners) {
-			    listener.onSyncSucess(true);
-		    }
-	    } catch (EaseMobException e) {
-	    	isSyncingGroupsFromServer = false;
-		    syncGroupsFromServerFailed = true;
-		    for (SyncListener listener : syncGroupsListeners) {
-			    listener.onSyncSucess(false);
-		    }
-		    e.printStackTrace();
-		    throw e;
-	    }
+    public synchronized void asyncFetchGroupsFromServer(final EMCallBack callback){
+        if(isSyncingGroupsWithServer){
+            return;
+        }
+        
+        isSyncingGroupsWithServer = true;
+        
+        new Thread(){
+            @Override
+            public void run(){
+                try {
+                    EMChatManager.getInstance().fetchJoinedGroupsFromServer();
+                    isGroupsSyncedWithServer = true;
+                    if(callback != null){
+                        callback.onSuccess();
+                    }
+                } catch (EaseMobException e) {
+                    isGroupsSyncedWithServer = false;
+                    if(callback != null){
+                        callback.onError(e.getErrorCode(), e.toString());
+                    }
+                }
+            
+                isSyncingGroupsWithServer = false;
+            }
+        }.start();
     }
 
-    public synchronized List<String> getContactsFromServer() throws EaseMobException {
-	    List<String> usernames = null;
-	    try {
-	    	isSyncingContactsFromServer = true;
-		    usernames = EMContactManager.getInstance().getContactUserNames();
-		    HXPreferenceUtils.getInstance().setSettingSyncContactsFinished(true);
-	    	isSyncingContactsFromServer = false;
-		    syncContactsFromServerFailed = false;
-		    for (SyncListener listener : syncContactsListeners) {
-			    listener.onSyncSucess(true);
-		    }
-	    } catch (EaseMobException e) {
-	    	isSyncingContactsFromServer = false;
-		    syncContactsFromServerFailed = true;
-		    for (SyncListener listener : syncContactsListeners) {
-			    listener.onSyncSucess(false);
-		    }
-		    e.printStackTrace();
-		    throw e;
-	    }
-	    return usernames;
-    }
-
-    public synchronized List<String> getBlackListFromServer() throws EaseMobException {
-	    List<String> usernames = null; 
-	    try {
-	    	isSyncingBlackListFromServer = true;
-		    usernames = EMContactManager.getInstance().getBlackListUsernamesFromServer();
-		    HXPreferenceUtils.getInstance().setSettingSyncBlackListFinished(true);
-	    	isSyncingBlackListFromServer = false;
-		    syncBlackListFromServerFailed = false;
-		    for (SyncListener listener : syncBlackListListeners) {
-			    listener.onSyncSucess(true);
-		    }
-	    } catch (EaseMobException e) {
-	    	isSyncingBlackListFromServer = false;
-		    syncBlackListFromServerFailed = true;
-		    for (SyncListener listener : syncBlackListListeners) {
-			    listener.onSyncSucess(false);
-		    }
-		    e.printStackTrace();
-		    throw e;
-	    }
-	    return usernames;
-    }
-
-    public boolean isSyncingGroupsFromServer() {
-	    return isSyncingGroupsFromServer;
-    }
-
-    public boolean isSyncingContactsFromServer() {
-	    return isSyncingContactsFromServer;
-    }
-
-    public boolean isSyncingBlackListFromServer() {
-	    return isSyncingBlackListFromServer;
+    public void noitifyGroupSyncListeners(boolean success){
+        for (SyncListener listener : syncGroupsListeners) {
+            listener.onSyncSucess(success);
+        }
     }
     
-    public boolean syncGroupsFromServerFailed() {
-	    return syncGroupsFromServerFailed;
+    public void asyncFetchContactsFromServer(final EMValueCallBack<List<String>> callback){
+        if(isSyncingContactsWithServer){
+            return;
+        }
+        
+        isSyncingContactsWithServer = true;
+        
+        new Thread(){
+            @Override
+            public void run(){
+                List<String> usernames = null;
+                try {
+                    usernames = EMContactManager.getInstance().getContactUserNames();
+                    isContactsSyncedWithServer = true;
+                    if(callback != null){
+                        callback.onSuccess(usernames);
+                    }
+                } catch (EaseMobException e) {                   
+                    isContactsSyncedWithServer = false;
+                    e.printStackTrace();
+                    if(callback != null){
+                        callback.onError(e.getErrorCode(), e.toString());
+                    }
+                }
+                
+                isSyncingContactsWithServer = false;
+            }
+        }.start();
     }
 
-    public boolean syncContactsFromServerFailed() {
-	    return syncContactsFromServerFailed;
+    public void notifyContactsSyncListener(boolean success){
+        for (SyncListener listener : syncContactsListeners) {
+            listener.onSyncSucess(success);
+        }
+    }
+    
+    public void asyncFetchBlackListFromServer(final EMValueCallBack<List<String>> callback){
+        
+        if(isSyncingBlackListWithServer){
+            return;
+        }
+        
+        isSyncingBlackListWithServer = true;
+        
+        new Thread(){
+            @Override
+            public void run(){
+                try {
+                    List<String> usernames = null;
+                    usernames = EMContactManager.getInstance().getBlackListUsernamesFromServer();
+                    isBlackListSyncedWithServer = true;
+                    
+                    if(callback != null){
+                        callback.onSuccess(usernames);
+                    }
+                } catch (EaseMobException e) {
+                    isBlackListSyncedWithServer = false;
+                    e.printStackTrace();
+                    
+                    if(callback != null){
+                        callback.onError(e.getErrorCode(), e.toString());
+                    }
+                }
+                
+                isSyncingBlackListWithServer = false; 
+            }
+        }.start();
     }
 
-    public boolean syncBlackListFromServerFailed() {
-	    return syncBlackListFromServerFailed;
+    public void notifyBlackListSyncListener(boolean success){
+        for (SyncListener listener : syncBlackListListeners) {
+            listener.onSyncSucess(success);
+        }
+    }
+    
+    public boolean isSyncingGroupsWithServer() {
+	    return isSyncingGroupsWithServer;
     }
 
-    public enum EMSyncPendingMessage {
-	    EContactOnAdded,
-	    EContactOnDeleted,
-	    EContactOnInvited,
-	    EContactOnAgreed,
-	    EContactOnRefused,
-	    EGroupOnInvitationReceived,
-	    EGroupOnInvitationAccepted,
-	    EGroupOnInvitationDeclined,
-	    EGroupOnUserRemoved,
-	    EGroupOnGroupDestroy,
-	    EGroupOnApplicationReceived,
-	    EGroupOnApplicationAccept,
-	    EGroupOnApplicationDeclined
+    public boolean isSyncingContactsWithServer() {
+	    return isSyncingContactsWithServer;
     }
 
-    /**
-     * 异步登录时，同步联系人和群组时如果收到服务器消息，需要先缓存到本地消息队列中，等待
-     * 联系人和群组同步成功后处理 
-     */
-    static class SyncPendingMessage {
-	    private EMSyncPendingMessage type;
-	    private Message msg;
-
-	    SyncPendingMessage(EMSyncPendingMessage type, Message msg) {
-		    this.type = type;
-		    this.msg = msg;
-	    }
-
-	    public EMSyncPendingMessage getType() {
-		    return this.type;
-	    }
-
-	    public Message getMessage() {
-		    return this.msg;
-	    }
+    public boolean isSyncingBlackListWithServer() {
+	    return isSyncingBlackListWithServer;
+    }
+    
+    public boolean isGroupsSyncedWithServer() {
+	    return isGroupsSyncedWithServer;
     }
 
-    public void addMessage(EMSyncPendingMessage type, Message msg) {
-	    if (messages == null) {
-		    messages = new ArrayList<SyncPendingMessage>();
-	    }
-	    messages.add(new SyncPendingMessage(type, msg));
+    public boolean isContactsSyncedWithServer() {
+	    return isContactsSyncedWithServer;
     }
 
-    /**
-     * 异步执行，处理在同步联系人和群组过程中收到的服务器通知    
-     */
-    @SuppressWarnings("unchecked")
-	   	public void handlePendingMessages() {
-		    EMContactListener contactListener = EMContactManager.getInstance().getContactListener();
-		    List<GroupChangeListener> groupListeners = EMGroupManager.getInstance().getGroupChangeListener();
-
-		    if (contactListener == null || messages == null || groupListeners == null) {
-			    return;
-		    }
-		    while (messages.size() > 0) {
-			    Object _msg = messages.get(0);
-			    messages.remove(0);
-			    if (_msg == null && !(_msg instanceof SyncPendingMessage)) {
-				    continue;
-			    }
-			    SyncPendingMessage msg = (SyncPendingMessage)_msg;
-			    Message rawMsg = msg.getMessage();
-			    switch (msg.getType()) {
-				    // EContact____
-				    case EContactOnAdded:
-					    if (rawMsg != null && rawMsg.obj != null && rawMsg.obj instanceof List<?>) { 
-						    contactListener.onContactAdded((List<String>)rawMsg.obj);
-					    }
-					    break;
-				    case EContactOnDeleted:
-					    if (rawMsg != null && rawMsg.obj != null && rawMsg.obj instanceof List<?>) { 
-						    contactListener.onContactDeleted((List<String>)rawMsg.obj);
-					    }
-					    break;
-				    case EContactOnInvited:
-					    if (rawMsg != null && rawMsg.obj != null && rawMsg.obj instanceof Map<?, ?>) {
-						    Map<String, String> params = (Map<String, String>) rawMsg.obj;
-						    if (params.containsKey("username") && params.containsKey("reason")) {
-							    String username = params.get("username");
-							    String reason = params.get("reason");
-							    contactListener.onContactInvited(username, reason);
-						    }
-					    }
-					    break;
-				    case EContactOnAgreed:
-					    if (rawMsg != null && rawMsg.obj != null && rawMsg.obj instanceof String) {
-						    contactListener.onContactAgreed((String)rawMsg.obj);
-					    }
-					    break;
-				    case EContactOnRefused:
-					    if (rawMsg != null && rawMsg.obj != null && rawMsg.obj instanceof String) {
-						    contactListener.onContactRefused((String)rawMsg.obj);
-					    }
-					    break;
-					    // EGroup____
-				    case EGroupOnInvitationReceived:
-					    if (rawMsg != null && rawMsg.obj != null && rawMsg.obj instanceof Map<?, ?>) {
-						    Map<String, String> params = (Map<String, String>) rawMsg.obj;
-						    if (params.containsKey("groupId") && params.containsKey("groupName") &&
-								    params.containsKey("inviter") && params.containsKey("reason")) {
-							    String groupId = params.get("groupId");
-							    String groupName = params.get("groupName");
-							    String inviter = params.get("inviter");
-							    String reason = params.get("reason");
-							    for (GroupChangeListener listener : groupListeners) {
-								    listener.onInvitationReceived(groupId, groupName, inviter, reason);
-							    }
-						    }
-					    }
-					    break;
-				    case EGroupOnInvitationAccepted:
-					    break;
-				    case EGroupOnInvitationDeclined:
-					    break;
-				    case EGroupOnUserRemoved:
-					    if (rawMsg != null && rawMsg.obj != null && rawMsg.obj instanceof Map<?, ?>) {
-						    Map<String, String> params = (Map<String, String>) rawMsg.obj;
-						    if (params.containsKey("groupId") && params.containsKey("groupName")) {
-							    String groupId = params.get("groupId");
-							    String groupName = params.get("groupName");
-							    for (GroupChangeListener listener : groupListeners) {
-								    listener.onUserRemoved(groupId, groupName);
-							    }
-						    }
-					    }
-					    break;
-				    case EGroupOnGroupDestroy:
-					    if (rawMsg != null && rawMsg.obj != null && rawMsg.obj instanceof Map<?, ?>) {
-						    Map<String, String> params = (Map<String, String>) rawMsg.obj;
-						    if (params.containsKey("groupId") && params.containsKey("groupName")) {
-							    String groupId = params.get("groupId");
-							    String groupName = params.get("groupName");
-							    for (GroupChangeListener listener : groupListeners) {
-								    listener.onGroupDestroy(groupId, groupName);
-							    }
-						    }
-					    }
-					    break;
-				    case EGroupOnApplicationReceived:
-					    if (rawMsg != null && rawMsg.obj != null && rawMsg.obj instanceof Map<?, ?>) {
-						    Map<String, String> params = (Map<String, String>) rawMsg.obj;
-						    if (params.containsKey("groupId") && params.containsKey("groupName") &&
-								    params.containsKey("inviter") && params.containsKey("reason")) {
-							    String groupId = params.get("groupId");
-							    String groupName = params.get("groupName");
-							    String inviter = params.get("inviter");
-							    String reason = params.get("reason");
-							    for (GroupChangeListener listener : groupListeners) {
-								    listener.onApplicationReceived(groupId, groupName, inviter, reason);
-							    }
-						    }
-					    }
-					    break;
-				    case EGroupOnApplicationAccept:
-					    if (rawMsg != null && rawMsg.obj != null && rawMsg.obj instanceof Map<?, ?>) {
-						    Map<String, String> params = (Map<String, String>) rawMsg.obj;
-						    if (params.containsKey("groupId") && params.containsKey("groupName")) {
-							    String groupId = params.get("groupId");
-							    String groupName = params.get("groupName");
-							    String applyer = params.get("applyer");
-							    for (GroupChangeListener listener : groupListeners) {
-								    listener.onApplicationAccept(groupId, groupName, applyer);
-							    }
-						    }
-					    }
-					    break;
-				    case EGroupOnApplicationDeclined:
-					    break;
-				    default:
-					    break;
-			    }
-		    }
-
-		    // release message queue
-		    messages.clear();
-		    messages = null;
-	    }
-
-    public boolean isSyncReady() {
-	    return HXPreferenceUtils.getInstance().getSettingSyncGroupsFinished() && 
-		    HXPreferenceUtils.getInstance().getSettingSyncContactsFinished() &&
-		    HXPreferenceUtils.getInstance().getSettingSyncBlackListFinished();
+    public boolean isBlackListSyncedWithServer() {
+	    return isBlackListSyncedWithServer;
     }
 }

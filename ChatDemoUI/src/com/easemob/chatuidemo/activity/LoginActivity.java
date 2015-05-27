@@ -188,34 +188,6 @@ public class LoginActivity extends BaseActivity {
 						MainActivity.class);
 				intent.putExtra(Constant.FROM_LOGIN, true);
 				startActivity(intent);
-				// 处理好友和群组
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							loadGroups();
-						} catch (EaseMobException e) {
-							e.printStackTrace();
-						}
-					}
-				}).start();
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							loadBlackList();
-						} catch (EaseMobException e) {
-							e.printStackTrace();
-						}
-					}
-				}).start();
-				try {					
-					loadContacts(LoginActivity.this);
-				} catch (EaseMobException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				finish();
 			}
 
 			@Override
@@ -263,108 +235,6 @@ public class LoginActivity extends BaseActivity {
 		List<User> users = new ArrayList<User>(userlist.values());
 		dao.saveContactList(users);
 	}
-		
-	private void processContactsAndGroups() throws EaseMobException {
-		// demo中简单的处理成每次登陆都去获取好友username，开发者自己根据情况而定
-		List<String> usernames = EMContactManager.getInstance().getContactUserNames();
-		EMLog.d("roster", "contacts size: " + usernames.size());
-		Map<String, User> userlist = new HashMap<String, User>();
-		for (String username : usernames) {
-			User user = new User();
-			user.setUsername(username);
-			setUserHearder(username, user);
-			userlist.put(username, user);
-		}
-		// 添加user"申请与通知"
-		User newFriends = new User();
-		newFriends.setUsername(Constant.NEW_FRIENDS_USERNAME);
-		String strChat = getString(R.string.Application_and_notify);
-		newFriends.setNick(strChat);
-
-		userlist.put(Constant.NEW_FRIENDS_USERNAME, newFriends);
-		
-		// 添加"群聊"
-		User groupUser = new User();
-		String strGroup = getString(R.string.group_chat);
-		groupUser.setUsername(Constant.GROUP_USERNAME);
-		groupUser.setNick(strGroup);
-		groupUser.setHeader("");
-		userlist.put(Constant.GROUP_USERNAME, groupUser);
-		
-		// 添加"聊天室"
-        User chatRoomItem = new User();
-        String strChatRoom = getString(R.string.chat_room);
-        chatRoomItem.setUsername(Constant.CHAT_ROOM);
-        chatRoomItem.setNick(strChatRoom);
-        chatRoomItem.setHeader("");
-        userlist.put(Constant.CHAT_ROOM, chatRoomItem);
-
-		// 存入内存
-		DemoApplication.getInstance().setContactList(userlist);
-		System.out.println("----------------" + userlist.values().toString());
-		// 存入db
-		UserDao dao = new UserDao(LoginActivity.this);
-		List<User> users = new ArrayList<User>(userlist.values());
-		dao.saveContactList(users);
-
-		// 获取黑名单列表
-		List<String> blackList = EMContactManager.getInstance().getBlackListUsernamesFromServer();
-		// 保存黑名单
-		EMContactManager.getInstance().saveBlackList(blackList);
-
-		// 获取群聊列表(群聊里只有groupid和groupname等简单信息，不包含members),sdk会把群组存入到内存和db中
-		EMChatManager.getInstance().fetchJoinedGroupsFromServer();
-	}
-	
-
-	// 从服务器获取联系人列表
-	 public static void loadContacts(Context context) throws EaseMobException {
-		 List<String> usernames = HXSDKHelper.getInstance().getContactsFromServer();
-		 System.out.println("----------------"+usernames.toString());
-		 EMLog.d("roster", "contacts size: " + usernames.size());
-		 Map<String, User> userlist = new HashMap<String, User>();
-		 for (String username : usernames) {
-			 User user = new User();
-			 user.setUsername(username);
-			 setUserHearder(username, user);
-			 userlist.put(username, user);
-		 }
-		 // 添加user"申请与通知"
-		 User newFriends = new User();
-		 newFriends.setUsername(Constant.NEW_FRIENDS_USERNAME);
-		 String strChat = context.getString(R.string.Application_and_notify);
-		 newFriends.setNick(strChat);
- 
-		 userlist.put(Constant.NEW_FRIENDS_USERNAME, newFriends);
-		 // 添加"群聊"
-		 User groupUser = new User();
-		 String strGroup = context.getString(R.string.group_chat);
-		 groupUser.setUsername(Constant.GROUP_USERNAME);
-		 groupUser.setNick(strGroup);
-		 groupUser.setHeader("");
-		 userlist.put(Constant.GROUP_USERNAME, groupUser);
-		 
-          // 存入内存
-          DemoApplication.getInstance().setContactList(userlist);
-          // 存入db
-         UserDao dao = new UserDao(context);
-          List<User> users = new ArrayList<User>(userlist.values());
-          dao.saveContactList(users);
-	 }
-
-	// 从服务器获取黑名单
-	public static void loadBlackList() throws EaseMobException {
-		// 获取黑名单列表
-		List<String> blackList = HXSDKHelper.getInstance()
-				.getBlackListFromServer();
-		// 保存黑名单
-		EMContactManager.getInstance().saveBlackList(blackList);
-	}
-
-	public static void loadGroups() throws EaseMobException {
-		// 获取群聊列表(群聊里只有groupid和groupname等简单信息，不包含members),sdk会把群组存入到内存和db中
-		HXSDKHelper.getInstance().getGroupsFromServer();
-	}
 	
 	/**
 	 * 注册
@@ -380,33 +250,6 @@ public class LoginActivity extends BaseActivity {
 		super.onResume();
 		if (autoLogin) {
 			return;
-		}
-	}
-
-	/**
-	 * 设置hearder属性，方便通讯中对联系人按header分类显示，以及通过右侧ABCD...字母栏快速定位联系人
-	 * 
-	 * @param username
-	 * @param user
-	 */
-	protected static void setUserHearder(String username, User user) {
-		String headerName = null;
-		if (!TextUtils.isEmpty(user.getNick())) {
-			headerName = user.getNick();
-		} else {
-			headerName = user.getUsername();
-		}
-		if (username.equals(Constant.NEW_FRIENDS_USERNAME)) {
-			user.setHeader("");
-		} else if (Character.isDigit(headerName.charAt(0))) {
-			user.setHeader("#");
-		} else {
-			user.setHeader(HanziToPinyin.getInstance().get(headerName.substring(0, 1)).get(0).target.substring(0, 1)
-					.toUpperCase());
-			char header = user.getHeader().toLowerCase().charAt(0);
-			if (header < 'a' || header > 'z') {
-				user.setHeader("#");
-			}
 		}
 	}
 }
