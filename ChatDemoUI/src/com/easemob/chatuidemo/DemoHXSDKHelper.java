@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -35,6 +36,7 @@ import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
 import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMChatOptions;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
@@ -86,8 +88,8 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         super.initHXOptions();
 
         // you can also get EMChatOptions to set related SDK options
-        // EMChatOptions options = EMChatManager.getInstance().getChatOptions();
-        
+        EMChatOptions options = EMChatManager.getInstance().getChatOptions();
+        options.allowChatroomOwnerLeave(getModel().isChatroomOwnerLeaveAllowed());  
     }
 
     @Override
@@ -115,19 +117,26 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             
             @Override
             public void onEvent(EMNotifierEvent event) {
-                EMMessage message = (EMMessage)event.getData();
-                EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
+                EMMessage message = null;
+                if(event.getData() instanceof EMMessage){
+                    message = (EMMessage)event.getData();
+                    EMLog.d(TAG, "receive the event : " + event.getEvent() + ",id : " + message.getMsgId());
+                }
                 
                 switch (event.getEvent()) {
                 case EventNewMessage:
-                {
                     //应用在后台，不需要刷新UI,通知栏提示新消息
                     if(activityList.size() <= 0){
                         HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
                     }
-
                     break;
-                }
+                case EventOfflineMessage:
+                    if(activityList.size() <= 0){
+                        EMLog.d(TAG, "received offline messages");
+                        List<EMMessage> messages = (List<EMMessage>) event.getData();
+                        HXSDKHelper.getInstance().getNotifier().onNewMesg(messages);
+                    }
+                    break;
                 // below is just giving a example to show a cmd toast, the app should not follow this
                 // so be careful of this
                 case EventNewCMDMessage:
@@ -208,15 +217,9 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             }
             
             @Override
-            public void onInvitationReceived(String roomId, String roomName,
-                    String inviter, String reason) {
-                showToast(" Invitation was received from : " + inviter + " to the room : " + roomName + " with roomID : " + roomName + " reason : " + reason);
-            }
- 
-            @Override
             public void onChatRoomDestroyed(String roomId, String roomName) {
                 showToast(" room : " + roomId + " with room name : " + roomName + " was destroyed");
-                
+                Log.i("info","onChatRoomDestroyed="+roomName);
             }
 
             @Override
@@ -294,7 +297,12 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 } else { // 群聊信息
                     // message.getTo()为群聊id
                     intent.putExtra("groupId", message.getTo());
-                    intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+                    if(chatType == ChatType.GroupChat){
+                        intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+                    }else{
+                        intent.putExtra("chatType", ChatActivity.CHATTYPE_CHATROOM);
+                    }
+                    
                 }
                 return intent;
             }

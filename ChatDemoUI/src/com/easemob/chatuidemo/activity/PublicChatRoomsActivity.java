@@ -41,10 +41,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.EMChatRoomChangeListener;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
+import com.easemob.chat.EMCursorResult;
 import com.easemob.chat.EMGroupInfo;
-import com.easemob.chat.EMResult;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
@@ -88,6 +89,42 @@ public class PublicChatRoomsActivity extends BaseActivity {
         //获取及显示数据
         loadAndShowData();
         
+        EMChatManager.getInstance().addChatRoomChangeListener(new EMChatRoomChangeListener(){
+            @Override
+            public void onChatRoomDestroyed(String roomId, String roomName) {
+                chatRoomList.clear();
+                if(adapter != null){
+                    runOnUiThread(new Runnable(){
+
+                        @Override
+                        public void run() {
+                            if(adapter != null){
+                                adapter.notifyDataSetChanged();
+                                loadAndShowData();
+                            }
+                        }
+                        
+                    });
+                }
+            }
+
+            @Override
+            public void onMemberJoined(String roomId, String participant) {                
+            }
+
+            @Override
+            public void onMemberExited(String roomId, String roomName,
+                    String participant) {
+                
+            }
+
+            @Override
+            public void onMemberKicked(String roomId, String roomName,
+                    String participant) {
+            }
+            
+        });
+        
         //设置item点击事件
         listView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -105,7 +142,7 @@ public class PublicChatRoomsActivity extends BaseActivity {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
                 if(scrollState == OnScrollListener.SCROLL_STATE_IDLE){
-                    if(listView.getCount() != 0){
+                    if(cursor != null){
                         int lasPos = view.getLastVisiblePosition();
                         if(hasMoreData && !isLoading && lasPos == listView.getCount()-1){
                             loadAndShowData();
@@ -128,18 +165,18 @@ public class PublicChatRoomsActivity extends BaseActivity {
             public void run() {
                 try {
                     isLoading = true;
-                    final EMResult<EMChatRoom> data = EMChatManager.getInstance().fetchPublicChatRoomsFromServer(pagesize, cursor);
+                    final EMCursorResult<EMChatRoom> result = EMChatManager.getInstance().fetchPublicChatRoomsFromServer(pagesize, cursor);
                     //获取group list
-                    final List<EMChatRoom> chatRooms = data.getList();
+                    final List<EMChatRoom> chatRooms = result.getData();
                     runOnUiThread(new Runnable() {
 
                         public void run() {
                             chatRoomList.addAll(chatRooms);
                             if(chatRooms.size() != 0){
                                 //获取cursor
-                                cursor = data.getCursor();
-                                if(chatRooms.size() == pagesize)
-                                    footLoadingLayout.setVisibility(View.VISIBLE);
+                                cursor = result.getCursor();
+//                                if(chatRooms.size() == pagesize)
+//                                    footLoadingLayout.setVisibility(View.VISIBLE);
                             }
                             if(isFirstLoading){
                                 pb.setVisibility(View.INVISIBLE);

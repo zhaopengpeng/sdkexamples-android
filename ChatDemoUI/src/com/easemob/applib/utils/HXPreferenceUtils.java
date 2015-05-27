@@ -44,6 +44,7 @@ public class HXPreferenceUtils {
 	private String SHARED_KEY_SETTING_SYNC_CONTACTS_FINISHED = "shared_key_setting_sync_contacts_finished";
 	private String SHARED_KEY_SETTING_SYNC_BLACK_LIST_FINISHED = "shared_key_setting_sync_blacklist_finished";
 
+	private static String SHARED_KEY_SETTING_CHATROOM_OWNER_LEAVE = "shared_key_setting_chatroom_owner_leave";
 
 	private HXPreferenceUtils(Context cxt) {
 		mSharedPreferences = cxt.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
@@ -139,4 +140,13 @@ public class HXPreferenceUtils {
 		String username = DemoApplication.getInstance().getUserName();
 		return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_SYNC_BLACK_LIST_FINISHED + " " + username, false);		
 	}
+	
+	public void setSettingAllowChatroomOwnerLeave(boolean value) {
+        editor.putBoolean(SHARED_KEY_SETTING_CHATROOM_OWNER_LEAVE, value);
+        editor.commit();
+    }
+	
+	public boolean getSettingAllowChatroomOwnerLeave() {
+        return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_CHATROOM_OWNER_LEAVE, true);
+    }
 }

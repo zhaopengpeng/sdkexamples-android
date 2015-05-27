@@ -269,4 +269,5 @@
     <string name="update_groups_failed">更新群聊失败</string>
     
     <string name="gorup_not_found">找不到这个群组</string>
+    <string name= "chatroom_allow_owner_leave"> 允许聊天室群主离开</string>
 </resources>

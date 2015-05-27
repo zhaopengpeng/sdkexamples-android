@@ -156,9 +156,16 @@ public class ChatAllHistoryFragment extends Fragment implements View.OnClickList
 				    // 进入聊天页面
 				    Intent intent = new Intent(getActivity(), ChatActivity.class);
 				    if(conversation.isGroup()){
-				        // it is group chat
-                        intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
-                        intent.putExtra("groupId", username);
+				        if(conversation.getType() == EMConversationType.ChatRoom){
+				         // it is group chat
+	                        intent.putExtra("chatType", ChatActivity.CHATTYPE_CHATROOM);
+	                        intent.putExtra("groupId", username);
+				        }else{
+				         // it is group chat
+	                        intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+	                        intent.putExtra("groupId", username);
+				        }
+				        
 				    }else{
 				        // it is single chat
                         intent.putExtra("userId", username);
@@ -298,9 +305,9 @@ public class ChatAllHistoryFragment extends Fragment implements View.OnClickList
 		synchronized (conversations) {
 			for (EMConversation conversation : conversations.values()) {
 				if (conversation.getAllMessages().size() != 0) {
-					if(conversation.getType() != EMConversationType.ChatRoom){
+					//if(conversation.getType() != EMConversationType.ChatRoom){
 						sortList.add(new Pair<Long, EMConversation>(conversation.getLastMessage().getMsgTime(), conversation));
-					}
+					//}
 				}
 			}
 		}

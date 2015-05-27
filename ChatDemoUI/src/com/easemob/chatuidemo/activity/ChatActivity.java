@@ -43,7 +43,6 @@ import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -65,6 +64,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.EMChatRoomChangeListener;
 import com.easemob.EMError;
 import com.easemob.EMEventListener;
 import com.easemob.EMGroupChangeListener;
@@ -75,6 +75,7 @@ import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMConversation;
+import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
@@ -375,8 +376,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		if (chatType == CHATTYPE_SINGLE) { // 单聊
 			toChatUsername = getIntent().getStringExtra("userId");
 			((TextView) findViewById(R.id.name)).setText(toChatUsername);
-			// conversation =
-			// EMChatManager.getInstance().getConversation(toChatUsername,false);
 		} else {
 			// 群聊
 			findViewById(R.id.container_to_group).setVisibility(View.VISIBLE);
@@ -386,128 +385,169 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			toChatUsername = getIntent().getStringExtra("groupId");
 
 			if(chatType == CHATTYPE_GROUP){
-				group = EMChatManager.getInstance().getGroup(toChatUsername);
-				
-				if (group != null){
-					((TextView) findViewById(R.id.name)).setText(group.getGroupName());
-				}else{
-					((TextView) findViewById(R.id.name)).setText(toChatUsername);
-				}
-			}else{
-				
-				final ProgressDialog pd = ProgressDialog.show(this, "", "Joining......");
-				EMChatManager.getInstance().joinChatRoom(toChatUsername, new EMValueCallBack<EMChatRoom>() {
-				
-				@Override
-				public void onSuccess(EMChatRoom value) {
-					// TODO Auto-generated method stub
-					 runOnUiThread(new Runnable(){
-                           @Override
-                           public void run(){
-                        	   	pd.dismiss();
-                        	   	room = EMChatManager.getInstance().getChatRoom(toChatUsername);
-                        	   	if(room !=null){
-                        	   		((TextView) findViewById(R.id.name)).setText(room.getName());
-                        	   	}else{
-                        	   		((TextView) findViewById(R.id.name)).setText(toChatUsername);
-                        	   	}
-//			                    Toast.makeText(ChatActivity.this, "join room success : " + room.getName(), Toast.LENGTH_SHORT).show();
-                        	   	Log.i("info", "join room success!");
-                        	   	conversation = EMChatManager.getInstance().getConversation(toChatUsername);
-                        		// 把此会话的未读数置为0
-                        		conversation.markAllMessagesAsRead();
-
-                        		// 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
-                        		// 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
-                        		final List<EMMessage> msgs = conversation.getAllMessages();
-                        		int msgCount = msgs != null ? msgs.size() : 0;
-                        		if (msgCount < conversation.getAllMsgCount() && msgCount < pagesize) {
-                        			String msgId = null;
-                        			if (msgs != null && msgs.size() > 0) {
-                        				msgId = msgs.get(0).getMsgId();
-                        			}
-                    				conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
-                        		}
-                        		adapter = new MessageAdapter(ChatActivity.this, toChatUsername, chatType);
-                        		// 显示消息
-                        		listView.setAdapter(adapter);
-                        		adapter.refreshSelectLast();
-
-                           }
-                       });
-				}
-				
-				@Override
-				public void onError(final int error, String errorMsg) {
-					// TODO Auto-generated method stub
-                   runOnUiThread(new Runnable(){
-                       @Override
-                       public void run(){
-                    	   pd.dismiss();
-//			                   Toast.makeText(ChatActivity.this, "join room failure : " + error, Toast.LENGTH_SHORT).show();
-                    	   Log.i("info", "join room failure = "+error);
-                       }
-                   });
-                   finish();
-				}
-			});
-	                      
-			}
-			
-			// conversation =
-			// EMChatManager.getInstance().getConversation(toChatUsername,true);
-		}
-		conversation = EMChatManager.getInstance().getConversation(toChatUsername);
-		// 把此会话的未读数置为0
-		conversation.markAllMessagesAsRead();
-
-		// 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
-		// 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
-		final List<EMMessage> msgs = conversation.getAllMessages();
-		int msgCount = msgs != null ? msgs.size() : 0;
-		if (msgCount < conversation.getAllMsgCount() && msgCount < pagesize) {
-			String msgId = null;
-			if (msgs != null && msgs.size() > 0) {
-				msgId = msgs.get(0).getMsgId();
-			}
-			if (chatType == CHATTYPE_SINGLE) {
-				conversation.loadMoreMsgFromDB(msgId, pagesize);
-			} else {
-				conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
+			    onGroupViewCreation();
+			}else{ 
+			    onChatRoomViewCreation();
 			}
 		}
-		adapter = new MessageAdapter(this, toChatUsername, chatType);
-		// 显示消息
-		listView.setAdapter(adapter);
-		listView.setOnScrollListener(new ListScrollListener());
-		adapter.refreshSelectLast();
-
-		listView.setOnTouchListener(new OnTouchListener() {
-
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				hideKeyboard();
-				more.setVisibility(View.GONE);
-				iv_emoticons_normal.setVisibility(View.VISIBLE);
-				iv_emoticons_checked.setVisibility(View.INVISIBLE);
-				emojiIconContainer.setVisibility(View.GONE);
-				btnContainer.setVisibility(View.GONE);
-				return false;
-			}
-		});
-
-		// 监听当前会话的群聊解散被T事件
-		groupListener = new GroupListener();
-		EMChatManager.getInstance().addGroupChangeListener(groupListener);
-
-		// show forward message if the message is not null
-		String forward_msg_id = getIntent().getStringExtra("forward_msg_id");
-		if (forward_msg_id != null) {
-			// 显示发送要转发的消息
-			forwardMessage(forward_msg_id);
+        
+		// for chatroom type, we only init conversation and create view adapter on success
+		if(chatType != CHATTYPE_CHATROOM){
+		    onConversationInit();
+	        
+	        onListViewCreation();
+	        
+	        // show forward message if the message is not null
+	        String forward_msg_id = getIntent().getStringExtra("forward_msg_id");
+	        if (forward_msg_id != null) {
+	            // 显示发送要转发的消息
+	            forwardMessage(forward_msg_id);
+	        }
 		}
 	}
 
+	protected void onConversationInit(){
+	    if(chatType == CHATTYPE_SINGLE){
+	        conversation = EMChatManager.getInstance().getConversationByType(toChatUsername,EMConversationType.Chat);
+	    }else if(chatType == CHATTYPE_GROUP){
+	        conversation = EMChatManager.getInstance().getConversationByType(toChatUsername,EMConversationType.GroupChat);
+	    }else if(chatType == CHATTYPE_CHATROOM){
+	        conversation = EMChatManager.getInstance().getConversationByType(toChatUsername,EMConversationType.ChatRoom);
+	    }
+	     
+        // 把此会话的未读数置为0
+        conversation.markAllMessagesAsRead();
+
+        // 初始化db时，每个conversation加载数目是getChatOptions().getNumberOfMessagesLoaded
+        // 这个数目如果比用户期望进入会话界面时显示的个数不一样，就多加载一些
+        final List<EMMessage> msgs = conversation.getAllMessages();
+        int msgCount = msgs != null ? msgs.size() : 0;
+        if (msgCount < conversation.getAllMsgCount() && msgCount < pagesize) {
+            String msgId = null;
+            if (msgs != null && msgs.size() > 0) {
+                msgId = msgs.get(0).getMsgId();
+            }
+            if (chatType == CHATTYPE_SINGLE) {
+                conversation.loadMoreMsgFromDB(msgId, pagesize);
+            } else {
+                conversation.loadMoreGroupMsgFromDB(msgId, pagesize);
+            }
+        }
+        
+        EMChatManager.getInstance().addChatRoomChangeListener(new EMChatRoomChangeListener(){
+
+            @Override
+            public void onChatRoomDestroyed(String roomId, String roomName) {
+                if(roomId.equals(toChatUsername)){
+                    finish();
+                }
+            }
+
+            @Override
+            public void onMemberJoined(String roomId, String participant) {                
+            }
+
+            @Override
+            public void onMemberExited(String roomId, String roomName,
+                    String participant) {
+                
+            }
+
+            @Override
+            public void onMemberKicked(String roomId, String roomName,
+                    String participant) {
+                if(roomId.equals(toChatUsername)){
+                    String curUser = EMChatManager.getInstance().getCurrentUser();
+                    if(curUser.equals(participant)){
+                        EMChatManager.getInstance().leaveChatRoom(toChatUsername);
+                        finish();
+                    }
+                }
+            }
+            
+        });
+	}
+	
+	protected void onListViewCreation(){
+        adapter = new MessageAdapter(ChatActivity.this, toChatUsername, chatType);
+        // 显示消息
+        listView.setAdapter(adapter);
+        
+        listView.setOnScrollListener(new ListScrollListener());
+        adapter.refreshSelectLast();
+
+        listView.setOnTouchListener(new OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                hideKeyboard();
+                more.setVisibility(View.GONE);
+                iv_emoticons_normal.setVisibility(View.VISIBLE);
+                iv_emoticons_checked.setVisibility(View.INVISIBLE);
+                emojiIconContainer.setVisibility(View.GONE);
+                btnContainer.setVisibility(View.GONE);
+                return false;
+            }
+        });
+	}
+	
+	protected void onGroupViewCreation(){
+	    group = EMChatManager.getInstance().getGroup(toChatUsername);
+        
+        if (group != null){
+            ((TextView) findViewById(R.id.name)).setText(group.getGroupName());
+        }else{
+            ((TextView) findViewById(R.id.name)).setText(toChatUsername);
+        }
+        
+        // 监听当前会话的群聊解散被T事件
+        groupListener = new GroupListener();
+        EMChatManager.getInstance().addGroupChangeListener(groupListener);
+	}
+	
+	protected void onChatRoomViewCreation(){
+        findViewById(R.id.container_to_group).setVisibility(View.GONE);
+        
+        final ProgressDialog pd = ProgressDialog.show(this, "", "Joining......");
+        EMChatManager.getInstance().joinChatRoom(toChatUsername, new EMValueCallBack<EMChatRoom>() {
+        
+        @Override
+        public void onSuccess(EMChatRoom value) {
+            // TODO Auto-generated method stub
+             runOnUiThread(new Runnable(){
+                   @Override
+                   public void run(){
+                        pd.dismiss();
+                        room = EMChatManager.getInstance().getChatRoom(toChatUsername);
+                        if(room !=null){
+                            ((TextView) findViewById(R.id.name)).setText(room.getName());
+                        }else{
+                            ((TextView) findViewById(R.id.name)).setText(toChatUsername);
+                        }
+                        EMLog.d(TAG, "join room success : " + room.getName());
+                        
+                        onConversationInit();
+                        
+                        onListViewCreation();
+                   }
+               });
+        }
+        
+        @Override
+        public void onError(final int error, String errorMsg) {
+                // TODO Auto-generated method stub
+                EMLog.d(TAG, "join room failure : " + error);
+               runOnUiThread(new Runnable(){
+                   @Override
+                   public void run(){
+                       pd.dismiss();
+                   }
+               });
+               finish();
+            }
+        });
+	}
+	
 	/**
 	 * onActivityResult
 	 */
@@ -537,7 +577,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				Intent intent = new Intent(this, ForwardMessageActivity.class);
 				intent.putExtra("forward_msg_id", forwardMsg.getMsgId());
 				startActivity(intent);
-
+				
 				break;
 
 			default:
@@ -761,6 +801,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	
 	
 	private void refreshUIWithNewMessage(){
+	    if(adapter == null){
+	        return;
+	    }
+	    
 	    runOnUiThread(new Runnable() {
             public void run() {
                 adapter.refreshSelectLast();
@@ -769,6 +813,10 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	}
 
 	private void refreshUI() {
+	    if(adapter == null){
+            return;
+        }
+	    
 		runOnUiThread(new Runnable() {
 			public void run() {
 				adapter.refresh();
@@ -1378,16 +1426,20 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	protected void onDestroy() {
 		super.onDestroy();
 		activityInstance = null;
-		EMChatManager.getInstance().removeGroupChangeListener(groupListener);
+		if(groupListener != null){
+		    EMChatManager.getInstance().removeGroupChangeListener(groupListener);
+		}
 	}
 
 	@Override
 	protected void onResume() {
-		Log.i("ChatActivity", "onResume");
 		super.onResume();
 		if (group != null)
 			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
-		adapter.refresh();
+
+		 if(adapter != null){
+		     adapter.refresh();
+	     }
 
 		DemoHXSDKHelper sdkHelper = (DemoHXSDKHelper) DemoHXSDKHelper.getInstance();
 		sdkHelper.pushActivity(this);
@@ -1400,8 +1452,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 	@Override
 	protected void onStop() {
-		Log.i("ChatActivity", "onStop");
-
 		// unregister this event listener when this activity enters the
 		// background
 		EMChatManager.getInstance().unregisterEventListener(this);
@@ -1410,7 +1460,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 		// 把此activity 从foreground activity 列表里移除
 		sdkHelper.popActivity(this);
-
+		
 		super.onStop();
 	}
 
@@ -1485,31 +1535,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	public void back(View view) {
 		EMChatManager.getInstance().unregisterEventListener(this);
 		if(chatType == CHATTYPE_CHATROOM){
-			new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					try {
-						EMChatManager.getInstance().leaveChatRoom(toChatUsername);
-						runOnUiThread(new Runnable() {
-							public void run() {
-//								Toast.makeText(ChatActivity.this, "leave success!", 1).show();
-								Log.i("info", "leave success!");
-							}
-						});
-					} catch (final Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						runOnUiThread(new Runnable() {
-							public void run() {
-//								Toast.makeText(ChatActivity.this, "leave failure!", 1).show();
-								Log.i("info", "leave failure = "+e.toString());
-							}
-						});
-					}
-				}
-			}).start();
+			EMChatManager.getInstance().leaveChatRoom(toChatUsername);
 		}
 		finish();
 	}
@@ -1526,31 +1552,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		} else {
 			super.onBackPressed();
 			if(chatType == CHATTYPE_CHATROOM){
-				new Thread(new Runnable() {
-					
-					@Override
-					public void run() {
-						// TODO Auto-generated method stub
-						try {
-							EMChatManager.getInstance().leaveChatRoom(toChatUsername);
-							runOnUiThread(new Runnable() {
-								public void run() {
-//									Toast.makeText(ChatActivity.this, "leave success!", 1).show();
-									Log.i("info", "leave success!");
-								}
-							});
-						} catch (final Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							runOnUiThread(new Runnable() {
-								public void run() {
-//									Toast.makeText(ChatActivity.this, "leave failure!", 1).show();
-									Log.i("info", "leave failure = "+e.toString());
-								}
-							});
-						}
-					}
-				}).start();
+				EMChatManager.getInstance().leaveChatRoom(toChatUsername);
 			}
 		}
 	}
@@ -1631,7 +1633,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * @param forward_msg_id
 	 */
 	protected void forwardMessage(String forward_msg_id) {
-		EMMessage forward_msg = EMChatManager.getInstance().getMessage(forward_msg_id);
+		final EMMessage forward_msg = EMChatManager.getInstance().getMessage(forward_msg_id);
 		EMMessage.Type type = forward_msg.getType();
 		switch (type) {
 		case TXT:
@@ -1654,8 +1656,12 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		default:
 			break;
 		}
+		
+		if(forward_msg.getChatType() == EMMessage.ChatType.ChatRoom){
+			EMChatManager.getInstance().leaveChatRoom(forward_msg.getTo());
+		}
 	}
-
+	
 	/**
 	 * 监测群组解散或者被T事件
 	 * 

@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,7 @@ import android.widget.TextView;
 import android.widget.TextView.BufferType;
 
 import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMContact;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMGroup;
@@ -96,7 +98,11 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 			holder.avatar.setImageResource(R.drawable.group_icon);
 			EMGroup group = EMChatManager.getInstance().getGroup(username);
 			holder.name.setText(group != null ? group.getGroupName() : username);
-		} else {
+		} else if(conversation.getType() == EMConversationType.ChatRoom){
+		    holder.avatar.setImageResource(R.drawable.group_icon);
+            EMChatRoom room = EMChatManager.getInstance().getChatRoom(username);
+            holder.name.setText(room != null && !TextUtils.isEmpty(room.getName()) ? room.getName() : username);
+		}else {
 		    UserUtils.setUserAvatar(getContext(), username, holder.avatar);
 			if (username.equals(Constant.GROUP_USERNAME)) {
 				holder.name.setText("群聊");
