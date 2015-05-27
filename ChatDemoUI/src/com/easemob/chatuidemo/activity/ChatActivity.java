@@ -69,6 +69,7 @@ import com.easemob.EMGroupChangeListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.EMValueCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.model.GroupRemoveListener;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMContactManager;
@@ -1614,7 +1615,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * 监测群组解散或者被T事件
 	 * 
 	 */
-	class GroupListener implements EMGroupChangeListener {
+	class GroupListener extends GroupRemoveListener{
 
 		@Override
 		public void onUserRemoved(final String groupId, String groupName) {
@@ -1648,37 +1649,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				}
 			});
 		}
-
-        @Override
-        public void onInvitationReceived(String groupId, String groupName,
-                String inviter, String reason) {            
-        }
-
-        @Override
-        public void onApplicationReceived(String groupId, String groupName,
-                String applyer, String reason) {            
-        }
-
-        @Override
-        public void onApplicationAccept(String groupId, String groupName,
-                String accepter) {
-            
-        }
-
-        @Override
-        public void onApplicationDeclined(String groupId, String groupName,
-                String decliner, String reason) {            
-        }
-
-        @Override
-        public void onInvitationAccpted(String groupId, String inviter,
-                String reason) {            
-        }
-
-        @Override
-        public void onInvitationDeclined(String groupId, String invitee,
-                String reason) {            
-        }
 
 	}
 
