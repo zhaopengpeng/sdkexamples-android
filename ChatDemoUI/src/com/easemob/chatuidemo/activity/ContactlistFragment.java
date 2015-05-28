@@ -21,13 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import u.aly.ad;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -49,8 +47,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.easemob.applib.controller.HXSDKHelper;
@@ -86,9 +82,8 @@ public class ContactlistFragment extends Fragment {
 	Handler handler = new Handler();
     private User toBeProcessUser;
     private String toBeProcessUsername;
-    private RelativeLayout errorUpdateContacts = null;
 
-	class SyncListener implements HXSDKHelper.SyncListener {
+	class SyncListener implements HXSDKHelper.HXSyncListener {
 		@Override
 		public void onSyncSucess(final boolean success) {
 			EMLog.d(TAG, "onSyncGroupsFinish success:" + success);
@@ -128,11 +123,6 @@ public class ContactlistFragment extends Fragment {
 		listView = (ListView) getView().findViewById(R.id.list);
 		sidebar = (Sidebar) getView().findViewById(R.id.sidebar);
 		sidebar.setListView(listView);
-		
-		TextView text = null;
-		errorUpdateContacts = (RelativeLayout) getView().findViewById(R.id.rl_sync_contacts_error);
-        text = (TextView) errorUpdateContacts.findViewById(R.id.tv_connect_errormsg);
-        text.setText(getActivity().getResources().getString(R.string.update_contact_list_failed));
         
 		//黑名单列表
 		blackList = EMContactManager.getInstance().getBlackListUsernames();

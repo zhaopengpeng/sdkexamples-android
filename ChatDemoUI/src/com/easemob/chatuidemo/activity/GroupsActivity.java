@@ -53,7 +53,7 @@ public class GroupsActivity extends BaseActivity {
 	private SwipeRefreshLayout swipeRefreshLayout;
 	Handler handler = new Handler();
 
-	class SyncListener implements HXSDKHelper.SyncListener {
+	class SyncListener implements HXSDKHelper.HXSyncListener {
 		@Override
 		public void onSyncSucess(final boolean success) {
 			EMLog.d(TAG, "onSyncGroupsFinish success:" + success);

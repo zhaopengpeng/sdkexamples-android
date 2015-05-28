@@ -91,6 +91,8 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	// 账号被移除
 	private boolean isCurrentAccountRemoved = false;
 	private boolean needToSyncWithServers = true;
+	
+	private MyConnectionListener connectionListener = null;
 
 	/**
 	 * 检查当前用户是否被删除
@@ -151,7 +153,10 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		// setContactListener监听联系人的变化等
 		EMContactManager.getInstance().setContactListener(new MyContactListener());
 		// 注册一个监听连接状态的listener
-		EMChatManager.getInstance().addConnectionListener(new MyConnectionListener());
+		
+		connectionListener = new MyConnectionListener();
+		EMChatManager.getInstance().addConnectionListener(connectionListener);
+		
 		// 注册群聊相关的listener
 		EMChatManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
 		// 通知sdk，UI 已经初始化完毕，注册了相应的receiver和listener, 可以接受broadcast了
@@ -386,6 +391,9 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 			conflictBuilder = null;
 		}
 		
+		if(connectionListener != null){
+		    EMChatManager.getInstance().removeConnectionListener(connectionListener);
+		}
 		super.onDestroy();
 	}
 

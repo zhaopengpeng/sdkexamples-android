@@ -66,11 +66,7 @@
                 android:id="@+id/search_bar_view"
                 layout="@layout/search_bar_with_padding"/>
 
-            <include
-		        android:id="@+id/rl_sync_contacts_error"
-		        layout="@layout/chat_neterror_item"
-		        android:visibility="gone" />
-            
+
             <ListView
                 android:id="@+id/list"
                 android:layout_below="@+id/search_bar_view"

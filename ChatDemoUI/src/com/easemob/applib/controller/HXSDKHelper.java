@@ -68,7 +68,7 @@ public abstract class HXSDKHelper {
 	/**
 	 * 群组更新完成
 	 */
-	public interface SyncListener {
+	static public interface HXSyncListener {
 		public void onSyncSucess(boolean success);
 	}
 	
@@ -117,17 +117,17 @@ public abstract class HXSDKHelper {
 	/**
 	 * HuanXin sync groups status listener
 	 */
-	private List<SyncListener> syncGroupsListeners;
+	private List<HXSyncListener> syncGroupsListeners;
 
 	/**
 	 * HuanXin sync contacts status listener
 	 */
-	private List<SyncListener> syncContactsListeners;
+	private List<HXSyncListener> syncContactsListeners;
 
 	/**
 	 * HuanXin sync blacklist status listener
 	 */
-	private List<SyncListener> syncBlackListListeners;
+	private List<HXSyncListener> syncBlackListListeners;
 
 	private boolean isSyncingGroupsWithServer = false;
 
@@ -170,9 +170,9 @@ public abstract class HXSDKHelper {
 
         appContext = context;
 
-		syncGroupsListeners = new ArrayList<SyncListener>();
-		syncContactsListeners = new ArrayList<SyncListener>();
-		syncBlackListListeners = new ArrayList<SyncListener>();
+		syncGroupsListeners = new ArrayList<HXSyncListener>();
+		syncContactsListeners = new ArrayList<HXSyncListener>();
+		syncBlackListListeners = new ArrayList<HXSyncListener>();
 
         // create HX SDK model
         hxModel = createModel();
@@ -313,25 +313,22 @@ public abstract class HXSDKHelper {
      */
     public void logout(final EMCallBack callback){
         setPassword(null);
+        reset();
         EMChatManager.getInstance().logout(new EMCallBack(){
 
             @Override
             public void onSuccess() {
-                // TODO Auto-generated method stub
                 if(callback != null){
                     callback.onSuccess();
                 }
             }
 
             @Override
-            public void onError(int code, String message) {
-                // TODO Auto-generated method stub
-                
+            public void onError(int code, String message) {                
             }
 
             @Override
             public void onProgress(int progress, String status) {
-                // TODO Auto-generated method stub
                 if(callback != null){
                     callback.onProgress(progress, status);
                 }
@@ -434,7 +431,7 @@ public abstract class HXSDKHelper {
     }
     
         
-    public void addSyncGroupListener(SyncListener listener) {
+    public void addSyncGroupListener(HXSyncListener listener) {
 	    if (listener == null) {
 		    return;
 	    }
@@ -443,7 +440,7 @@ public abstract class HXSDKHelper {
 	    }
     }
 
-    public void removeSyncGroupListener(SyncListener listener) {
+    public void removeSyncGroupListener(HXSyncListener listener) {
 	    if (listener == null) {
 		    return;
 	    }
@@ -452,7 +449,7 @@ public abstract class HXSDKHelper {
 	    }
     }
 
-    public void addSyncContactListener(SyncListener listener) {
+    public void addSyncContactListener(HXSyncListener listener) {
 	    if (listener == null) {
 		    return;
 	    }
@@ -461,7 +458,7 @@ public abstract class HXSDKHelper {
 	    }
     }
 
-    public void removeSyncContactListener(SyncListener listener) {
+    public void removeSyncContactListener(HXSyncListener listener) {
 	    if (listener == null) {
 		    return;
 	    }
@@ -470,7 +467,7 @@ public abstract class HXSDKHelper {
 	    }
     }
 
-    public void addSyncBlackListListener(SyncListener listener) {
+    public void addSyncBlackListListener(HXSyncListener listener) {
 	    if (listener == null) {
 		    return;
 	    }
@@ -479,7 +476,7 @@ public abstract class HXSDKHelper {
 	    }
     }
 
-    public void removeSyncBlackListListener(SyncListener listener) {
+    public void removeSyncBlackListListener(HXSyncListener listener) {
 	    if (listener == null) {
 		    return;
 	    }
@@ -523,7 +520,7 @@ public abstract class HXSDKHelper {
     }
 
     public void noitifyGroupSyncListeners(boolean success){
-        for (SyncListener listener : syncGroupsListeners) {
+        for (HXSyncListener listener : syncGroupsListeners) {
             listener.onSyncSucess(success);
         }
     }
@@ -559,7 +556,7 @@ public abstract class HXSDKHelper {
     }
 
     public void notifyContactsSyncListener(boolean success){
-        for (SyncListener listener : syncContactsListeners) {
+        for (HXSyncListener listener : syncContactsListeners) {
             listener.onSyncSucess(success);
         }
     }
@@ -598,7 +595,7 @@ public abstract class HXSDKHelper {
     }
 
     public void notifyBlackListSyncListener(boolean success){
-        for (SyncListener listener : syncBlackListListeners) {
+        for (HXSyncListener listener : syncBlackListListeners) {
             listener.onSyncSucess(success);
         }
     }
@@ -625,5 +622,16 @@ public abstract class HXSDKHelper {
 
     public boolean isBlackListSyncedWithServer() {
 	    return isBlackListSyncedWithServer;
+    }
+    
+    void reset(){
+        isSyncingGroupsWithServer = false;
+        isSyncingContactsWithServer = false;
+        isSyncingBlackListWithServer = false;
+        
+        isGroupsSyncedWithServer = false;
+        isContactsSyncedWithServer = false;
+        isBlackListSyncedWithServer = false;
+        
     }
 }
