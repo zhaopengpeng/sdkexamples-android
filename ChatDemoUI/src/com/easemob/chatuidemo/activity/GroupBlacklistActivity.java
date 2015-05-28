@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.easemob.chat.EMChatManager;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
 
@@ -43,7 +44,7 @@ public class GroupBlacklistActivity extends BaseActivity {
 
 			public void run() {
 				try {
-					List<String> blockedList = EMChatManager.getInstance().getBlockedGroupUsers(groupId);
+					List<String> blockedList = EMGroupManager.getInstance().getBlockedUsers(groupId);
 					if(blockedList != null){
 						Collections.sort(blockedList);
 						adapter = new BlacklistAdapter(GroupBlacklistActivity.this, 1, blockedList);
@@ -93,7 +94,7 @@ public class GroupBlacklistActivity extends BaseActivity {
 		final String st2 = getResources().getString(R.string.Removed_from_the_failure);
 		try {
 			// 移出黑民单
-		    EMChatManager.getInstance().unblockGroupUser(groupId, tobeRemoveUser);
+		    EMGroupManager.getInstance().unblockUser(groupId, tobeRemoveUser);
 			adapter.remove(tobeRemoveUser);
 		} catch (EaseMobException e) {
 			e.printStackTrace();

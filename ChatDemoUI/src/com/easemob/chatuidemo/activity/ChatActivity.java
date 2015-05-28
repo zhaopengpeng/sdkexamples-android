@@ -75,6 +75,7 @@ import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chat.EMGroup;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.ImageMessageBody;
@@ -440,7 +441,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	}
 	
 	protected void onGroupViewCreation(){
-	    group = EMChatManager.getInstance().getGroup(toChatUsername);
+	    group = EMGroupManager.getInstance().getGroup(toChatUsername);
         
         if (group != null){
             ((TextView) findViewById(R.id.name)).setText(group.getGroupName());
@@ -450,7 +451,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
         
         // 监听当前会话的群聊解散被T事件
         groupListener = new GroupListener();
-        EMChatManager.getInstance().addGroupChangeListener(groupListener);
+        EMGroupManager.getInstance().addGroupChangeListener(groupListener);
 	}
 	
 	protected void onChatRoomViewCreation(){
@@ -1375,7 +1376,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		super.onDestroy();
 		activityInstance = null;
 		if(groupListener != null){
-		    EMChatManager.getInstance().removeGroupChangeListener(groupListener);
+		    EMGroupManager.getInstance().removeGroupChangeListener(groupListener);
 		}
 	}
 

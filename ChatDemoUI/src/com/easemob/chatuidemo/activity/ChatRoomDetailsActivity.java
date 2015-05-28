@@ -179,11 +179,6 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 				progressDialog.show();
 				exitGrop();
 				break;
-			case REQUEST_CODE_EXIT_DELETE: // 解散群
-				progressDialog.setMessage(st3);
-				progressDialog.show();
-				deleteGrop();
-				break;
 			case REQUEST_CODE_CLEAR_ALL_HISTORY:
 				// 清空此群聊的聊天记录
 				progressDialog.setMessage(st4);
@@ -286,38 +281,6 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 					runOnUiThread(new Runnable() {
 						public void run() {
 							loadingPB.setVisibility(View.INVISIBLE);
-						}
-					});
-				}
-			}
-		}).start();
-	}
-
-	/**
-	 * 解散群组
-	 * 
-	 * @param groupId
-	 */
-	private void deleteGrop() {
-		final String st5 = getResources().getString(R.string.Dissolve_group_chat_tofail);
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					EMChatManager.getInstance().dismissGroup(roomId);
-					runOnUiThread(new Runnable() {
-						public void run() {
-							progressDialog.dismiss();
-							setResult(RESULT_OK);
-							finish();
-							if(ChatActivity.activityInstance != null)
-							    ChatActivity.activityInstance.finish();
-						}
-					});
-				} catch (final Exception e) {
-					runOnUiThread(new Runnable() {
-						public void run() {
-							progressDialog.dismiss();
-							Toast.makeText(getApplicationContext(), st5 + e.getMessage(), 1).show();
 						}
 					});
 				}
@@ -468,7 +431,6 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 								return;
 							}
 							EMLog.d("room", "remove user from room:" + username);
-							deleteMembersFromGroup(username);
 						} else {
 							// 正常情况下点击user，可以进入用户详情或者聊天页面等等
 							// startActivity(new
@@ -477,47 +439,6 @@ public class ChatRoomDetailsActivity extends BaseActivity implements OnClickList
 							// user.getUsername()));
 
 						}
-					}
-
-					/**
-					 * 删除群成员
-					 * 
-					 * @param username
-					 */
-					protected void deleteMembersFromGroup(final String username) {
-						final ProgressDialog deleteDialog = new ProgressDialog(ChatRoomDetailsActivity.this);
-						deleteDialog.setMessage(st13);
-						deleteDialog.setCanceledOnTouchOutside(false);
-						deleteDialog.show();
-						new Thread(new Runnable() {
-
-							@Override
-							public void run() {
-								try {
-									// 删除被选中的成员
-									EMChatManager.getInstance().removeUserFromGroup(roomId, username);
-									isInDeleteMode = false;
-									runOnUiThread(new Runnable() {
-
-										@Override
-										public void run() {
-											deleteDialog.dismiss();
-											notifyDataSetChanged();
-											((TextView) findViewById(R.id.group_name)).setText(room.getName() + "("
-													+ room.getAffiliationsCount() + st);
-										}
-									});
-								} catch (final Exception e) {
-									deleteDialog.dismiss();
-									runOnUiThread(new Runnable() {
-										public void run() {
-											Toast.makeText(getApplicationContext(), st14 + e.getMessage(), 1).show();
-										}
-									});
-								}
-
-							}
-						}).start();
 					}
 				});
 
