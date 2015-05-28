@@ -259,4 +259,5 @@
     <string name="gorup_not_found">Can not find this group</string>
     <string name="add_public_group_chat">add chat room</string>
     <string name= "chatroom_allow_owner_leave"> allow chatroom owner leave</string>
+    <string name= "no_more_messages">no more messages</string>
 </resources>

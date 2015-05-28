@@ -320,39 +320,39 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 		         @Override
 		         public void onRefresh() {
-		                 // TODO Auto-generated method stub
 		                 new Handler().postDelayed(new Runnable() {
 
 		                         @Override
 		                         public void run() {
 		                                 // TODO Auto-generated method stub
 		                                 if (listView.getFirstVisiblePosition() == 0 && !isloading && haveMoreData) {
-		                                         // sdk?????????????????0?????«???db???????~Z
 		                                         List<EMMessage> messages;
 		                                         try {
-		                                                 // ??????messges???????????????db?????essages
-		                                                 // sdk???????????onversation?|-
-		                                                 if (chatType == CHATTYPE_SINGLE)
-		                                                         messages = conversation.loadMoreMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
-		                                                 else
-		                                                         messages = conversation.loadMoreGroupMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
+	                                                 if (chatType == CHATTYPE_SINGLE){
+                                                         messages = conversation.loadMoreMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
+	                                                 }
+	                                                 else{
+                                                         messages = conversation.loadMoreGroupMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
+	                                                 }
 		                                         } catch (Exception e1) {
-		                                                 swipeRefreshLayout.setRefreshing(false);
-		                                                 return;
+	                                                 swipeRefreshLayout.setRefreshing(false);
+	                                                 return;
 		                                         }
-		                                         if (messages.size() != 0) {
-		                                                 // ???ui
-		                                                 adapter.notifyDataSetChanged();
-		                                                 listView.setSelection(messages.size() - 1);
-		                                                 if (messages.size() != pagesize)
-		                                                         haveMoreData = false;
+		                                         
+		                                         if (messages.size() > 0) {
+	                                                 adapter.notifyDataSetChanged();
+	                                                 listView.setSelection(messages.size() - 1);
+	                                                 if (messages.size() != pagesize){
+	                                                     haveMoreData = false;
+	                                                 }
 		                                         } else {
-		                                                 haveMoreData = false;
+		                                             haveMoreData = false;
 		                                         }
+		                                         
 		                                         isloading = false;
 
 		                                 }else{
-		                                         Toast.makeText(ChatActivity.this, "?????????", Toast.LENGTH_SHORT).show();
+		                                     Toast.makeText(ChatActivity.this, getResources().getString(R.string.no_more_messages), Toast.LENGTH_SHORT).show();
 		                                 }
 		                                 swipeRefreshLayout.setRefreshing(false);
 		                         }
