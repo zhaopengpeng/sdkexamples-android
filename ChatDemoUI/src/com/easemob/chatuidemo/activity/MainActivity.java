@@ -90,7 +90,6 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	public boolean isConflict = false;
 	// 账号被移除
 	private boolean isCurrentAccountRemoved = false;
-	private boolean needToSyncWithServers = true;
 	
 	private MyConnectionListener connectionListener = null;
 
@@ -578,19 +577,17 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 				public void run() {
 					chatHistoryFragment.errorItem.setVisibility(View.GONE);
 					
-					if(needToSyncWithServers){
-					    if(!HXSDKHelper.getInstance().isGroupsSyncedWithServer()){
-	                        asyncFetchGroupsFromServer();
-	                    }
-	                    
-	                    if(!HXSDKHelper.getInstance().isContactsSyncedWithServer()){
-	                        asyncFetchContactsFromServer();
-	                    }
-	                    
-	                    if(!HXSDKHelper.getInstance().isBlackListSyncedWithServer()){
-	                        asyncFetchBlackListFromServer();
-	                    }
-					}
+				    if(!HXSDKHelper.getInstance().isGroupsSyncedWithServer()){
+                        asyncFetchGroupsFromServer();
+                    }
+                    
+                    if(!HXSDKHelper.getInstance().isContactsSyncedWithServer()){
+                        asyncFetchContactsFromServer();
+                    }
+                    
+                    if(!HXSDKHelper.getInstance().isBlackListSyncedWithServer()){
+                        asyncFetchBlackListFromServer();
+                    }
 				}
 
 			});

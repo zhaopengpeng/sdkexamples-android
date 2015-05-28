@@ -13,15 +13,6 @@
  */
 package com.easemob.applib.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-
-import org.json.JSONArray;
-
-import com.easemob.chatuidemo.DemoApplication;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -38,11 +29,6 @@ public class HXPreferenceUtils {
 	private String SHARED_KEY_SETTING_SOUND = "shared_key_setting_sound";
 	private String SHARED_KEY_SETTING_VIBRATE = "shared_key_setting_vibrate";
 	private String SHARED_KEY_SETTING_SPEAKER = "shared_key_setting_speaker";
-	private String SHARED_KEY_SETTING_DISABLED_GROUPS =  "shared_key__setting_disabled_groups";
-	private String SHARED_KEY_SETTING_DISABLED_IDS =  "shared_key_setting_disabled_ids";
-	private String SHARED_KEY_SETTING_SYNC_GROUPS_FINISHED = "shared_key_setting_sync_groups_finished";
-	private String SHARED_KEY_SETTING_SYNC_CONTACTS_FINISHED = "shared_key_setting_sync_contacts_finished";
-	private String SHARED_KEY_SETTING_SYNC_BLACK_LIST_FINISHED = "shared_key_setting_sync_blacklist_finished";
 
 	private static String SHARED_KEY_SETTING_CHATROOM_OWNER_LEAVE = "shared_key_setting_chatroom_owner_leave";
 
