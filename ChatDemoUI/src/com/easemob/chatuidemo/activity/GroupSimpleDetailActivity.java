@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMGroupInfo;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
 
@@ -72,7 +73,7 @@ public class GroupSimpleDetailActivity extends BaseActivity {
 			public void run() {
 				//从服务器获取详情
 				try {
-					group = EMChatManager.getInstance().fetchGroupFromServer(groupid);
+					group = EMGroupManager.getInstance().getGroupFromServer(groupid);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							showGroupDetail();
@@ -111,9 +112,9 @@ public class GroupSimpleDetailActivity extends BaseActivity {
 				try {
 					//如果是membersOnly的群，需要申请加入，不能直接join
 					if(group.isMembersOnly()){
-					    EMChatManager.getInstance().applyJoinToGroup(groupid, st2);
+					    EMGroupManager.getInstance().applyJoinToGroup(groupid, st2);
 					}else{
-					    EMChatManager.getInstance().joinGroup(groupid);
+					    EMGroupManager.getInstance().joinGroup(groupid);
 					}
 					runOnUiThread(new Runnable() {
 						public void run() {

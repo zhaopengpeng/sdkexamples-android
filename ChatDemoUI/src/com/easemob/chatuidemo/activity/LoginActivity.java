@@ -34,6 +34,7 @@ import android.widget.Toast;
 import com.easemob.EMCallBack;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactManager;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.DemoHXSDKHelper;
@@ -155,7 +156,7 @@ public class LoginActivity extends BaseActivity {
 				try {
 					// ** 第一次登录或者之前logout后再登录，加载所有本地群和回话
 					// ** manually load all local groups and
-				    EMChatManager.getInstance().loadAllLocalGroups();
+				    EMGroupManager.getInstance().loadAllGroups();
 					EMChatManager.getInstance().loadAllConversations();
 					// 处理好友和群组
 					processContactsAndGroups();
@@ -253,7 +254,7 @@ public class LoginActivity extends BaseActivity {
 		EMContactManager.getInstance().saveBlackList(blackList);
 
 		// 获取群聊列表(群聊里只有groupid和groupname等简单信息，不包含members),sdk会把群组存入到内存和db中
-		EMChatManager.getInstance().fetchJoinedGroupsFromServer();
+		EMGroupManager.getInstance().getGroupsFromServer();
 	}
 
 	/**
