@@ -330,7 +330,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                                 if (isAnswered) {
                                     callingState = CallingState.NORMAL;
                                     if (endCallTriggerByMe) {
-                                        callStateTextView.setText(s6);
+//                                        callStateTextView.setText(s6);
                                     } else {
                                         callStateTextView.setText(s7);
                                     }
@@ -385,6 +385,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                 ringtone.stop();
             if (isInComingCall) {
                 try {
+                    callStateTextView.setText("正在接听...");
                     EMChatManager.getInstance().answerCall();
                     cameraHelper.setStartFlag(true);
 
@@ -409,7 +410,9 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
         case R.id.btn_hangup_call: // 挂断电话
             if (soundPool != null)
                 soundPool.stop(streamID);
+            chronometer.stop();
             endCallTriggerByMe = true;
+            callStateTextView.setText("正在挂断...");
             try {
                 EMChatManager.getInstance().endCall();
             } catch (Exception e) {
