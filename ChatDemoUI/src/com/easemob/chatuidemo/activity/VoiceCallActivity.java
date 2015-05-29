@@ -252,7 +252,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
                                 if (isAnswered) {
                                     callingState = CallingState.NORMAL;
                                     if (endCallTriggerByMe) {
-                                        callStateTextView.setText(st7);
+//                                        callStateTextView.setText(st7);
                                     } else {
                                         callStateTextView.setText(st8);
                                     }
@@ -307,6 +307,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
                 ringtone.stop();
 			if (isInComingCall) {
 				try {
+				    callStateTextView.setText("正在接听...");
 					EMChatManager.getInstance().answerCall();
 					isAnswered = true;
 				} catch (Exception e) {
@@ -326,9 +327,10 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 		case R.id.btn_hangup_call: // 挂断电话
 			if (soundPool != null)
 				soundPool.stop(streamID);
+			chronometer.stop();
 			endCallTriggerByMe = true;
+			callStateTextView.setText("正在挂断...");
 			try {
-			    callStateTextView.setText("正在挂断...");
 				EMChatManager.getInstance().endCall();
 			} catch (Exception e) {
 				e.printStackTrace();
