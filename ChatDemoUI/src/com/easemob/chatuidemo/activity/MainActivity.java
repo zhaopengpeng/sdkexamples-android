@@ -247,6 +247,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
             @Override
             public void onSuccess(List<String> value) {
+                EMContactManager.getInstance().saveBlackList(value);
                 HXSDKHelper.getInstance().notifyBlackListSyncListener(true);
             }
 

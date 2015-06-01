@@ -50,6 +50,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.controller.HXSDKHelper.HXSyncListener;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
@@ -77,36 +78,55 @@ public class ContactlistFragment extends Fragment {
 	private List<String> blackList;
 	ImageButton clearSearch;
 	EditText query;
-	SyncListener syncListener;
+	HXContactSyncListener contactSyncListener;
+	HXBlackListSyncListener blackListSyncListener;
 	View progressBar;
 	Handler handler = new Handler();
     private User toBeProcessUser;
     private String toBeProcessUsername;
 
-	class SyncListener implements HXSDKHelper.HXSyncListener {
+	class HXContactSyncListener implements HXSDKHelper.HXSyncListener {
 		@Override
 		public void onSyncSucess(final boolean success) {
 			EMLog.d(TAG, "onSyncGroupsFinish success:" + success);
 			ContactlistFragment.this.getActivity().runOnUiThread(new Runnable() {
 				public void run() {
-					if (success) {
-						// 等待数据写入本地联系人数据库
-						handler.postDelayed(new Runnable() {
-							@Override
-							public void run() {
-								refresh();
-								progressBar.setVisibility(View.GONE);
-							}
-						}, 1000);
-					} else {
-						String s1 = getResources().getString(R.string.get_failed_please_check);
-						Toast.makeText(getActivity(), s1, 1).show();
-						progressBar.setVisibility(View.GONE);
-					}
+				    getActivity().runOnUiThread(new Runnable(){
+
+		                @Override
+		                public void run() {
+		                    if(success){
+		                        progressBar.setVisibility(View.GONE);
+                                refresh();
+		                    }else{
+		                        String s1 = getResources().getString(R.string.get_failed_please_check);
+		                        Toast.makeText(getActivity(), s1, 1).show();
+		                        progressBar.setVisibility(View.GONE);
+		                    }
+		                }
+		                
+		            });
 				}
 			});
 		}
 	}
+	
+	class HXBlackListSyncListener implements HXSyncListener{
+
+        @Override
+        public void onSyncSucess(boolean success) {
+            getActivity().runOnUiThread(new Runnable(){
+
+                @Override
+                public void run() {
+                    blackList = EMContactManager.getInstance().getBlackListUsernames();
+                    refresh();
+                }
+                
+            });
+        }
+	    
+	};
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -211,8 +231,11 @@ public class ContactlistFragment extends Fragment {
 		
 		progressBar = (View) getView().findViewById(R.id.progress_bar);
 
-		syncListener = new SyncListener();
-		HXSDKHelper.getInstance().addSyncContactListener(syncListener);
+		contactSyncListener = new HXContactSyncListener();
+		HXSDKHelper.getInstance().addSyncContactListener(contactSyncListener);
+		
+		blackListSyncListener = new HXBlackListSyncListener();
+		HXSDKHelper.getInstance().addSyncBlackListListener(blackListSyncListener);
 		
 		if (!HXSDKHelper.getInstance().isContactsSyncedWithServer()) {
 			progressBar.setVisibility(View.VISIBLE);
@@ -365,10 +388,15 @@ public class ContactlistFragment extends Fragment {
 
 	@Override
 	public void onDestroy() {
-		if (syncListener != null) {
-			HXSDKHelper.getInstance().removeSyncContactListener(syncListener);
-			syncListener = null;
+		if (contactSyncListener != null) {
+			HXSDKHelper.getInstance().removeSyncContactListener(contactSyncListener);
+			contactSyncListener = null;
 		}
+		
+		if(blackListSyncListener != null){
+		    HXSDKHelper.getInstance().removeSyncBlackListListener(blackListSyncListener);
+		}
+		
 		super.onDestroy();
 	}
 	
