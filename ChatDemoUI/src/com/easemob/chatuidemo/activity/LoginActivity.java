@@ -37,6 +37,7 @@ import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactManager;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.DemoHXSDKHelper;
@@ -158,7 +159,7 @@ public class LoginActivity extends BaseActivity {
 				try {
 					// ** 第一次登录或者之前logout后再登录，加载所有本地群和回话
 					// ** manually load all local groups and
-				    EMChatManager.getInstance().loadAllLocalGroups();
+				    EMGroupManager.getInstance().loadAllGroups();
 					EMChatManager.getInstance().loadAllConversations();
 					// 处理好友和群组
 					initializeContacts();

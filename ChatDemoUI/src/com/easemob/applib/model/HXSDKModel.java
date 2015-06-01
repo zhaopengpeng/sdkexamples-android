@@ -100,6 +100,6 @@ public abstract class HXSDKModel {
      * @return
      */
     public boolean isDebugMode(){
-        return false;
+        return true;
     }
 }

@@ -290,7 +290,7 @@
 
         <!-- 百度地图所需的service -->
         <service
-            android:name="com.baidu.location.f"
+            android:name="com.baidu.location.f" 
             android:enabled="true"
             android:process=":remote" />
         <!-- umeng appkey，可忽略 -->

@@ -50,6 +50,7 @@ import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chat.EMGroup;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
@@ -157,7 +158,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		EMChatManager.getInstance().addConnectionListener(connectionListener);
 		
 		// 注册群聊相关的listener
-		EMChatManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
+		EMGroupManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
 		// 通知sdk，UI 已经初始化完毕，注册了相应的receiver和listener, 可以接受broadcast了
 		EMChat.getInstance().setAppInited();
 	}
@@ -630,7 +631,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		public void onInvitationReceived(String groupId, String groupName, String inviter, String reason) {
 			
 			boolean hasGroup = false;
-			for (EMGroup group : EMChatManager.getInstance().getAllGroups()) {
+			for (EMGroup group : EMGroupManager.getInstance().getAllGroups()) {
 				if (group.getGroupId().equals(groupId)) {
 					hasGroup = true;
 					break;

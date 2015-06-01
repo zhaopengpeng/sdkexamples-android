@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
@@ -90,7 +91,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 		String username = user.getUsername();
 		String header = user.getHeader();
 		if (position == 0 || header != null && !header.equals(getItem(position - 1).getHeader())) {
-			if ("".equals(header)) {
+			if (TextUtils.isEmpty(header)) {
 			    holder.tvHeader.setVisibility(View.GONE);
 			} else {
 			    holder.tvHeader.setVisibility(View.VISIBLE);

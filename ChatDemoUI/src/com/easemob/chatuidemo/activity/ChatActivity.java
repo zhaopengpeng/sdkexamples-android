@@ -71,12 +71,14 @@ import com.easemob.EMGroupChangeListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.EMValueCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.model.GroupRemoveListener;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chat.EMGroup;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.ImageMessageBody;
@@ -492,7 +494,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	}
 	
 	protected void onGroupViewCreation(){
-	    group = EMChatManager.getInstance().getGroup(toChatUsername);
+	    group = EMGroupManager.getInstance().getGroup(toChatUsername);
         
         if (group != null){
             ((TextView) findViewById(R.id.name)).setText(group.getGroupName());
@@ -502,7 +504,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
         
         // 监听当前会话的群聊解散被T事件
         groupListener = new GroupListener();
-        EMChatManager.getInstance().addGroupChangeListener(groupListener);
+        EMGroupManager.getInstance().addGroupChangeListener(groupListener);
 	}
 	
 	protected void onChatRoomViewCreation(){
@@ -1427,7 +1429,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		super.onDestroy();
 		activityInstance = null;
 		if(groupListener != null){
-		    EMChatManager.getInstance().removeGroupChangeListener(groupListener);
+		    EMGroupManager.getInstance().removeGroupChangeListener(groupListener);
 		}
 	}
 
@@ -1666,7 +1668,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * 监测群组解散或者被T事件
 	 * 
 	 */
-	class GroupListener implements EMGroupChangeListener {
+	class GroupListener extends GroupRemoveListener{
 
 		@Override
 		public void onUserRemoved(final String groupId, String groupName) {
@@ -1700,37 +1702,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				}
 			});
 		}
-
-        @Override
-        public void onInvitationReceived(String groupId, String groupName,
-                String inviter, String reason) {            
-        }
-
-        @Override
-        public void onApplicationReceived(String groupId, String groupName,
-                String applyer, String reason) {            
-        }
-
-        @Override
-        public void onApplicationAccept(String groupId, String groupName,
-                String accepter) {
-            
-        }
-
-        @Override
-        public void onApplicationDeclined(String groupId, String groupName,
-                String decliner, String reason) {            
-        }
-
-        @Override
-        public void onInvitationAccpted(String groupId, String inviter,
-                String reason) {            
-        }
-
-        @Override
-        public void onInvitationDeclined(String groupId, String invitee,
-                String reason) {            
-        }
 
 	}
 

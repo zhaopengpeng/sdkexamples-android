@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.easemob.EMError;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMGroup;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
 
@@ -52,7 +53,7 @@ public class PublicGroupsSeachActivity extends BaseActivity{
 
             public void run() {
                 try {
-                    searchedGroup = EMChatManager.getInstance().fetchGroupFromServer(idET.getText().toString());
+                    searchedGroup = EMGroupManager.getInstance().getGroupFromServer(idET.getText().toString());
                     runOnUiThread(new Runnable() {
                         public void run() {
                             pd.dismiss();
