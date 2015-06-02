@@ -14,15 +14,12 @@
 package com.easemob.applib.controller;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Message;
 import android.util.Log;
 
 import com.easemob.EMCallBack;
@@ -33,22 +30,12 @@ import com.easemob.applib.model.DefaultHXSDKModel;
 import com.easemob.applib.model.HXNotifier;
 import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
 import com.easemob.applib.model.HXSDKModel;
-import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatConfig.EMEnvMode;
-import com.easemob.chatuidemo.Constant;
-import com.easemob.chatuidemo.DemoApplication;
-import com.easemob.chatuidemo.R;
-import com.easemob.chatuidemo.db.UserDao;
-import com.easemob.chatuidemo.domain.User;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
-import com.easemob.chat.EMContactListener;
 import com.easemob.chat.EMContactManager;
-import com.easemob.chat.EMGroupManager;
-import com.easemob.chat.GroupChangeListener;
 import com.easemob.exceptions.EaseMobException;
-import com.easemob.util.EMLog;
 
 /**
  * The developer can derive from this class to talk with HuanXin SDK
@@ -140,6 +127,8 @@ public abstract class HXSDKHelper {
 	private boolean isContactsSyncedWithServer = false;
 
 	private boolean isBlackListSyncedWithServer = false;
+	
+	private boolean hasAppAlreadyNotifiedSDK = false;
 
     protected HXSDKHelper(){
         me = this;
@@ -624,6 +613,16 @@ public abstract class HXSDKHelper {
 	    return isBlackListSyncedWithServer;
     }
     
+    public void notifyHXSDKAppReadyForRecevingEvents(){
+        if(hasAppAlreadyNotifiedSDK){
+            return;
+        }
+        
+        // 通知sdk，UI 已经初始化完毕，注册了相应的receiver和listener, 可以接受broadcast了
+        EMChat.getInstance().setAppInited();
+        hasAppAlreadyNotifiedSDK = true;
+    }
+    
     void reset(){
         isSyncingGroupsWithServer = false;
         isSyncingContactsWithServer = false;
@@ -632,6 +631,8 @@ public abstract class HXSDKHelper {
         isGroupsSyncedWithServer = false;
         isContactsSyncedWithServer = false;
         isBlackListSyncedWithServer = false;
+        
+        hasAppAlreadyNotifiedSDK = false;
         
     }
 }
