@@ -240,7 +240,7 @@
     <string name="Into_the_blacklist">Move to the blacklist?</string>
     <string name="Have_downloaded">Already downloaded</string>
     <string name="Did_not_download">Not yet downloaded</string>
-    <string name="Has_agreed_to_your_friend_request">The peer has accepted your friend request</string>
+    <string name="Has_agreed_to_your_friend_request">Accepted your request</string>
     <string name="Request_to_add_you_as_a_friend">You got a friend request</string>
     <string name="Apply_to_the_group_of">Apply to join the group</string>
     <string name="Has_agreed_to">Accepted</string>
