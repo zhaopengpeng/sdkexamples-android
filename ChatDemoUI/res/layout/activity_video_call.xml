@@ -46,6 +46,12 @@
                 android:visibility="invisible" />
 
             <TextView
+                android:id="@+id/tv_is_p2p"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#fff" />
+
+            <TextView
                 android:id="@+id/tv_nick"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

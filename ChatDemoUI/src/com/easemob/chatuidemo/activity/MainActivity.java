@@ -18,8 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -31,6 +34,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.EMCallBack;
 import com.easemob.EMConnectionListener;
 import com.easemob.EMError;
 import com.easemob.EMEventListener;
@@ -144,6 +148,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		EMChatManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
 		// 通知sdk，UI 已经初始化完毕，注册了相应的receiver和listener, 可以接受broadcast了
 		EMChat.getInstance().setAppInited();
+		
 	}
 
 	/**
