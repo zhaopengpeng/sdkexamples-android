@@ -257,8 +257,9 @@
     <string name="Delete_the_contact">删除联系人</string>
     <string name="Move_into_the_blacklist_new">移入到黑名单</string>
     <string name="Change_the_group_name">改变群名称</string>
-    <string name="The_dissolution_of_chatting_new">解散群聊</string>
+    <string name="dismiss_group">解散群聊</string>
     
     <string name="gorup_not_found">找不到这个群组</string>
     <string name= "chatroom_allow_owner_leave"> 允许聊天室群主离开</string>
+    <string name="group_id">群ID</string>
 </resources>

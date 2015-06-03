@@ -491,7 +491,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 			msg.setFrom(inviter);
 			msg.setTo(groupId);
 			msg.setMsgId(UUID.randomUUID().toString());
-			msg.addBody(new TextMessageBody(inviter + st3));
+			msg.addBody(new TextMessageBody(inviter + " " +st3));
 			// 保存邀请消息
 			EMChatManager.getInstance().saveMessage(msg);
 			// 提醒新消息
