@@ -35,6 +35,7 @@ import com.easemob.chat.EMChatConfig.EMEnvMode;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
 import com.easemob.chat.EMContactManager;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.exceptions.EaseMobException;
 
 /**
@@ -491,8 +492,9 @@ public abstract class HXSDKHelper {
             @Override
             public void run(){
                 try {
-                    EMChatManager.getInstance().fetchJoinedGroupsFromServer();
+                    EMGroupManager.getInstance().getGroupsFromServer();
                     isGroupsSyncedWithServer = true;
+                    isSyncingGroupsWithServer = false;
                     if(callback != null){
                         callback.onSuccess();
                     }
@@ -503,7 +505,6 @@ public abstract class HXSDKHelper {
                     }
                 }
             
-                isSyncingGroupsWithServer = false;
             }
         }.start();
     }
@@ -528,6 +529,7 @@ public abstract class HXSDKHelper {
                 try {
                     usernames = EMContactManager.getInstance().getContactUserNames();
                     isContactsSyncedWithServer = true;
+                    isSyncingContactsWithServer = false;
                     if(callback != null){
                         callback.onSuccess(usernames);
                     }
@@ -539,7 +541,6 @@ public abstract class HXSDKHelper {
                     }
                 }
                 
-                isSyncingContactsWithServer = false;
             }
         }.start();
     }
@@ -565,7 +566,7 @@ public abstract class HXSDKHelper {
                     List<String> usernames = null;
                     usernames = EMContactManager.getInstance().getBlackListUsernamesFromServer();
                     isBlackListSyncedWithServer = true;
-                    
+                    isSyncingBlackListWithServer = false;
                     if(callback != null){
                         callback.onSuccess(usernames);
                     }
@@ -578,7 +579,6 @@ public abstract class HXSDKHelper {
                     }
                 }
                 
-                isSyncingBlackListWithServer = false; 
             }
         }.start();
     }
