@@ -153,7 +153,7 @@
     <string name="send_failure_please">Send failure, please test whether the server connection</string>
     <string name="Move_into_blacklist_success">Move into blacklist success</string>
     <string name="Move_into_blacklist_failure">Move into blacklist failure</string>
-    <string name="you_are_group">You are group of creators to remove from the group</string>
+    <string name="you_are_group">You have been kicked off from the group</string>
     <string name="the_current_group">The current group has been dismissed</string>
     <string name="Cant_chat_with_yourself">cannot chat with yourself</string>
     <string name="deleting">Deleting..</string>
@@ -172,8 +172,8 @@
     <string name="change_the_group_name_failed_please">Failed to change the group name, please check the network or try again later</string>
     <string name="Are_moving_to_blacklist">Moving to backlist</string>
     <string name="failed_to_move_into">Failed to move to the blacklist, please check the network or try again later</string>
-    <string name="Exit_the_group_chat_failure">Exit the group chat failure:</string>
-    <string name="Dissolve_group_chat_tofail">Dissolve group chat to fail:</string>
+    <string name="Exit_the_group_chat_failure">Failed to exit the group:</string>
+    <string name="Dissolve_group_chat_tofail">Failed to dismiss the group:</string>
     <string name="Add_group_members_fail">Add group members fail:</string>
     <string name="Is_unblock">Unblocking group</string>
     <string name="remove_group_of">Remove group of shielding failure, please check the network or try again later</string>
@@ -184,7 +184,7 @@
     <string name="Add_a_button_was_clicked">Add a button was clicked</string>
     <string name="not_delete_myself">Cannot delete myself</string>
     <string name="Are_removed">Removing</string>
-    <string name="confirm_the_members">"Confirm the members to join this group of blacklist?"</string>
+    <string name="confirm_the_members">Move this member to group backlist?</string>
     <string name="Failed_to_get_group_chat_information">Failed to get group information:</string>
     <string name="Is_sending_a_request">Sending the request..</string>
     <string name="Request_to_join">Apply to join</string>
@@ -205,7 +205,7 @@
     <string name="Less_than_chat_server_connection">Less than chat server connection</string>
     <string name="the_current_network">The current network is not available, please check the network Settings</string>
     <string name="Invite_you_to_join_a_group_chat"> Invite you to join this group</string>
-    <string name="Agreed_to_your_group_chat_application">your group application was accepted</string>
+    <string name="Agreed_to_your_group_chat_application">Your group application was accepted</string>
     <string name="Logoff_notification">Logoff notification</string>
     <string name="Remove_the_notification">Remove the notification</string>
     <string name="Group_name_cannot_be_empty">Group name cannot be empty</string>
@@ -261,4 +261,9 @@
     <string name="join_public_group">Join public group</string>
     <string name="chatroom_allow_owner_leave">Allow chatroom owner leave</string>
     <string name="group_id">Group ID</string>
+    <string name="move_out_backlist">Remove from backlist</string>
+    <string name="input_new_nick_hint">Input a new nick</string>
+    <string name="search_pubic_group">Search public group</string>
+    <string name="group_not_existed">The group does not exist</string>
+    <string name="group_search_failed">Search failed</string>
 </resources>

@@ -347,7 +347,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 					runOnUiThread(new Runnable() {
 						public void run() {
 							progressDialog.dismiss();
-							Toast.makeText(getApplicationContext(), "退出群聊失败: " + e.getMessage(), 1).show();
+							Toast.makeText(getApplicationContext(), getResources().getString(R.string.Exit_the_group_chat_failure) + " " + e.getMessage(), 1).show();
 						}
 					});
 				}
@@ -736,7 +736,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 					runOnUiThread(new Runnable() {
 						public void run() {
 							((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getAffiliationsCount()
-									+ "人)");
+									+ ")");
 							loadingPB.setVisibility(View.INVISIBLE);
 							refreshMembers();
 							if (EMChatManager.getInstance().getCurrentUser().equals(group.getOwner())) {

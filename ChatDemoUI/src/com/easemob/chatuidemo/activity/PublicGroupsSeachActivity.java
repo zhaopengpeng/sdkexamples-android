@@ -70,9 +70,9 @@ public class PublicGroupsSeachActivity extends BaseActivity{
                             searchedGroup = null;
                             containerLayout.setVisibility(View.GONE);
                             if(e.getErrorCode() == EMError.GROUP_NOT_EXIST){
-                                Toast.makeText(getApplicationContext(), "不存在的群组", 0).show();
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.group_not_existed), 0).show();
                             }else{
-                                Toast.makeText(getApplicationContext(), "搜索失败，" + getString(R.string.connect_failuer_toast), 0).show();
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.group_search_failed) + " : " + getString(R.string.connect_failuer_toast), 0).show();
                             }
                         }
                     });

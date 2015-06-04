@@ -271,4 +271,10 @@
     <string name="gorup_not_found">找不到这个群组</string>
     <string name= "chatroom_allow_owner_leave"> 允许聊天室群主离开</string>
     <string name="group_id">群ID</string>
+    <string name="move_out_backlist">移出黑名单</string>
+    <string name="input_new_nick_hint">输入新昵称</string>
+    <string name="search_pubic_group">搜索公开群</string>
+    <string name="group_not_existed">群组不存在</string>
+    <string name="group_search_failed">搜索失败</string>
+    
 </resources>
