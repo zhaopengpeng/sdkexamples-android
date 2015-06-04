@@ -151,11 +151,6 @@ public class LoginActivity extends BaseActivity {
 				DemoApplication.getInstance().setUserName(currentUsername);
 				DemoApplication.getInstance().setPassword(currentPassword);
 
-				runOnUiThread(new Runnable() {
-					public void run() {
-						pd.setMessage(getString(R.string.list_is_for));
-					}
-				});
 				try {
 					// ** 第一次登录或者之前logout后再登录，加载所有本地群和回话
 					// ** manually load all local groups and

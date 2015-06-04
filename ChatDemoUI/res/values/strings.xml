@@ -123,8 +123,8 @@
     
     <string name="not_add_myself">"Can't add myself"</string>
     <string name="This_user_is_already_your_friend">This user is already your friend</string>
-    <string name="Add_a_friend">Added</string>
-    <string name="send_successful">Send the request is successful, waiting for the other party</string>
+    <string name="Add_a_friend">Let me to be your friend!</string>
+    <string name="send_successful">Request was sent, waiting for the peer to accept</string>
     <string name="Request_add_buddy_failure">Request add buddy failure:</string>
     <string name="Network_error">Network error</string>
     <string name="Making_sure_your_location">Making sure your location..</string>
@@ -257,7 +257,6 @@
     <string name="dismiss_group">Dismiss group</string>
     <string name="add_public_group_chat">Add public group</string>
     <string name="gorup_not_found">Can not find this group</string>
-    <string name="add_public_group_chat">add chat room</string>
     <string name= "no_more_messages">no more messages</string>
     <string name="join_public_group">Join public group</string>
     <string name="chatroom_allow_owner_leave">Allow chatroom owner leave</string>

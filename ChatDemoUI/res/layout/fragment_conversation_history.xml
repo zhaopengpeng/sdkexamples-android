@@ -27,22 +27,6 @@
         android:id="@+id/rl_error_item"
         layout="@layout/chat_neterror_item"
         android:visibility="gone" />
-
-    <include
-        android:id="@+id/rl_sync_contacts_error"
-        layout="@layout/chat_neterror_item"
-        android:visibility="gone" />
-    
-    <include
-        android:id="@+id/rl_sync_groups_error"
-        layout="@layout/chat_neterror_item"
-        android:visibility="gone" />
-    
-    <include
-        android:id="@+id/rl_sync_black_list_error"
-        layout="@layout/chat_neterror_item"
-        android:visibility="gone" />
-    
     
       <ListView
          android:cacheColorHint="#00000000"
