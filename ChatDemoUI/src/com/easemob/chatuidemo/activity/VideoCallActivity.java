@@ -267,7 +267,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                             }
                             openSpeakerOn();
                             ((TextView)findViewById(R.id.tv_is_p2p)).setText(EMChatManager.getInstance().isDirectCall()
-                                    ? "p2p" : "relay");
+                                    ? "Direct" : "Relay");
                             handsFreeImage.setImageResource(R.drawable.icon_speaker_on);
                             isHandsfreeState = true;
                             chronometer.setVisibility(View.VISIBLE);
