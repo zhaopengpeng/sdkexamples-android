@@ -13,12 +13,19 @@
  */
 package com.easemob.applib.controller;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.util.Log;
 
 import com.easemob.EMCallBack;
 import com.easemob.EMConnectionListener;
 import com.easemob.EMError;
+import com.easemob.EMValueCallBack;
 import com.easemob.applib.model.DefaultHXSDKModel;
 import com.easemob.applib.model.HXNotifier;
 import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
@@ -27,10 +34,8 @@ import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatConfig.EMEnvMode;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
-import android.app.ActivityManager;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.util.Log;
+import com.easemob.chat.EMContactManager;
+import com.easemob.exceptions.EaseMobException;
 
 /**
  * The developer can derive from this class to talk with HuanXin SDK
@@ -46,7 +51,16 @@ import android.util.Log;
  *
  */
 public abstract class HXSDKHelper {
+
+	/**
+	 * 群组更新完成
+	 */
+	static public interface HXSyncListener {
+		public void onSyncSucess(boolean success);
+	}
+	
     private static final String TAG = "HXSDKHelper";
+    
     /**
      * application context
      */
@@ -86,7 +100,36 @@ public abstract class HXSDKHelper {
      * the notifier
      */
     protected HXNotifier notifier = null;
-    
+
+	/**
+	 * HuanXin sync groups status listener
+	 */
+	private List<HXSyncListener> syncGroupsListeners;
+
+	/**
+	 * HuanXin sync contacts status listener
+	 */
+	private List<HXSyncListener> syncContactsListeners;
+
+	/**
+	 * HuanXin sync blacklist status listener
+	 */
+	private List<HXSyncListener> syncBlackListListeners;
+
+	private boolean isSyncingGroupsWithServer = false;
+
+	private boolean isSyncingContactsWithServer = false;
+
+	private boolean isSyncingBlackListWithServer = false;
+	
+	private boolean isGroupsSyncedWithServer = false;
+
+	private boolean isContactsSyncedWithServer = false;
+
+	private boolean isBlackListSyncedWithServer = false;
+	
+	private boolean hasAppAlreadyNotifiedSDK = false;
+
     protected HXSDKHelper(){
         me = this;
     }
@@ -115,7 +158,11 @@ public abstract class HXSDKHelper {
         }
 
         appContext = context;
-        
+
+		syncGroupsListeners = new ArrayList<HXSyncListener>();
+		syncContactsListeners = new ArrayList<HXSyncListener>();
+		syncBlackListListeners = new ArrayList<HXSyncListener>();
+
         // create HX SDK model
         hxModel = createModel();
         
@@ -167,6 +214,10 @@ public abstract class HXSDKHelper {
      */
     public static HXSDKHelper getInstance(){
         return me;
+    }
+    
+    public Context getAppContext(){
+        return appContext;
     }
     
     public HXSDKModel getModel(){
@@ -251,25 +302,22 @@ public abstract class HXSDKHelper {
      */
     public void logout(final EMCallBack callback){
         setPassword(null);
+        reset();
         EMChatManager.getInstance().logout(new EMCallBack(){
 
             @Override
             public void onSuccess() {
-                // TODO Auto-generated method stub
                 if(callback != null){
                     callback.onSuccess();
                 }
             }
 
             @Override
-            public void onError(int code, String message) {
-                // TODO Auto-generated method stub
-                
+            public void onError(int code, String message) {                
             }
 
             @Override
             public void onProgress(int progress, String status) {
-                // TODO Auto-generated method stub
                 if(callback != null){
                     callback.onProgress(progress, status);
                 }
@@ -369,5 +417,222 @@ public abstract class HXSDKHelper {
             }
         }
         return processName;
+    }
+    
+        
+    public void addSyncGroupListener(HXSyncListener listener) {
+	    if (listener == null) {
+		    return;
+	    }
+	    if (!syncGroupsListeners.contains(listener)) {
+		    syncGroupsListeners.add(listener);
+	    }
+    }
+
+    public void removeSyncGroupListener(HXSyncListener listener) {
+	    if (listener == null) {
+		    return;
+	    }
+	    if (syncGroupsListeners.contains(listener)) {
+		    syncGroupsListeners.remove(listener);
+	    }
+    }
+
+    public void addSyncContactListener(HXSyncListener listener) {
+	    if (listener == null) {
+		    return;
+	    }
+	    if (!syncContactsListeners.contains(listener)) {
+		    syncContactsListeners.add(listener);
+	    }
+    }
+
+    public void removeSyncContactListener(HXSyncListener listener) {
+	    if (listener == null) {
+		    return;
+	    }
+	    if (syncContactsListeners.contains(listener)) {
+		    syncContactsListeners.remove(listener);
+	    }
+    }
+
+    public void addSyncBlackListListener(HXSyncListener listener) {
+	    if (listener == null) {
+		    return;
+	    }
+	    if (!syncBlackListListeners.contains(listener)) {
+		    syncBlackListListeners.add(listener);
+	    }
+    }
+
+    public void removeSyncBlackListListener(HXSyncListener listener) {
+	    if (listener == null) {
+		    return;
+	    }
+	    if (syncBlackListListeners.contains(listener)) {
+		    syncBlackListListeners.remove(listener);
+	    }
+    }
+   
+    /**
+     * 同步操作，从服务器获取群组列表
+     * 该方法会记录更新状态，可以通过isSyncingGroupsFromServer获取是否正在更新
+     * 和HXPreferenceUtils.getInstance().getSettingSyncGroupsFinished()获取是否更新已经完成
+     * @throws EaseMobException
+     */
+    public synchronized void asyncFetchGroupsFromServer(final EMCallBack callback){
+        if(isSyncingGroupsWithServer){
+            return;
+        }
+        
+        isSyncingGroupsWithServer = true;
+        
+        new Thread(){
+            @Override
+            public void run(){
+                try {
+                    EMChatManager.getInstance().fetchJoinedGroupsFromServer();
+                    isGroupsSyncedWithServer = true;
+                    if(callback != null){
+                        callback.onSuccess();
+                    }
+                } catch (EaseMobException e) {
+                    isGroupsSyncedWithServer = false;
+                    if(callback != null){
+                        callback.onError(e.getErrorCode(), e.toString());
+                    }
+                }
+            
+                isSyncingGroupsWithServer = false;
+            }
+        }.start();
+    }
+
+    public void noitifyGroupSyncListeners(boolean success){
+        for (HXSyncListener listener : syncGroupsListeners) {
+            listener.onSyncSucess(success);
+        }
+    }
+    
+    public void asyncFetchContactsFromServer(final EMValueCallBack<List<String>> callback){
+        if(isSyncingContactsWithServer){
+            return;
+        }
+        
+        isSyncingContactsWithServer = true;
+        
+        new Thread(){
+            @Override
+            public void run(){
+                List<String> usernames = null;
+                try {
+                    usernames = EMContactManager.getInstance().getContactUserNames();
+                    isContactsSyncedWithServer = true;
+                    if(callback != null){
+                        callback.onSuccess(usernames);
+                    }
+                } catch (EaseMobException e) {                   
+                    isContactsSyncedWithServer = false;
+                    e.printStackTrace();
+                    if(callback != null){
+                        callback.onError(e.getErrorCode(), e.toString());
+                    }
+                }
+                
+                isSyncingContactsWithServer = false;
+            }
+        }.start();
+    }
+
+    public void notifyContactsSyncListener(boolean success){
+        for (HXSyncListener listener : syncContactsListeners) {
+            listener.onSyncSucess(success);
+        }
+    }
+    
+    public void asyncFetchBlackListFromServer(final EMValueCallBack<List<String>> callback){
+        
+        if(isSyncingBlackListWithServer){
+            return;
+        }
+        
+        isSyncingBlackListWithServer = true;
+        
+        new Thread(){
+            @Override
+            public void run(){
+                try {
+                    List<String> usernames = null;
+                    usernames = EMContactManager.getInstance().getBlackListUsernamesFromServer();
+                    isBlackListSyncedWithServer = true;
+                    
+                    if(callback != null){
+                        callback.onSuccess(usernames);
+                    }
+                } catch (EaseMobException e) {
+                    isBlackListSyncedWithServer = false;
+                    e.printStackTrace();
+                    
+                    if(callback != null){
+                        callback.onError(e.getErrorCode(), e.toString());
+                    }
+                }
+                
+                isSyncingBlackListWithServer = false; 
+            }
+        }.start();
+    }
+
+    public void notifyBlackListSyncListener(boolean success){
+        for (HXSyncListener listener : syncBlackListListeners) {
+            listener.onSyncSucess(success);
+        }
+    }
+    
+    public boolean isSyncingGroupsWithServer() {
+	    return isSyncingGroupsWithServer;
+    }
+
+    public boolean isSyncingContactsWithServer() {
+	    return isSyncingContactsWithServer;
+    }
+
+    public boolean isSyncingBlackListWithServer() {
+	    return isSyncingBlackListWithServer;
+    }
+    
+    public boolean isGroupsSyncedWithServer() {
+	    return isGroupsSyncedWithServer;
+    }
+
+    public boolean isContactsSyncedWithServer() {
+	    return isContactsSyncedWithServer;
+    }
+
+    public boolean isBlackListSyncedWithServer() {
+	    return isBlackListSyncedWithServer;
+    }
+    
+    public void notifyHXSDKAppReadyForRecevingEvents(){
+        if(hasAppAlreadyNotifiedSDK){
+            return;
+        }
+        
+        // 通知sdk，UI 已经初始化完毕，注册了相应的receiver和listener, 可以接受broadcast了
+        EMChat.getInstance().setAppInited();
+        hasAppAlreadyNotifiedSDK = true;
+    }
+    
+    void reset(){
+        isSyncingGroupsWithServer = false;
+        isSyncingContactsWithServer = false;
+        isSyncingBlackListWithServer = false;
+        
+        isGroupsSyncedWithServer = false;
+        isContactsSyncedWithServer = false;
+        isBlackListSyncedWithServer = false;
+        
+        hasAppAlreadyNotifiedSDK = false;
+        
     }
 }

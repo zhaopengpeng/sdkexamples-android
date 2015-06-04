@@ -123,8 +123,8 @@
     
     <string name="not_add_myself">"Can't add myself"</string>
     <string name="This_user_is_already_your_friend">This user is already your friend</string>
-    <string name="Add_a_friend">Added</string>
-    <string name="send_successful">Send the request is successful, waiting for the other party</string>
+    <string name="Add_a_friend">Let me to be your friend!</string>
+    <string name="send_successful">Request was sent, waiting for the peer to accept</string>
     <string name="Request_add_buddy_failure">Request add buddy failure:</string>
     <string name="Network_error">Network error</string>
     <string name="Making_sure_your_location">Making sure your location..</string>

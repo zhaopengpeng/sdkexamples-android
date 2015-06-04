@@ -1,6 +1,5 @@
 package com.easemob.chatuidemo.activity;
 
-import java.lang.Exception;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,6 +34,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMConversation.EMConversationType;
@@ -48,7 +49,7 @@ import com.easemob.chatuidemo.db.InviteMessgeDao;
  * 显示所有会话记录，比较简单的实现，更好的可能是把陌生人存入本地，这样取到的聊天记录是可控的
  * 
  */
-public class ChatAllHistoryFragment extends Fragment {
+public class ChatAllHistoryFragment extends Fragment implements View.OnClickListener {
 
 	private InputMethodManager inputMethodManager;
 	private ListView listView;
@@ -56,10 +57,11 @@ public class ChatAllHistoryFragment extends Fragment {
 	private EditText query;
 	private ImageButton clearSearch;
 	public RelativeLayout errorItem;
+
 	public TextView errorText;
 	private boolean hidden;
 	private List<EMConversation> conversationList = new ArrayList<EMConversation>();
-
+		
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_conversation_history, container, false);
@@ -72,7 +74,7 @@ public class ChatAllHistoryFragment extends Fragment {
             return;
 		inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		errorItem = (RelativeLayout) getView().findViewById(R.id.rl_error_item);
-		errorText = (TextView) errorItem.findViewById(R.id.tv_connect_errormsg);
+		errorText = (TextView) errorItem.findViewById(R.id.tv_connect_errormsg);		
 		
 		conversationList.addAll(loadConversationsWithRecentChat());
 		listView = (ListView) getView().findViewById(R.id.list);
@@ -154,7 +156,7 @@ public class ChatAllHistoryFragment extends Fragment {
 				hideSoftKeyboard();
 			}
 		});
-
+		
 	}
 
 	void hideSoftKeyboard() {
@@ -293,5 +295,9 @@ public class ChatAllHistoryFragment extends Fragment {
         }else if(((MainActivity)getActivity()).getCurrentAccountRemoved()){
         	outState.putBoolean(Constant.ACCOUNT_REMOVED, true);
         }
+    }
+
+    @Override
+    public void onClick(View v) {        
     }
 }
