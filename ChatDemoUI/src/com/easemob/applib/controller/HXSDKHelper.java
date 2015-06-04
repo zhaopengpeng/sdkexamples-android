@@ -130,6 +130,7 @@ public abstract class HXSDKHelper {
 	private boolean isBlackListSyncedWithServer = false;
 	
 	private boolean hasAppAlreadyNotifiedSDK = false;
+	private boolean logoutCalled = false;
 
     protected HXSDKHelper(){
         me = this;
@@ -493,6 +494,11 @@ public abstract class HXSDKHelper {
             public void run(){
                 try {
                     EMGroupManager.getInstance().getGroupsFromServer();
+                    
+                    // in case that logout already before server returns, we should return immediately
+                    if(!EMChat.getInstance().isLoggedIn()){
+                        return;
+                    }
                     isGroupsSyncedWithServer = true;
                     isSyncingGroupsWithServer = false;
                     if(callback != null){
@@ -528,6 +534,12 @@ public abstract class HXSDKHelper {
                 List<String> usernames = null;
                 try {
                     usernames = EMContactManager.getInstance().getContactUserNames();
+                    
+                    // in case that logout already before server returns, we should return immediately
+                    if(!EMChat.getInstance().isLoggedIn()){
+                        return;
+                    }
+                    
                     isContactsSyncedWithServer = true;
                     isSyncingContactsWithServer = false;
                     if(callback != null){
@@ -565,6 +577,11 @@ public abstract class HXSDKHelper {
                 try {
                     List<String> usernames = null;
                     usernames = EMContactManager.getInstance().getBlackListUsernamesFromServer();
+                    
+                    // in case that logout already before server returns, we should return immediately
+                    if(!EMChat.getInstance().isLoggedIn()){
+                        return;
+                    }
                     isBlackListSyncedWithServer = true;
                     isSyncingBlackListWithServer = false;
                     if(callback != null){
@@ -633,6 +650,5 @@ public abstract class HXSDKHelper {
         isBlackListSyncedWithServer = false;
         
         hasAppAlreadyNotifiedSDK = false;
-        
     }
 }
