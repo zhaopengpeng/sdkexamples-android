@@ -149,34 +149,10 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		// 通知sdk，UI 已经初始化完毕，注册了相应的receiver和listener, 可以接受broadcast了
 		EMChat.getInstance().setAppInited();
 		
-		IntentFilter filter = new IntentFilter(getPackageName() + "em_internal_debug");
-		registerReceiver(new BroadcastReceiver() {
-            
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                DemoApplication.getInstance().logout(new EMCallBack() {
-                    
-                    @Override
-                    public void onSuccess() {
-                        runOnUiThread(new Runnable() {
-                            public void run() {
-                                // 重新显示登陆页面
-                                finish();
-                                startActivity(new Intent(MainActivity.this, LoginActivity.class));
-                                
-                            }
-                        });
-                    }
-                    
-                    @Override
-                    public void onProgress(int progress, String status) {}
-                    
-                    @Override
-                    public void onError(int code, String message) {}
-                });
-            }
-        }, filter);
+		//内部测试方法，请忽略
+		registerInternalDebugReceiver();
 	}
+
 
 	/**
 	 * 初始化组件
@@ -279,12 +255,16 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();		
-
+		
 		if (conflictBuilder != null) {
 			conflictBuilder.create().dismiss();
 			conflictBuilder = null;
 		}
 
+		try {
+            unregisterReceiver(internalDebugReceiver);
+        } catch (Exception e) {
+        }
 	}
 
 	/**
@@ -748,6 +728,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	private android.app.AlertDialog.Builder accountRemovedBuilder;
 	private boolean isConflictDialogShow;
 	private boolean isAccountRemovedDialogShow;
+    private BroadcastReceiver internalDebugReceiver;
 
 	/**
 	 * 显示帐号在别处登录dialog
@@ -828,5 +809,39 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 			showAccountRemovedDialog();
 		}
 	}
+	
+	/**
+	 * 内部测试代码，开发者请忽略
+	 */
+	private void registerInternalDebugReceiver() {
+	    internalDebugReceiver = new BroadcastReceiver() {
+            
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                DemoApplication.getInstance().logout(new EMCallBack() {
+                    
+                    @Override
+                    public void onSuccess() {
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                // 重新显示登陆页面
+                                finish();
+                                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                                
+                            }
+                        });
+                    }
+                    
+                    @Override
+                    public void onProgress(int progress, String status) {}
+                    
+                    @Override
+                    public void onError(int code, String message) {}
+                });
+            }
+        };
+        IntentFilter filter = new IntentFilter(getPackageName() + "em_internal_debug");
+        registerReceiver(internalDebugReceiver, filter);
+    }
 
 }
