@@ -1010,7 +1010,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
                 });
             }
         };
-        IntentFilter filter = new IntentFilter(getPackageName() + "em_internal_debug");
+        IntentFilter filter = new IntentFilter(getPackageName() + ".em_internal_debug");
         registerReceiver(internalDebugReceiver, filter);
     }
 
