@@ -19,10 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-<<<<<<< HEAD
 import android.content.BroadcastReceiver;
-=======
->>>>>>> ca4dcb377e83e63c8dbce6e8249e8e5cc4797cbe
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -163,8 +160,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		EMChatManager.getInstance().addConnectionListener(connectionListener);
 		
 		// 注册群聊相关的listener
-<<<<<<< HEAD
-		EMChatManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
+		EMGroupManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
 		// 通知sdk，UI 已经初始化完毕，注册了相应的receiver和listener, 可以接受broadcast了
 		EMChat.getInstance().setAppInited();
 		
@@ -173,9 +169,6 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	}
 
 
-=======
-		EMGroupManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
-	}
 	
 	static void asyncFetchGroupsFromServer(){
 	    HXSDKHelper.getInstance().asyncFetchGroupsFromServer(new EMCallBack(){
@@ -308,7 +301,6 @@ public class MainActivity extends BaseActivity implements EMEventListener {
         }
     }
     
->>>>>>> ca4dcb377e83e63c8dbce6e8249e8e5cc4797cbe
 	/**
 	 * 初始化组件
 	 */
