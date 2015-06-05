@@ -50,6 +50,7 @@ import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContact;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMGroup;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
@@ -82,7 +83,6 @@ public class ChatHistoryFragment extends Fragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-		errorItem = (RelativeLayout) getView().findViewById(R.id.rl_error_item);
 		errorText = (TextView) errorItem.findViewById(R.id.tv_connect_errormsg);
 		// contact list
 		contactList = DemoApplication.getInstance().getContactList();
@@ -216,7 +216,7 @@ public class ChatHistoryFragment extends Fragment {
 				resultList.add(user);
 			}
 		}
-		for(EMGroup group : EMChatManager.getInstance().getAllGroups()){
+		for(EMGroup group : EMGroupManager.getInstance().getAllGroups()){
 			EMConversation conversation = EMChatManager.getInstance().getConversation(group.getGroupId());
 			if(conversation.getMsgCount() > 0){
 				resultList.add(group);

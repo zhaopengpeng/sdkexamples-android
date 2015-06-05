@@ -37,7 +37,7 @@
             android:layout_marginTop="20dip"
             android:background="@drawable/nickename_input_bg"
             android:paddingLeft="10dip"
-            android:hint="输入新昵称" />
+            android:hint="@string/input_new_nick_hint" />
 
         <Button
             android:id="@+id/btn_save"

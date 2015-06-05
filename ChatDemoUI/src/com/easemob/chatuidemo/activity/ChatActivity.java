@@ -37,6 +37,8 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -76,6 +78,7 @@ import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chat.EMGroup;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.ImageMessageBody;
@@ -186,6 +189,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	private Button btnMore;
 	public String playMsgId;
 
+	private SwipeRefreshLayout swipeRefreshLayout;
+
 	private Handler micImageHandler = new Handler() {
 		@Override
 		public void handleMessage(android.os.Message msg) {
@@ -195,7 +200,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	};
 	public EMGroup group;
 	public EMChatRoom room;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -308,6 +313,54 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			}
 		});
 
+		 swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.chat_swipe_layout);
+
+		 swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light,
+		                 android.R.color.holo_orange_light, android.R.color.holo_red_light);
+
+		 swipeRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
+
+		         @Override
+		         public void onRefresh() {
+		                 new Handler().postDelayed(new Runnable() {
+
+		                         @Override
+		                         public void run() {
+		                                 // TODO Auto-generated method stub
+		                                 if (listView.getFirstVisiblePosition() == 0 && !isloading && haveMoreData) {
+		                                         List<EMMessage> messages;
+		                                         try {
+	                                                 if (chatType == CHATTYPE_SINGLE){
+                                                         messages = conversation.loadMoreMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
+	                                                 }
+	                                                 else{
+                                                         messages = conversation.loadMoreGroupMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
+	                                                 }
+		                                         } catch (Exception e1) {
+	                                                 swipeRefreshLayout.setRefreshing(false);
+	                                                 return;
+		                                         }
+		                                         
+		                                         if (messages.size() > 0) {
+	                                                 adapter.notifyDataSetChanged();
+	                                                 listView.setSelection(messages.size() - 1);
+	                                                 if (messages.size() != pagesize){
+	                                                     haveMoreData = false;
+	                                                 }
+		                                         } else {
+		                                             haveMoreData = false;
+		                                         }
+		                                         
+		                                         isloading = false;
+
+		                                 }else{
+		                                     Toast.makeText(ChatActivity.this, getResources().getString(R.string.no_more_messages), Toast.LENGTH_SHORT).show();
+		                                 }
+		                                 swipeRefreshLayout.setRefreshing(false);
+		                         }
+		                 }, 2000);
+		         }
+		 });
 	}
 
 	private void setUpView() {
@@ -441,7 +494,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	}
 	
 	protected void onGroupViewCreation(){
-	    group = EMChatManager.getInstance().getGroup(toChatUsername);
+	    group = EMGroupManager.getInstance().getGroup(toChatUsername);
         
         if (group != null){
             ((TextView) findViewById(R.id.name)).setText(group.getGroupName());
@@ -451,7 +504,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
         
         // 监听当前会话的群聊解散被T事件
         groupListener = new GroupListener();
-        EMChatManager.getInstance().addGroupChangeListener(groupListener);
+        EMGroupManager.getInstance().addGroupChangeListener(groupListener);
 	}
 	
 	protected void onChatRoomViewCreation(){
@@ -1376,7 +1429,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		super.onDestroy();
 		activityInstance = null;
 		if(groupListener != null){
-		    EMChatManager.getInstance().removeGroupChangeListener(groupListener);
+		    EMGroupManager.getInstance().removeGroupChangeListener(groupListener);
 		}
 	}
 

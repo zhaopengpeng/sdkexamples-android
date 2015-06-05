@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
@@ -32,8 +33,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.easemob.EMCallBack;
+import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactManager;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.DemoHXSDKHelper;
@@ -147,18 +151,13 @@ public class LoginActivity extends BaseActivity {
 				DemoApplication.getInstance().setUserName(currentUsername);
 				DemoApplication.getInstance().setPassword(currentPassword);
 
-				runOnUiThread(new Runnable() {
-					public void run() {
-						pd.setMessage(getString(R.string.list_is_for));
-					}
-				});
 				try {
 					// ** 第一次登录或者之前logout后再登录，加载所有本地群和回话
 					// ** manually load all local groups and
-				    EMChatManager.getInstance().loadAllLocalGroups();
+				    EMGroupManager.getInstance().loadAllGroups();
 					EMChatManager.getInstance().loadAllConversations();
 					// 处理好友和群组
-					processContactsAndGroups();
+					initializeContacts();
 				} catch (Exception e) {
 					e.printStackTrace();
 					// 取好友或者群聊失败，不让进入主页面
@@ -177,10 +176,14 @@ public class LoginActivity extends BaseActivity {
 				if (!updatenick) {
 					Log.e("LoginActivity", "update current user nick fail");
 				}
-				if (!LoginActivity.this.isFinishing())
+				if (!LoginActivity.this.isFinishing() && pd.isShowing()) {
 					pd.dismiss();
+				}
 				// 进入主页面
-				startActivity(new Intent(LoginActivity.this, MainActivity.class));
+				Intent intent = new Intent(LoginActivity.this,
+						MainActivity.class);
+				startActivity(intent);
+				
 				finish();
 			}
 
@@ -204,58 +207,32 @@ public class LoginActivity extends BaseActivity {
 		});
 	}
 
-	private void processContactsAndGroups() throws EaseMobException {
-		// demo中简单的处理成每次登陆都去获取好友username，开发者自己根据情况而定
-		List<String> usernames = EMContactManager.getInstance().getContactUserNames();
-		EMLog.d("roster", "contacts size: " + usernames.size());
+	private void initializeContacts() {
 		Map<String, User> userlist = new HashMap<String, User>();
-		for (String username : usernames) {
-			User user = new User();
-			user.setUsername(username);
-			setUserHearder(username, user);
-			userlist.put(username, user);
-		}
 		// 添加user"申请与通知"
 		User newFriends = new User();
 		newFriends.setUsername(Constant.NEW_FRIENDS_USERNAME);
-		String strChat = getString(R.string.Application_and_notify);
+		String strChat = getResources().getString(
+				R.string.Application_and_notify);
 		newFriends.setNick(strChat);
 
 		userlist.put(Constant.NEW_FRIENDS_USERNAME, newFriends);
-		
 		// 添加"群聊"
 		User groupUser = new User();
-		String strGroup = getString(R.string.group_chat);
+		String strGroup = getResources().getString(R.string.group_chat);
 		groupUser.setUsername(Constant.GROUP_USERNAME);
 		groupUser.setNick(strGroup);
 		groupUser.setHeader("");
 		userlist.put(Constant.GROUP_USERNAME, groupUser);
-		
-		// 添加"聊天室"
-        User chatRoomItem = new User();
-        String strChatRoom = getString(R.string.chat_room);
-        chatRoomItem.setUsername(Constant.CHAT_ROOM);
-        chatRoomItem.setNick(strChatRoom);
-        chatRoomItem.setHeader("");
-        userlist.put(Constant.CHAT_ROOM, chatRoomItem);
 
 		// 存入内存
 		DemoApplication.getInstance().setContactList(userlist);
-		System.out.println("----------------" + userlist.values().toString());
 		// 存入db
 		UserDao dao = new UserDao(LoginActivity.this);
 		List<User> users = new ArrayList<User>(userlist.values());
 		dao.saveContactList(users);
-
-		// 获取黑名单列表
-		List<String> blackList = EMContactManager.getInstance().getBlackListUsernamesFromServer();
-		// 保存黑名单
-		EMContactManager.getInstance().saveBlackList(blackList);
-
-		// 获取群聊列表(群聊里只有groupid和groupname等简单信息，不包含members),sdk会把群组存入到内存和db中
-		EMChatManager.getInstance().fetchJoinedGroupsFromServer();
 	}
-
+	
 	/**
 	 * 注册
 	 * 
@@ -270,33 +247,6 @@ public class LoginActivity extends BaseActivity {
 		super.onResume();
 		if (autoLogin) {
 			return;
-		}
-	}
-
-	/**
-	 * 设置hearder属性，方便通讯中对联系人按header分类显示，以及通过右侧ABCD...字母栏快速定位联系人
-	 * 
-	 * @param username
-	 * @param user
-	 */
-	protected void setUserHearder(String username, User user) {
-		String headerName = null;
-		if (!TextUtils.isEmpty(user.getNick())) {
-			headerName = user.getNick();
-		} else {
-			headerName = user.getUsername();
-		}
-		if (username.equals(Constant.NEW_FRIENDS_USERNAME)) {
-			user.setHeader("");
-		} else if (Character.isDigit(headerName.charAt(0))) {
-			user.setHeader("#");
-		} else {
-			user.setHeader(HanziToPinyin.getInstance().get(headerName.substring(0, 1)).get(0).target.substring(0, 1)
-					.toUpperCase());
-			char header = user.getHeader().toLowerCase().charAt(0);
-			if (header < 'a' || header > 'z') {
-				user.setHeader("#");
-			}
 		}
 	}
 }
