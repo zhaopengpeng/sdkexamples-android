@@ -749,7 +749,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 			msg.setFrom(accepter);
 			msg.setTo(groupId);
 			msg.setMsgId(UUID.randomUUID().toString());
-			msg.addBody(new TextMessageBody(accepter + st4));
+			msg.addBody(new TextMessageBody(accepter + " " +st4));
 			// 保存同意消息
 			EMChatManager.getInstance().saveMessage(msg);
 			// 提醒新消息
