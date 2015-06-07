@@ -134,12 +134,12 @@
     <string name="be_removing">Be removing</string>
     <string name="call_duration">call duration</string>
     <string name="Refused">Refused</string>
-    <string name="The_other_party_has_refused_to">The other party has refused to</string>
-    <string name="The_other_is_not_online">The other is not online</string>
-    <string name="The_other_is_on_the_phone">The other is on the phone</string>
-    <string name="The_other_party_did_not_answer">The other party did not answer</string>
+    <string name="The_other_party_has_refused_to">Call was refused</string>
+    <string name="The_other_is_not_online">The peer is not online</string>
+    <string name="The_other_is_on_the_phone">The peer is on the phone</string>
+    <string name="The_other_party_did_not_answer">The peer did not answer</string>
     <string name="did_not_answer">did not answer</string>
-    <string name="Has_been_cancelled">Has been cancelled</string>
+    <string name="Has_been_cancelled">Cancelled</string>
     <string name="unable_to_get_loaction">Unable to get to your location information!</string>
     <string name="not_connect_to_server">Not connect to server, please try again later</string>
     <string name="sd_card_does_not_exist">"SD card does not exist, can't take pictures"</string>
@@ -202,7 +202,7 @@
     <string name="Login_failed">Login failed:</string>
     <string name="receive_the_passthrough">Receive cmd message : action：</string>
     <string name="have_you_removed">Have you removed from his buddy list</string>
-    <string name="Less_than_chat_server_connection">Less than chat server connection</string>
+    <string name="can_not_connect_chat_server_connection">Cannot connect to server</string>
     <string name="the_current_network">The current network is not available, please check the network Settings</string>
     <string name="Invite_you_to_join_a_group_chat"> Invite you to join this group</string>
     <string name="Agreed_to_your_group_chat_application">Accepted your group application</string>
@@ -231,7 +231,7 @@
     <string name="Is_not_yet_connected_to_the_server">Not connect to server</string>
     <string name="have_connected_with">Connected to the peer and waiting for the peer to accept</string>
     <string name="In_the_call">In the call..</string>
-    <string name="The_other_party_refused_to_accept">The peer refused accepting the call</string>
+    <string name="The_other_party_refused_to_accept">The call was refused</string>
     <string name="Connection_failure">Connection failed!</string>
     <string name="The_other_party_is_not_online">The peer is not online now, please try later</string>
     <string name="The_other_is_on_the_phone_please">The peer is busy now, please try later</string>
@@ -266,4 +266,5 @@
     <string name="search_pubic_group">Search public group</string>
     <string name="group_not_existed">The group does not exist</string>
     <string name="group_search_failed">Search failed</string>
+    <string name="nickname_description">Once this nick is set, this nick will be used in push notification (by default this is HuanXin ID ) when the receiver is using the IOS device.</string>
 </resources>
