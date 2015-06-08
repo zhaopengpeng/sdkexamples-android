@@ -109,6 +109,7 @@ public class ChatAllHistoryFragment extends Fragment implements View.OnClickList
 				    }else{
 				        // it is single chat
                         intent.putExtra("userId", username);
+                        intent.putExtra("isRobot", DemoApplication.getInstance().getContactList().get(username).isRobot());
 				    }
 				    startActivity(intent);
 				}

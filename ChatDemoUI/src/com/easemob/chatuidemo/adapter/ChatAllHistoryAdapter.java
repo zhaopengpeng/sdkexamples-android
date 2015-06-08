@@ -39,6 +39,7 @@ import com.easemob.chat.ImageMessageBody;
 import com.easemob.chat.TextMessageBody;
 import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chatuidemo.Constant;
+import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.utils.DateUtils;
 import com.easemob.chatuidemo.utils.SmileUtils;
@@ -110,7 +111,11 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 			} else if (username.equals(Constant.NEW_FRIENDS_USERNAME)) {
 				holder.name.setText("申请与通知");
 			}
-			holder.name.setText(username);
+			String nick = DemoApplication.getInstance().getContactList().get(username).getNick();
+			if (nick == null)
+				holder.name.setText(username);
+			else
+				holder.name.setText(nick);
 		}
 
 		if (conversation.getUnreadMsgCount() > 0) {

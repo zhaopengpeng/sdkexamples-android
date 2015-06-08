@@ -200,7 +200,8 @@ public class ContactlistFragment extends Fragment {
 				    startActivity(new Intent(getActivity(), PublicChatRoomsActivity.class));
 				}else {
 					// demo中直接进入聊天页面，实际一般是进入用户详情页
-					startActivity(new Intent(getActivity(), ChatActivity.class).putExtra("userId", adapter.getItem(position).getUsername()));
+					User user = adapter.getItem(position);
+					startActivity(new Intent(getActivity(), ChatActivity.class).putExtra("userId", user.getUsername()).putExtra("isRobot", user.isRobot()));
 				}
 			}
 		});
