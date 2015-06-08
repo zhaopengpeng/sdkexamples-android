@@ -267,4 +267,6 @@
     <string name="group_not_existed">The group does not exist</string>
     <string name="group_search_failed">Search failed</string>
     <string name="nickname_description">Once this nick is set, this nick will be used in push notification (by default this is HuanXin ID ) when the receiver is using the IOS device.</string>
+    <string name="error_send_invalid_content">The message content is not allowed to be sent!</string>
+    <string name="error_send_not_in_the_group">You already were not in the group</string>
 </resources>
