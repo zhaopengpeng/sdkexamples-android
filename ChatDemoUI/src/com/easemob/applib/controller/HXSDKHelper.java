@@ -506,6 +506,7 @@ public abstract class HXSDKHelper {
                     }
                 } catch (EaseMobException e) {
                     isGroupsSyncedWithServer = false;
+                    isSyncingGroupsWithServer = false;
                     if(callback != null){
                         callback.onError(e.getErrorCode(), e.toString());
                     }
@@ -547,6 +548,7 @@ public abstract class HXSDKHelper {
                     }
                 } catch (EaseMobException e) {                   
                     isContactsSyncedWithServer = false;
+                    isSyncingContactsWithServer = false;
                     e.printStackTrace();
                     if(callback != null){
                         callback.onError(e.getErrorCode(), e.toString());
@@ -589,6 +591,7 @@ public abstract class HXSDKHelper {
                     }
                 } catch (EaseMobException e) {
                     isBlackListSyncedWithServer = false;
+                    isSyncingBlackListWithServer = true;
                     e.printStackTrace();
                     
                     if(callback != null){
