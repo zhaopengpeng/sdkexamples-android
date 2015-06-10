@@ -277,8 +277,12 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 if(message.getType() == Type.TXT){
                     ticker = ticker.replaceAll("\\[.{2,3}\\]", "[表情]");
                 }
-                
-                return message.getFrom() + ": " + ticker;
+				User user = DemoApplication.getInstance().getContactList().get(message.getFrom());
+				if (user != null && user.getNick() != null) {
+					return user.getNick() + ": " + ticker;
+				} else {
+					return message.getFrom() + ": " + ticker;
+				}
             }
             
             @Override

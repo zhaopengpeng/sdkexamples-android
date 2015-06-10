@@ -68,6 +68,7 @@ import com.easemob.chatuidemo.domain.InviteMessage;
 import com.easemob.chatuidemo.domain.InviteMessage.InviteMesageStatus;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.utils.CommonUtils;
+import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.EMLog;
 import com.easemob.util.HanziToPinyin;
 import com.easemob.util.NetUtils;
@@ -213,16 +214,19 @@ public class MainActivity extends BaseActivity implements EMEventListener {
                     userlist.put(username, user);
                 }
                 
-                // 添加"Robots"
-                List<EMContact> robots = EMChatManager.getInstance().getRobotUsers();
-                for (EMContact robot : robots) {
-                	User user = new User();
-                	user.setUsername(robot.getUsername());
-                	user.setNick(robot.getNick());
-                	user.setRobot(true);
-                	setUserHearder(robot.getUsername(), user);
-        			userlist.put(robot.getUsername(), user);
-        		}
+                // 添加robot用户
+				List<EMContact> robots = syncFetchRobotListFromServer();
+				if (robots != null) {
+					for (EMContact robot : robots) {
+						User user = new User();
+						user.setUsername(robot.getUsername());
+						if(robot.getNick()!=null)
+							user.setNick(robot.getNick());
+						user.setRobot(true);
+						setUserHearder(robot.getUsername(), user);
+						userlist.put(robot.getUsername(), user);
+					}
+				}
                 
                 // 添加user"申请与通知"
                 User newFriends = new User();
@@ -286,6 +290,21 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	        
 	    });
 	}
+	
+
+	
+	static List<EMContact> syncFetchRobotListFromServer() {
+		List<EMContact> robots = null;
+		try {
+			robots = EMChatManager.getInstance().getRobotsFromServer();
+		} catch (EaseMobException e) {
+			e.printStackTrace();
+			EMLog.e(TAG, e.getMessage());
+		}
+		return robots;
+	}
+	
+	
 	
 	/**
      * 设置hearder属性，方便通讯中对联系人按header分类显示，以及通过右侧ABCD...字母栏快速定位联系人
