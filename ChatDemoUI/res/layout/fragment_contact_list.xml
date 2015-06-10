@@ -66,6 +66,7 @@
                 android:id="@+id/search_bar_view"
                 layout="@layout/search_bar_with_padding"/>
 
+
             <ListView
                 android:id="@+id/list"
                 android:layout_below="@+id/search_bar_view"
@@ -84,7 +85,7 @@
                 android:layout_alignParentRight="true"
                 android:background="@android:color/transparent"
                 android:clickable="true" />
-
+ 			
             <TextView
                 android:id="@+id/floating_header"
                 android:layout_width="wrap_content"
@@ -99,6 +100,25 @@
                 android:visibility="invisible" />
 
         </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:id="@+id/progress_bar">
+	        <ProgressBar
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="center_horizontal"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/now_refresh_list"
+                android:layout_gravity="center_horizontal"/>
+	    </LinearLayout>
+        
     </FrameLayout>
 
 </LinearLayout>

@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.easemob.EMError;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMGroup;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.exceptions.EaseMobException;
 
@@ -52,7 +53,7 @@ public class PublicGroupsSeachActivity extends BaseActivity{
 
             public void run() {
                 try {
-                    searchedGroup = EMChatManager.getInstance().fetchGroupFromServer(idET.getText().toString());
+                    searchedGroup = EMGroupManager.getInstance().getGroupFromServer(idET.getText().toString());
                     runOnUiThread(new Runnable() {
                         public void run() {
                             pd.dismiss();
@@ -69,9 +70,9 @@ public class PublicGroupsSeachActivity extends BaseActivity{
                             searchedGroup = null;
                             containerLayout.setVisibility(View.GONE);
                             if(e.getErrorCode() == EMError.GROUP_NOT_EXIST){
-                                Toast.makeText(getApplicationContext(), "不存在的群组", 0).show();
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.group_not_existed), 0).show();
                             }else{
-                                Toast.makeText(getApplicationContext(), "搜索失败，" + getString(R.string.connect_failuer_toast), 0).show();
+                                Toast.makeText(getApplicationContext(), getResources().getString(R.string.group_search_failed) + " : " + getString(R.string.connect_failuer_toast), 0).show();
                             }
                         }
                     });

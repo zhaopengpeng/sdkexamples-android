@@ -15,10 +15,12 @@ package com.easemob.chatuidemo.activity;
 
 import java.util.List;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -27,19 +29,59 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMGroup;
+import com.easemob.chat.EMGroupManager;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.GroupAdapter;
+import com.easemob.exceptions.EaseMobException;
+import com.easemob.util.EMLog;
 
 public class GroupsActivity extends BaseActivity {
+	public static final String TAG = "GroupsActivity";
 	private ListView groupListView;
 	protected List<EMGroup> grouplist;
 	private GroupAdapter groupAdapter;
 	private InputMethodManager inputMethodManager;
 	public static GroupsActivity instance;
+	private SyncListener syncListener;
+	private View progressBar;
+	private SwipeRefreshLayout swipeRefreshLayout;
+	Handler handler = new Handler();
 
+	class SyncListener implements HXSDKHelper.HXSyncListener {
+		@Override
+		public void onSyncSucess(final boolean success) {
+			EMLog.d(TAG, "onSyncGroupsFinish success:" + success);
+			runOnUiThread(new Runnable() {
+				public void run() {
+					swipeRefreshLayout.setRefreshing(false);
+					if (success) {
+						handler.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								refresh();
+								progressBar.setVisibility(View.GONE);
+							}
+						}, 1000);
+					} else {
+						if (!GroupsActivity.this.isFinishing()) {
+							String s1 = getResources()
+									.getString(
+											R.string.Failed_to_get_group_chat_information);
+							Toast.makeText(GroupsActivity.this, s1, Toast.LENGTH_LONG).show();
+							progressBar.setVisibility(View.GONE);
+						}
+					}
+				}
+			});
+		}
+	}
+		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -47,8 +89,20 @@ public class GroupsActivity extends BaseActivity {
 
 		instance = this;
 		inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		grouplist = EMChatManager.getInstance().getAllGroups();
+		grouplist = EMGroupManager.getInstance().getAllGroups();
 		groupListView = (ListView) findViewById(R.id.list);
+		
+		swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
+		swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light,
+		                android.R.color.holo_orange_light, android.R.color.holo_red_light);
+		swipeRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
+
+			@Override
+			public void onRefresh() {
+			    MainActivity.asyncFetchGroupsFromServer();
+			}
+		});
+		
 		groupAdapter = new GroupAdapter(this, 1, grouplist);
 		groupListView.setAdapter(groupAdapter);
 		groupListView.setOnItemClickListener(new OnItemClickListener() {
@@ -84,6 +138,19 @@ public class GroupsActivity extends BaseActivity {
 				return false;
 			}
 		});
+		
+		progressBar = (View)findViewById(R.id.progress_bar);
+		
+		syncListener = new SyncListener();
+		HXSDKHelper.getInstance().addSyncGroupListener(syncListener);
+
+		if (!HXSDKHelper.getInstance().isGroupsSyncedWithServer()) {
+			progressBar.setVisibility(View.VISIBLE);
+		} else {
+			progressBar.setVisibility(View.GONE);
+		}
+		
+		refresh();
 	}
 
 	/**
@@ -101,7 +168,7 @@ public class GroupsActivity extends BaseActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		grouplist = EMChatManager.getInstance().getAllGroups();
+		grouplist = EMGroupManager.getInstance().getAllGroups();
 		groupAdapter = new GroupAdapter(this, 1, grouplist);
 		groupListView.setAdapter(groupAdapter);
 		groupAdapter.notifyDataSetChanged();
@@ -109,8 +176,22 @@ public class GroupsActivity extends BaseActivity {
 
 	@Override
 	protected void onDestroy() {
+		if (syncListener != null) {
+			HXSDKHelper.getInstance().removeSyncGroupListener(syncListener);
+			syncListener = null;
+		}
 		super.onDestroy();
 		instance = null;
+	}
+	
+	public void refresh() {
+		if (groupListView != null && groupAdapter != null) {
+			grouplist = EMGroupManager.getInstance().getAllGroups();
+			groupAdapter = new GroupAdapter(GroupsActivity.this, 1,
+					grouplist);
+			groupListView.setAdapter(groupAdapter);
+			groupAdapter.notifyDataSetChanged();
+		}
 	}
 
 	/**
