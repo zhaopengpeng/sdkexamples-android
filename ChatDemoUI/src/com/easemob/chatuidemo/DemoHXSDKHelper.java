@@ -295,7 +295,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 if (chatType == ChatType.Chat) { // 单聊信息
                     intent.putExtra("userId", message.getFrom());
                     intent.putExtra("chatType", ChatActivity.CHATTYPE_SINGLE);
-                    if(message.getBooleanAttribute("em_publicaccount_message", false)){
+                    if(message.getBooleanAttribute("em_robot_message", false)){
                     	intent.putExtra("isRobot", true);
                     }
                 } else { // 群聊信息
