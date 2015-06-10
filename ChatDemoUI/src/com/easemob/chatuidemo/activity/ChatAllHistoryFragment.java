@@ -34,13 +34,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.easemob.applib.controller.HXSDKHelper;
-import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
+import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ChatAllHistoryAdapter;
 import com.easemob.chatuidemo.db.InviteMessgeDao;
@@ -110,7 +109,7 @@ public class ChatAllHistoryFragment extends Fragment implements View.OnClickList
 				    }else{
 				        // it is single chat
                         intent.putExtra("userId", username);
-						User user = DemoApplication.getInstance().getContactList().get(username);
+						User user = ((DemoHXSDKHelper)DemoHXSDKHelper.getInstance()).getContactList().get(username);
 						if (user != null) {
 							intent.putExtra("isRobot", user.isRobot());
 						}

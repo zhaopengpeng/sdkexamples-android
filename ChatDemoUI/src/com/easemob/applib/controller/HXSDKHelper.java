@@ -16,6 +16,7 @@ package com.easemob.applib.controller;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -32,6 +33,7 @@ import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
 import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatConfig.EMEnvMode;
+import com.easemob.chatuidemo.domain.User;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
 import com.easemob.chat.EMContactManager;
@@ -259,6 +261,7 @@ public abstract class HXSDKHelper {
      * @return
      */
     abstract protected HXSDKModel createModel();
+    
     
     /**
      * please make sure you have to get EMChatOptions by following method and set related options

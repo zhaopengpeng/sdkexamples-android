@@ -182,14 +182,8 @@ public class HXNotifier {
      */
     protected void sendNotification(EMMessage message, boolean isForeground, boolean numIncrease) {
         String username = message.getFrom();
-        User user = DemoApplication.getInstance().getContactList().get(username);
         try {
-            String notifyText = "";
-            if(user!=null&&user.getNick()!=null){
-            	notifyText = user.getNick() + " ";
-            }else{
-            	notifyText = username + " ";
-            }
+        	String notifyText = username + " ";
             switch (message.getType()) {
             case TXT:
                 notifyText += msgs[0];
