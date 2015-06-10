@@ -859,7 +859,13 @@ public class MessageAdapter extends BaseAdapter{
 	 */
 	private void handleVoiceMessage(final EMMessage message, final ViewHolder holder, final int position, View convertView) {
 		VoiceMessageBody voiceBody = (VoiceMessageBody) message.getBody();
-		holder.tv.setText(voiceBody.getLength() + "\"");
+		int voiceLen = voiceBody.getLength();
+		if(voiceLen==0){
+			holder.tv.setVisibility(View.INVISIBLE);
+		}else{
+			holder.tv.setText(voiceLen + "\"");
+			holder.tv.setVisibility(View.VISIBLE);
+		}
 		holder.iv.setOnClickListener(new VoicePlayClickListener(message, holder.iv, holder.iv_read_status, this, activity, username));
 		holder.iv.setOnLongClickListener(new OnLongClickListener() {
 			@Override
