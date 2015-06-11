@@ -172,7 +172,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	public static ChatActivity activityInstance = null;
 	// 给谁发送消息
 	private String toChatUsername;
-	private String toChatNick;
 	private VoiceRecorder voiceRecorder;
 	private MessageAdapter adapter;
 	private File cameraFile;
@@ -192,8 +191,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 	private SwipeRefreshLayout swipeRefreshLayout;
 
-	private boolean isRobot;
-	
 	private Handler micImageHandler = new Handler() {
 		@Override
 		public void handleMessage(android.os.Message msg) {
@@ -380,12 +377,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 		if (chatType == CHATTYPE_SINGLE) { // 单聊
 			toChatUsername = getIntent().getStringExtra("userId");
-			isRobot = getIntent().getBooleanExtra("isRobot", false);
-			toChatNick = DemoApplication.getInstance().getContactList().get(toChatUsername).getNick();
-			if(toChatNick==null)
-				((TextView) findViewById(R.id.name)).setText(toChatUsername);
-			else
-				((TextView) findViewById(R.id.name)).setText(toChatNick);
+			((TextView) findViewById(R.id.name)).setText(toChatUsername);
 		} else {
 			// 群聊
 			findViewById(R.id.container_to_group).setVisibility(View.VISIBLE);
@@ -907,10 +899,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			message.addBody(txtBody);
 			// 设置要发给谁,用户username或者群聊groupid
 			message.setReceipt(toChatUsername);
-			//判断是否为botUser
-			if(isRobot){
-				message.setAttribute("em_publicaccount_message", true);
-			}
 			// 把messgage加到conversation中
 			conversation.addMessage(message);
 			// 通知adapter有消息变动，adapter会根据加入的这条message显示消息和调用sdk的发送方法

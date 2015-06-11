@@ -47,7 +47,6 @@ import com.easemob.EMValueCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatManager;
-import com.easemob.chat.EMContact;
 import com.easemob.chat.EMContactListener;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chat.EMConversation;
@@ -212,18 +211,6 @@ public class MainActivity extends BaseActivity implements EMEventListener {
                     setUserHearder(username, user);
                     userlist.put(username, user);
                 }
-                
-                // 添加"Robots"
-                List<EMContact> robots = EMChatManager.getInstance().getRobotUsers();
-                for (EMContact robot : robots) {
-                	User user = new User();
-                	user.setUsername(robot.getUsername());
-                	user.setNick(robot.getNick());
-                	user.setRobot(true);
-                	setUserHearder(robot.getUsername(), user);
-        			userlist.put(robot.getUsername(), user);
-        		}
-                
                 // 添加user"申请与通知"
                 User newFriends = new User();
                 newFriends.setUsername(Constant.NEW_FRIENDS_USERNAME);
@@ -373,6 +360,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
 			// 提示新消息
 			HXSDKHelper.getInstance().getNotifier().onNewMsg(message);
+
 			refreshUI();
 			break;
 		}

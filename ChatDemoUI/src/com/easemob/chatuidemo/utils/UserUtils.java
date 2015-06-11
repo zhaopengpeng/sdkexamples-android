@@ -20,7 +20,7 @@ public class UserUtils {
             user = new User(username);
         }
             
-        if(user != null&&user.getNick()==null){
+        if(user != null){
             //demo没有这些数据，临时填充
             user.setNick(username);
 //            user.setAvatar("http://downloads.easemob.com/downloads/57.png");
