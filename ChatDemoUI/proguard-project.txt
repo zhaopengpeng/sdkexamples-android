@@ -58,7 +58,7 @@
 -keep class com.baidu.** {*;}
 -keep public class * extends com.umeng.**
 -keep class com.umeng.** { *; }
--keep class com.squareup.picasso
+-keep class com.squareup.picasso.* {*;}
 
 -keep class com.easemob.* {*;}
 -keep class com.easemob.chat.** {*;}
