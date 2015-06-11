@@ -32,8 +32,6 @@ import android.support.v4.app.NotificationCompat;
 import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
-import com.easemob.chatuidemo.DemoApplication;
-import com.easemob.chatuidemo.domain.User;
 import com.easemob.util.EMLog;
 import com.easemob.util.EasyUtils;
 
@@ -183,7 +181,7 @@ public class HXNotifier {
     protected void sendNotification(EMMessage message, boolean isForeground, boolean numIncrease) {
         String username = message.getFrom();
         try {
-        	String notifyText = username + " ";
+            String notifyText = username + " ";
             switch (message.getType()) {
             case TXT:
                 notifyText += msgs[0];

@@ -3,7 +3,7 @@ package com.easemob.chatuidemo.utils;
 import android.content.Context;
 import android.widget.ImageView;
 
-import com.easemob.chatuidemo.DemoHXSDKHelper;
+import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.domain.User;
 import com.squareup.picasso.Picasso;
@@ -15,12 +15,12 @@ public class UserUtils {
      * @return
      */
     public static User getUserInfo(String username){
-        User user = ((DemoHXSDKHelper)DemoHXSDKHelper.getInstance()).getContactList().get(username);
+        User user = DemoApplication.getInstance().getContactList().get(username);
         if(user == null){
             user = new User(username);
         }
             
-        if(user != null&&user.getNick()==null){
+        if(user != null){
             //demo没有这些数据，临时填充
             user.setNick(username);
 //            user.setAvatar("http://downloads.easemob.com/downloads/57.png");

@@ -45,7 +45,6 @@ public class DemoDBManager {
                     values.put(UserDao.COLUMN_NAME_NICK, user.getNick());
                 if(user.getAvatar() != null)
                     values.put(UserDao.COLUMN_NAME_AVATAR, user.getAvatar());
-                values.put(UserDao.COLUMN_NAME_ISROBOT, user.isRobot());
                 db.replace(UserDao.TABLE_NAME, null, values);
             }
         }
@@ -65,12 +64,10 @@ public class DemoDBManager {
                 String username = cursor.getString(cursor.getColumnIndex(UserDao.COLUMN_NAME_ID));
                 String nick = cursor.getString(cursor.getColumnIndex(UserDao.COLUMN_NAME_NICK));
                 String avatar = cursor.getString(cursor.getColumnIndex(UserDao.COLUMN_NAME_AVATAR));
-                boolean isRobot = cursor.getInt(cursor.getColumnIndex(UserDao.COLUMN_NAME_ISROBOT))==1;
                 User user = new User();
                 user.setUsername(username);
                 user.setNick(nick);
                 user.setAvatar(avatar);
-                user.setRobot(isRobot);
                 String headerName = null;
                 if (!TextUtils.isEmpty(user.getNick())) {
                     headerName = user.getNick();
@@ -121,7 +118,6 @@ public class DemoDBManager {
             values.put(UserDao.COLUMN_NAME_NICK, user.getNick());
         if(user.getAvatar() != null)
             values.put(UserDao.COLUMN_NAME_AVATAR, user.getAvatar());
-        values.put(UserDao.COLUMN_NAME_ISROBOT, user.isRobot());
         if(db.isOpen()){
             db.replace(UserDao.TABLE_NAME, null, values);
         }
