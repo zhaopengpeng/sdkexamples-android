@@ -909,7 +909,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			message.setReceipt(toChatUsername);
 			//判断是否为botUser
 			if(isRobot){
-				message.setAttribute("em_robot_message", true);
+				message.setAttribute("em_publicaccount_message", true);
 			}
 			// 把messgage加到conversation中
 			conversation.addMessage(message);
