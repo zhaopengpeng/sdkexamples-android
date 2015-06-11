@@ -190,7 +190,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
                             closeSpeakerOn();
                             //显示是否为直连，方便测试
                             ((TextView)findViewById(R.id.tv_is_p2p)).setText(EMChatManager.getInstance().isDirectCall()
-                                    ? "Direct" : "Relay");
+                                    ? R.string.direct_call : R.string.relay_call);
                             chronometer.setVisibility(View.VISIBLE);
                             chronometer.setBase(SystemClock.elapsedRealtime());
                             // 开始记时
