@@ -246,6 +246,8 @@
     <string name="Has_agreed_to">Accepted</string>
     <string name="Has_refused_to">Refused</string>
     <string name="Are_agree_with">Accepting</string>
+    <string name="direct_call">Direct</string>
+    <string name="relay_call">Relay</string>
     <string name="Agree_with_failure">Failed to accept</string>
     <string name="Is_download_voice_click_later">Downloading the voice message, click later</string>
     <string name="Send_the_following_pictures">Send the following pictures?</string>

@@ -89,5 +89,9 @@
     -->
     <!-- version-tag: 1 -->
     <import file="${sdk.dir}/tools/ant/build.xml" />
-
+	<target name="proguard-jar">
+        <java jar="${sdk.dir}/tools/proguard/lib/proguard.jar" fork="true">
+            <arg value="@proguard-project.txt"/>
+        </java>
+    </target>
 </project>
