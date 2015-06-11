@@ -255,7 +255,7 @@
     
     <string name="Delete_the_contact">Delete the contact</string>
     <string name="Move_into_the_blacklist_new">Move into the blacklist</string>
-    <string name="Change_the_group_name">Change the group name</string>
+    <string name="Change_the_group_name">Change group name</string>
     <string name="dismiss_group">Dismiss group</string>
     <string name="add_public_group_chat">Add public group</string>
     <string name="gorup_not_found">Can not find this group</string>
@@ -273,4 +273,5 @@
     <string name="error_send_not_in_the_group">You already were not in the group</string>
     <string name="refreshing_group_list">Refreshing group list</string>
     <string name="failed_to_load_data">Failed to load data, please check network or try again later</string>
+    <string name="searching">searching</string>
 </resources>

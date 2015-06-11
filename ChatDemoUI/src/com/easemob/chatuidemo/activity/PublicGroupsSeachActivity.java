@@ -45,7 +45,7 @@ public class PublicGroupsSeachActivity extends BaseActivity{
         }
         
         final ProgressDialog pd = new ProgressDialog(this);
-        pd.setMessage("正在搜索...");
+        pd.setMessage(getResources().getString(R.string.searching));
         pd.setCancelable(false);
         pd.show();
         
