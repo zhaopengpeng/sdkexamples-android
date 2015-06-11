@@ -380,7 +380,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		if (chatType == CHATTYPE_SINGLE) { // 单聊
 			toChatUsername = getIntent().getStringExtra("userId");
 			isRobot = getIntent().getBooleanExtra("isRobot", false);
-			User user = ((DemoHXSDKHelper)DemoHXSDKHelper.getInstance()).getContactList().get(toChatUsername);
+			User user = DemoApplication.getInstance().getContactList().get(toChatUsername);
 			if (user != null && user.getNick() != null) {
 				((TextView) findViewById(R.id.name)).setText(user.getNick());
 			} else {
