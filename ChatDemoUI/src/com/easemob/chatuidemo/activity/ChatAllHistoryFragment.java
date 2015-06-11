@@ -44,7 +44,6 @@ import com.easemob.chatuidemo.DemoApplication;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ChatAllHistoryAdapter;
 import com.easemob.chatuidemo.db.InviteMessgeDao;
-import com.easemob.chatuidemo.domain.User;
 
 /**
  * 显示所有会话记录，比较简单的实现，更好的可能是把陌生人存入本地，这样取到的聊天记录是可控的
@@ -110,10 +109,7 @@ public class ChatAllHistoryFragment extends Fragment implements View.OnClickList
 				    }else{
 				        // it is single chat
                         intent.putExtra("userId", username);
-						User user = DemoApplication.getInstance().getContactList().get(username);
-						if (user != null) {
-							intent.putExtra("isRobot", user.isRobot());
-						}
+                        intent.putExtra("isRobot", DemoApplication.getInstance().getContactList().get(username).isRobot());
 				    }
 				    startActivity(intent);
 				}

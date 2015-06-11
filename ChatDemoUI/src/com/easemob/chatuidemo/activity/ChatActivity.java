@@ -67,6 +67,7 @@ import android.widget.Toast;
 import com.easemob.EMChatRoomChangeListener;
 import com.easemob.EMError;
 import com.easemob.EMEventListener;
+import com.easemob.EMGroupChangeListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.EMValueCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
@@ -93,7 +94,6 @@ import com.easemob.chatuidemo.adapter.ExpressionAdapter;
 import com.easemob.chatuidemo.adapter.ExpressionPagerAdapter;
 import com.easemob.chatuidemo.adapter.MessageAdapter;
 import com.easemob.chatuidemo.adapter.VoicePlayClickListener;
-import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.chatuidemo.utils.ImageUtils;
 import com.easemob.chatuidemo.utils.SmileUtils;
@@ -172,6 +172,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	public static ChatActivity activityInstance = null;
 	// 给谁发送消息
 	private String toChatUsername;
+	private String toChatNick;
 	private VoiceRecorder voiceRecorder;
 	private MessageAdapter adapter;
 	private File cameraFile;
@@ -380,13 +381,11 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		if (chatType == CHATTYPE_SINGLE) { // 单聊
 			toChatUsername = getIntent().getStringExtra("userId");
 			isRobot = getIntent().getBooleanExtra("isRobot", false);
-			User user = DemoApplication.getInstance().getContactList().get(toChatUsername);
-			if (user != null && user.getNick() != null) {
-				((TextView) findViewById(R.id.name)).setText(user.getNick());
-			} else {
+			toChatNick = DemoApplication.getInstance().getContactList().get(toChatUsername).getNick();
+			if(toChatNick==null)
 				((TextView) findViewById(R.id.name)).setText(toChatUsername);
-			}
-				
+			else
+				((TextView) findViewById(R.id.name)).setText(toChatNick);
 		} else {
 			// 群聊
 			findViewById(R.id.container_to_group).setVisibility(View.VISIBLE);
