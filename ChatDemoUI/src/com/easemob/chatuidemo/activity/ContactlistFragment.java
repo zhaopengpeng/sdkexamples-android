@@ -54,6 +54,7 @@ import com.easemob.applib.controller.HXSDKHelper.HXSyncListener;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
+import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.adapter.ContactAdapter;
 import com.easemob.chatuidemo.db.InviteMessgeDao;
@@ -200,7 +201,8 @@ public class ContactlistFragment extends Fragment {
 				    startActivity(new Intent(getActivity(), PublicChatRoomsActivity.class));
 				}else {
 					// demo中直接进入聊天页面，实际一般是进入用户详情页
-					startActivity(new Intent(getActivity(), ChatActivity.class).putExtra("userId", adapter.getItem(position).getUsername()));
+					User user = adapter.getItem(position);
+					startActivity(new Intent(getActivity(), ChatActivity.class).putExtra("userId", user.getUsername()).putExtra("isRobot", user.isRobot()));
 				}
 			}
 		});
@@ -310,7 +312,7 @@ public class ContactlistFragment extends Fragment {
 					// 删除db和内存中此用户的数据
 					UserDao dao = new UserDao(getActivity());
 					dao.deleteContact(tobeDeleteUser.getUsername());
-					DemoApplication.getInstance().getContactList().remove(tobeDeleteUser.getUsername());
+					((DemoHXSDKHelper)DemoHXSDKHelper.getInstance()).getContactList().remove(tobeDeleteUser.getUsername());
 					getActivity().runOnUiThread(new Runnable() {
 						public void run() {
 							pd.dismiss();
@@ -416,7 +418,7 @@ public class ContactlistFragment extends Fragment {
 	private void getContactList() {
 		contactList.clear();
 		//获取本地好友列表
-		Map<String, User> users = DemoApplication.getInstance().getContactList();
+		Map<String, User> users = ((DemoHXSDKHelper)DemoHXSDKHelper.getInstance()).getContactList();
 		Iterator<Entry<String, User>> iterator = users.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Entry<String, User> entry = iterator.next();

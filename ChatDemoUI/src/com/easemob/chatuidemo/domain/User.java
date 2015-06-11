@@ -19,7 +19,17 @@ public class User extends EMContact {
 	private int unreadMsgCount;
 	private String header;
 	private String avatar;
+	private boolean isRobot;
 	
+
+	public boolean isRobot() {
+		return isRobot;
+	}
+
+	public void setRobot(boolean isRobot) {
+		this.isRobot = isRobot;
+	}
+
 	public User(){}
 	
 	public User(String username){

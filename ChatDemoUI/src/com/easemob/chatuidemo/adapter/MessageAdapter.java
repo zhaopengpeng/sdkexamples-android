@@ -30,6 +30,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.text.Spannable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -645,6 +646,9 @@ public class MessageAdapter extends BaseAdapter{
 					String remotePath = imgBody.getRemoteUrl();
 					String filePath = ImageUtils.getImagePath(remotePath);
 					String thumbRemoteUrl = imgBody.getThumbnailUrl();
+					if(TextUtils.isEmpty(thumbRemoteUrl)&&!TextUtils.isEmpty(remotePath)){
+						thumbRemoteUrl = remotePath;
+					}
 					String thumbnailPath = ImageUtils.getThumbnailImagePath(thumbRemoteUrl);
 					showImageView(thumbnailPath, holder.iv, filePath, imgBody.getRemoteUrl(), message);
 				}
@@ -859,7 +863,13 @@ public class MessageAdapter extends BaseAdapter{
 	 */
 	private void handleVoiceMessage(final EMMessage message, final ViewHolder holder, final int position, View convertView) {
 		VoiceMessageBody voiceBody = (VoiceMessageBody) message.getBody();
-		holder.tv.setText(voiceBody.getLength() + "\"");
+		int voiceLen = voiceBody.getLength();
+		if(voiceLen==0){
+			holder.tv.setVisibility(View.INVISIBLE);
+		}else{
+			holder.tv.setText(voiceLen + "\"");
+			holder.tv.setVisibility(View.VISIBLE);
+		}
 		holder.iv.setOnClickListener(new VoicePlayClickListener(message, holder.iv, holder.iv_read_status, this, activity, username));
 		holder.iv.setOnLongClickListener(new OnLongClickListener() {
 			@Override

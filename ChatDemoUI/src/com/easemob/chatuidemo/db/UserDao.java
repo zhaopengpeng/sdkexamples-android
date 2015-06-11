@@ -30,7 +30,8 @@ public class UserDao {
 	public static final String PREF_TABLE_NAME = "pref";
 	public static final String COLUMN_NAME_DISABLED_GROUPS = "disabled_groups";
 	public static final String COLUMN_NAME_DISABLED_IDS = "disabled_ids";
-
+	public static final String COLUMN_NAME_ISROBOT = "isrobot";
+	
 	public UserDao(Context context) {
 	    DemoDBManager.getInstance().onInit(context);
 	}
