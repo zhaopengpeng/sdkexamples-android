@@ -328,7 +328,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 		                         @Override
 		                         public void run() {
-		                                 // TODO Auto-generated method stub
 		                                 if (listView.getFirstVisiblePosition() == 0 && !isloading && haveMoreData) {
 		                                         List<EMMessage> messages;
 		                                         try {
@@ -345,7 +344,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		                                         
 		                                         if (messages.size() > 0) {
 	                                                 adapter.notifyDataSetChanged();
-	                                                 listView.setSelection(messages.size() - 1);
+	                                                 adapter.refreshSeekTo(messages.size() - 1);
 	                                                 if (messages.size() != pagesize){
 	                                                     haveMoreData = false;
 	                                                 }
@@ -360,7 +359,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		                                 }
 		                                 swipeRefreshLayout.setRefreshing(false);
 		                         }
-		                 }, 2000);
+		                 }, 1000);
 		         }
 		 });
 	}
@@ -1582,7 +1581,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		public void onScrollStateChanged(AbsListView view, int scrollState) {
 			switch (scrollState) {
 			case OnScrollListener.SCROLL_STATE_IDLE:
-				if (view.getFirstVisiblePosition() == 0 && !isloading && haveMoreData && conversation.getAllMessages().size() != 0) {
+				/*if (view.getFirstVisiblePosition() == 0 && !isloading && haveMoreData && conversation.getAllMessages().size() != 0) {
 					isloading = true;
 					loadmorePB.setVisibility(View.VISIBLE);
 					// sdk初始化加载的聊天记录为20条，到顶时去db里获取更多					
@@ -1617,7 +1616,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 					loadmorePB.setVisibility(View.GONE);
 					isloading = false;
 
-				}
+				}*/
 				break;
 			}
 		}
