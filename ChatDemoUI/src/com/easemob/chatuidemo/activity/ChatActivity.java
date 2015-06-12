@@ -67,6 +67,7 @@ import android.widget.Toast;
 import com.easemob.EMChatRoomChangeListener;
 import com.easemob.EMError;
 import com.easemob.EMEventListener;
+import com.easemob.EMGroupChangeListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.EMValueCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
@@ -93,7 +94,6 @@ import com.easemob.chatuidemo.adapter.ExpressionAdapter;
 import com.easemob.chatuidemo.adapter.ExpressionPagerAdapter;
 import com.easemob.chatuidemo.adapter.MessageAdapter;
 import com.easemob.chatuidemo.adapter.VoicePlayClickListener;
-import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.chatuidemo.utils.ImageUtils;
 import com.easemob.chatuidemo.utils.SmileUtils;
@@ -191,8 +191,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 	private SwipeRefreshLayout swipeRefreshLayout;
 
-	private boolean isRobot;
-	
 	private Handler micImageHandler = new Handler() {
 		@Override
 		public void handleMessage(android.os.Message msg) {
@@ -378,14 +376,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 		if (chatType == CHATTYPE_SINGLE) { // 单聊
 			toChatUsername = getIntent().getStringExtra("userId");
-			isRobot = getIntent().getBooleanExtra("isRobot", false);
-			User user = ((DemoHXSDKHelper)DemoHXSDKHelper.getInstance()).getContactList().get(toChatUsername);
-			if (user != null && user.getNick() != null) {
-				((TextView) findViewById(R.id.name)).setText(user.getNick());
-			} else {
-				((TextView) findViewById(R.id.name)).setText(toChatUsername);
-			}
-				
+			((TextView) findViewById(R.id.name)).setText(toChatUsername);
 		} else {
 			// 群聊
 			findViewById(R.id.container_to_group).setVisibility(View.VISIBLE);
@@ -907,10 +898,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			message.addBody(txtBody);
 			// 设置要发给谁,用户username或者群聊groupid
 			message.setReceipt(toChatUsername);
-			//判断是否为botUser
-			if(isRobot){
-				message.setAttribute("em_robot_message", true);
-			}
 			// 把messgage加到conversation中
 			conversation.addMessage(message);
 			// 通知adapter有消息变动，adapter会根据加入的这条message显示消息和调用sdk的发送方法

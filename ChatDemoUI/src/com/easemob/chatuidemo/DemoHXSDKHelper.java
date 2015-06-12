@@ -35,7 +35,6 @@ import com.easemob.applib.model.HXNotifier;
 import com.easemob.applib.model.HXNotifier.HXNotificationInfoProvider;
 import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.CmdMessageBody;
-import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
 import com.easemob.chat.EMMessage;
@@ -277,12 +276,8 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 if(message.getType() == Type.TXT){
                     ticker = ticker.replaceAll("\\[.{2,3}\\]", "[表情]");
                 }
-				User user = getContactList().get(message.getFrom());
-				if (user != null && user.getNick() != null) {
-					return user.getNick() + ": " + ticker;
-				} else {
-					return message.getFrom() + ": " + ticker;
-				}
+                
+                return message.getFrom() + ": " + ticker;
             }
             
             @Override
@@ -299,9 +294,6 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 if (chatType == ChatType.Chat) { // 单聊信息
                     intent.putExtra("userId", message.getFrom());
                     intent.putExtra("chatType", ChatActivity.CHATTYPE_SINGLE);
-                    if(message.getBooleanAttribute("em_robot_message", false)){
-                    	intent.putExtra("isRobot", true);
-                    }
                 } else { // 群聊信息
                     // message.getTo()为群聊id
                     intent.putExtra("groupId", message.getTo());
