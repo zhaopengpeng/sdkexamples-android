@@ -177,7 +177,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
                 HXSDKHelper.getInstance().noitifyGroupSyncListeners(true);
                 
                 if(HXSDKHelper.getInstance().isContactsSyncedWithServer()){
-                    HXSDKHelper.getInstance().notifyHXSDKAppReadyForRecevingEvents();
+                    HXSDKHelper.getInstance().notifyForRecevingEvents();
                 }
             }
 
@@ -243,7 +243,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
                 HXSDKHelper.getInstance().notifyContactsSyncListener(true);
                 
                 if(HXSDKHelper.getInstance().isGroupsSyncedWithServer()){
-                    HXSDKHelper.getInstance().notifyHXSDKAppReadyForRecevingEvents();
+                    HXSDKHelper.getInstance().notifyForRecevingEvents();
                 }
                 
             }
@@ -593,23 +593,36 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
 		@Override
 		public void onConnected() {
+            boolean groupSynced = HXSDKHelper.getInstance().isGroupsSyncedWithServer();
+            boolean contactSynced = HXSDKHelper.getInstance().isContactsSyncedWithServer();
+            
+            // in case group and contact were already synced, we supposed to notify sdk we are ready to receive the events
+            if(groupSynced && contactSynced){
+                new Thread(){
+                    @Override
+                    public void run(){
+                        HXSDKHelper.getInstance().notifyForRecevingEvents();
+                    }
+                }.start();
+            }else{
+                if(!groupSynced){
+                    asyncFetchGroupsFromServer();
+                }
+                
+                if(!contactSynced){
+                    asyncFetchContactsFromServer();
+                }
+                
+                if(!HXSDKHelper.getInstance().isBlackListSyncedWithServer()){
+                    asyncFetchBlackListFromServer();
+                }
+            }
+            
 			runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
 					chatHistoryFragment.errorItem.setVisibility(View.GONE);
-					
-				    if(!HXSDKHelper.getInstance().isGroupsSyncedWithServer()){
-                        asyncFetchGroupsFromServer();
-                    }
-                    
-                    if(!HXSDKHelper.getInstance().isContactsSyncedWithServer()){
-                        asyncFetchContactsFromServer();
-                    }
-                    
-                    if(!HXSDKHelper.getInstance().isBlackListSyncedWithServer()){
-                        asyncFetchBlackListFromServer();
-                    }
 				}
 
 			});
