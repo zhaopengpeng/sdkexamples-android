@@ -236,6 +236,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		iv_emoticons_checked.setVisibility(View.INVISIBLE);
 		more = findViewById(R.id.more);
 		edittext_layout.setBackgroundResource(R.drawable.input_bar_bg_normal);
+		voiceCallBtn = (ImageView) findViewById(R.id.btn_voice_call);
+		videoCallBtn = (ImageView) findViewById(R.id.btn_video_call);
 
 		// 动画资源文件,用于录制语音时
 		micImages = new Drawable[] { getResources().getDrawable(R.drawable.record_animate_01),
@@ -652,7 +654,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				double longitude = data.getDoubleExtra("longitude", 0);
 				String locationAddress = data.getStringExtra("address");
 				if (locationAddress != null && !locationAddress.equals("")) {
-					more(more);
+				    toggleMore(more);
 					sendLocationMsg(latitude, longitude, "", locationAddress);
 				} else {
 					String st = getResources().getString(R.string.unable_to_get_loaction);
@@ -726,15 +728,21 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		} else if (id == R.id.btn_voice_call) { // 点击语音电话图标
 			if (!EMChatManager.getInstance().isConnected())
 				Toast.makeText(this, st1, 0).show();
-			else
+			else{
 				startActivity(new Intent(ChatActivity.this, VoiceCallActivity.class).putExtra("username",
 						toChatUsername).putExtra("isComingCall", false));
+				voiceCallBtn.setEnabled(false);
+				toggleMore(null);
+			}
 		} else if (id == R.id.btn_video_call) { // 视频通话
 			if (!EMChatManager.getInstance().isConnected())
 				Toast.makeText(this, st1, 0).show();
-			else
+			else{
 				startActivity(new Intent(this, VideoCallActivity.class).putExtra("username", toChatUsername).putExtra(
 						"isComingCall", false));
+				videoCallBtn.setEnabled(false);
+				toggleMore(null);
+			}
 		}
 	}
 
@@ -1221,7 +1229,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * 
 	 * @param view
 	 */
-	public void more(View view) {
+	public void toggleMore(View view) {
 		if (more.getVisibility() == View.GONE) {
 			EMLog.d(TAG, "more gone");
 			hideKeyboard();
@@ -1258,6 +1266,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	}
 
 	private PowerManager.WakeLock wakeLock;
+    private ImageView voiceCallBtn;
+    private ImageView videoCallBtn;
 
 	/**
 	 * 按住说话listener
@@ -1437,6 +1447,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		super.onResume();
 		if (group != null)
 			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
+		voiceCallBtn.setEnabled(true);
+		videoCallBtn.setEnabled(true);
 
 		 if(adapter != null){
 		     adapter.refresh();
