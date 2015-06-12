@@ -180,7 +180,7 @@
                 android:layout_marginLeft="4dp"
                 android:layout_marginRight="10dp"
                 android:background="@drawable/type_select_btn"
-                android:onClick="more" />
+                android:onClick="toggleMore" />
 
             <Button
                 android:id="@+id/btn_send"

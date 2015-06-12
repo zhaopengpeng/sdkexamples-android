@@ -293,6 +293,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.btn_refuse_call: // 拒绝接听
+		    refuseBtn.setEnabled(false);
 			if (ringtone != null)
 				ringtone.stop();
 			try {
@@ -306,6 +307,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 			break;
 
 		case R.id.btn_answer_call: // 接听电话
+		    answerBtn.setEnabled(false);
 		    if (ringtone != null)
                 ringtone.stop();
 			if (isInComingCall) {
@@ -328,6 +330,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 			break;
 
 		case R.id.btn_hangup_call: // 挂断电话
+		    hangupBtn.setEnabled(false);
 			if (soundPool != null)
 				soundPool.stop(streamID);
 			chronometer.stop();
