@@ -335,7 +335,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 				soundPool.stop(streamID);
 			chronometer.stop();
 			endCallTriggerByMe = true;
-			callStateTextView.setText("正在挂断...");
+			callStateTextView.setText(getResources().getString(R.string.hanging_up));
 			try {
 				EMChatManager.getInstance().endCall();
 			} catch (Exception e) {
