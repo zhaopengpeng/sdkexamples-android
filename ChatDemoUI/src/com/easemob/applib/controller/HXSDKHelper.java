@@ -649,7 +649,7 @@ public abstract class HXSDKHelper {
 	    return isBlackListSyncedWithServer;
     }
     
-    public void notifyForRecevingEvents(){
+    public synchronized void notifyForRecevingEvents(){
         if(alreadyNotified){
             return;
         }
@@ -659,7 +659,7 @@ public abstract class HXSDKHelper {
         alreadyNotified = true;
     }
     
-    void reset(){
+    synchronized void reset(){
         isSyncingGroupsWithServer = false;
         isSyncingContactsWithServer = false;
         isSyncingBlackListWithServer = false;
