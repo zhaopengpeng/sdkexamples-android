@@ -274,4 +274,6 @@
     <string name="refreshing_group_list">Refreshing group list</string>
     <string name="failed_to_load_data">Failed to load data, please check network or try again later</string>
     <string name="searching">searching</string>
+    <string name="hanging_up">Hanging up..</string>
+    <string name="illegal_user_name">Illegal user name</string>
 </resources>
