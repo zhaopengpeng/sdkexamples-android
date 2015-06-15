@@ -16,7 +16,6 @@ package com.easemob.chatuidemo.activity;
 
 import java.util.UUID;
 
-import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.media.SoundPool;

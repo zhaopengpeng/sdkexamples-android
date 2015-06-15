@@ -95,6 +95,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	private boolean isCurrentAccountRemoved = false;
 	
 	private MyConnectionListener connectionListener = null;
+	private MyGroupChangeListener groupChangeListener = null;
 
 	/**
 	 * 检查当前用户是否被删除
@@ -159,8 +160,9 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		connectionListener = new MyConnectionListener();
 		EMChatManager.getInstance().addConnectionListener(connectionListener);
 		
+		groupChangeListener = new MyGroupChangeListener();
 		// 注册群聊相关的listener
-        EMGroupManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
+        EMGroupManager.getInstance().addGroupChangeListener(groupChangeListener);
 		
 		
 		//内部测试方法，请忽略
@@ -410,6 +412,10 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
 		if(connectionListener != null){
 		    EMChatManager.getInstance().removeConnectionListener(connectionListener);
+		}
+		
+		if(groupChangeListener != null){
+		    EMGroupManager.getInstance().removeGroupChangeListener(groupChangeListener);
 		}
 		
 		try {
