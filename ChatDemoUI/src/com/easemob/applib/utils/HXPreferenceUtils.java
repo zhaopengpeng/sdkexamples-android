@@ -13,13 +13,6 @@
  */
 package com.easemob.applib.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-
-import org.json.JSONArray;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -36,10 +29,12 @@ public class HXPreferenceUtils {
 	private String SHARED_KEY_SETTING_SOUND = "shared_key_setting_sound";
 	private String SHARED_KEY_SETTING_VIBRATE = "shared_key_setting_vibrate";
 	private String SHARED_KEY_SETTING_SPEAKER = "shared_key_setting_speaker";
-	private String SHARED_KEY_SETTING_DISABLED_GROUPS =  "shared_key__setting_disabled_groups";
-	private String SHARED_KEY_SETTING_DISABLED_IDS =  "shared_key_setting_disabled_ids";
-	private static String SHARED_KEY_SETTING_CHATROOM_OWNER_LEAVE = "shared_key_setting_chatroom_owner_leave";
 
+	private static String SHARED_KEY_SETTING_CHATROOM_OWNER_LEAVE = "shared_key_setting_chatroom_owner_leave";
+	private static String SHARED_KEY_SETTING_GROUPS_SYNCED = "SHARED_KEY_SETTING_GROUPS_SYNCED";
+	private static String SHARED_KEY_SETTING_CONTACT_SYNCED = "SHARED_KEY_SETTING_CONTACT_SYNCED";
+	private static String SHARED_KEY_SETTING_BALCKLIST_SYNCED = "SHARED_KEY_SETTING_BALCKLIST_SYNCED";
+	
 	private HXPreferenceUtils(Context cxt) {
 		mSharedPreferences = cxt.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
 		editor = mSharedPreferences.edit();
@@ -109,5 +104,32 @@ public class HXPreferenceUtils {
 	
 	public boolean getSettingAllowChatroomOwnerLeave() {
         return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_CHATROOM_OWNER_LEAVE, true);
+    }
+	
+	public void setGroupsSynced(boolean synced){
+	    editor.putBoolean(SHARED_KEY_SETTING_GROUPS_SYNCED, synced);
+        editor.commit();
+	}
+	
+	public boolean isGroupsSynced(){
+	    return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_GROUPS_SYNCED, false);
+	}
+	
+	public void setContactSynced(boolean synced){
+        editor.putBoolean(SHARED_KEY_SETTING_CONTACT_SYNCED, synced);
+        editor.commit();
+    }
+    
+    public boolean isContactSynced(){
+        return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_CONTACT_SYNCED, false);
+    }
+    
+    public void setBlacklistSynced(boolean synced){
+        editor.putBoolean(SHARED_KEY_SETTING_BALCKLIST_SYNCED, synced);
+        editor.commit();
+    }
+    
+    public boolean isBacklistSynced(){
+        return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_BALCKLIST_SYNCED, false);
     }
 }

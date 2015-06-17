@@ -30,6 +30,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.text.Spannable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,6 +47,7 @@ import android.widget.TextView.BufferType;
 import android.widget.Toast;
 
 import com.easemob.EMCallBack;
+import com.easemob.EMError;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMMessage;
@@ -70,12 +72,12 @@ import com.easemob.chatuidemo.activity.ShowNormalFileActivity;
 import com.easemob.chatuidemo.activity.ShowVideoActivity;
 import com.easemob.chatuidemo.task.LoadImageTask;
 import com.easemob.chatuidemo.task.LoadVideoImageTask;
+import com.easemob.chatuidemo.utils.DateUtils;
 import com.easemob.chatuidemo.utils.ImageCache;
 import com.easemob.chatuidemo.utils.ImageUtils;
 import com.easemob.chatuidemo.utils.SmileUtils;
 import com.easemob.chatuidemo.utils.UserUtils;
 import com.easemob.exceptions.EaseMobException;
-import com.easemob.util.DateUtils;
 import com.easemob.util.EMLog;
 import com.easemob.util.FileUtils;
 import com.easemob.util.LatLng;
@@ -644,6 +646,9 @@ public class MessageAdapter extends BaseAdapter{
 					String remotePath = imgBody.getRemoteUrl();
 					String filePath = ImageUtils.getImagePath(remotePath);
 					String thumbRemoteUrl = imgBody.getThumbnailUrl();
+					if(TextUtils.isEmpty(thumbRemoteUrl)&&!TextUtils.isEmpty(remotePath)){
+						thumbRemoteUrl = remotePath;
+					}
 					String thumbnailPath = ImageUtils.getThumbnailImagePath(thumbRemoteUrl);
 					showImageView(thumbnailPath, holder.iv, filePath, imgBody.getRemoteUrl(), message);
 				}
@@ -1286,8 +1291,17 @@ public class MessageAdapter extends BaseAdapter{
 					// holder.pb.setVisibility(View.GONE);
 					// }
 					// holder.staus_iv.setVisibility(View.VISIBLE);
-					Toast.makeText(activity, activity.getString(R.string.send_fail) + activity.getString(R.string.connect_failuer_toast), 0)
-							.show();
+				    
+				    if(message.getError() == EMError.MESSAGE_SEND_INVALID_CONTENT){
+				        Toast.makeText(activity, activity.getString(R.string.send_fail) + activity.getString(R.string.error_send_invalid_content), 0)
+                        .show();
+				    }else if(message.getError() == EMError.MESSAGE_SEND_NOT_IN_THE_GROUP){
+				        Toast.makeText(activity, activity.getString(R.string.send_fail) + activity.getString(R.string.error_send_not_in_the_group), 0)
+                        .show();
+				    }else{
+				        Toast.makeText(activity, activity.getString(R.string.send_fail) + activity.getString(R.string.connect_failuer_toast), 0)
+                        .show();
+				    }
 				}
 
 				notifyDataSetChanged();

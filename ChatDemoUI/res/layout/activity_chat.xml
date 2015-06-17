@@ -180,7 +180,7 @@
                 android:layout_marginLeft="4dp"
                 android:layout_marginRight="10dp"
                 android:background="@drawable/type_select_btn"
-                android:onClick="more" />
+                android:onClick="toggleMore" />
 
             <Button
                 android:id="@+id/btn_send"
@@ -350,7 +350,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:text="视频"
+                            android:text="@string/attach_video"
                             android:textColor="#727171" />
                     </LinearLayout>
                 </LinearLayout>
@@ -470,17 +470,23 @@
             android:layout_centerHorizontal="true"
             android:visibility="gone" />
 
-        <ListView
-            android:id="@+id/list"
-            android:layout_width="match_parent"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/chat_swipe_layout"
             android:layout_height="match_parent"
-            android:layout_below="@id/pb_load_more"
-            android:cacheColorHint="#00000000"
-            android:divider="@null"
-            android:dividerHeight="5dp"
-            android:listSelector="#00000000"
-            android:scrollbarStyle="outsideOverlay"
-            android:transcriptMode="normal" />
+            android:layout_width="match_parent">
+            
+	        <ListView
+	            android:id="@+id/list"
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
+	            android:layout_below="@id/pb_load_more"
+	            android:cacheColorHint="#00000000"
+	            android:divider="@null"
+	            android:dividerHeight="5dp"
+	            android:listSelector="#00000000"
+	            android:scrollbarStyle="outsideOverlay"
+	            android:transcriptMode="normal" />
+        </android.support.v4.widget.SwipeRefreshLayout>
 
         <RelativeLayout
             android:id="@+id/recording_container"

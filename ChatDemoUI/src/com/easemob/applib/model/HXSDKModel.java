@@ -13,6 +13,8 @@
  */
 package com.easemob.applib.model;
 
+import com.easemob.applib.utils.HXPreferenceUtils;
+
 /**
  * HX SDK app model which will manage the user data and preferences
  * @author easemob
@@ -100,6 +102,27 @@ public abstract class HXSDKModel {
      * @return
      */
     public boolean isDebugMode(){
+        return true;
+    }
+    
+    public void setGroupsSynced(boolean synced){
+    }
+    
+    public boolean isGroupsSynced(){
+        return false;
+    }
+    
+    public void setContactSynced(boolean synced){
+    }
+    
+    public boolean isContactSynced(){
+        return false;
+    }
+    
+    public void setBlacklistSynced(boolean synced){
+    }
+    
+    public boolean isBacklistSynced(){
         return false;
     }
 }

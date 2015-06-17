@@ -89,7 +89,7 @@
     <string name="blacklist">Черный список</string>
     <string name="Empty_the_chat_record">Очистить историю чата</string>
     <string name="Shielding_of_the_message">Блокировать сообщения чата</string>
-    <string name="The_dissolution_of_chatting">Распустить чат</string>
+    <string name="dismiss_group">Распустить чат</string>
     <string name="Select_the_contact">Выбрать контактное лицо</string>
     <string name="Group_chat_information">Информация о чате</string>
     <string name="Group_of_Lord">Администратор</string>

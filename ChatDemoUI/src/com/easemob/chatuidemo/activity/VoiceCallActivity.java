@@ -16,7 +16,6 @@ package com.easemob.chatuidemo.activity;
 
 import java.util.UUID;
 
-import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.media.SoundPool;
@@ -188,6 +187,9 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
                             } catch (Exception e) {
                             }
                             closeSpeakerOn();
+                            //显示是否为直连，方便测试
+                            ((TextView)findViewById(R.id.tv_is_p2p)).setText(EMChatManager.getInstance().isDirectCall()
+                                    ? R.string.direct_call : R.string.relay_call);
                             chronometer.setVisibility(View.VISIBLE);
                             chronometer.setBase(SystemClock.elapsedRealtime());
                             // 开始记时
@@ -252,7 +254,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
                                 if (isAnswered) {
                                     callingState = CallingState.NORMAL;
                                     if (endCallTriggerByMe) {
-                                        callStateTextView.setText(st7);
+//                                        callStateTextView.setText(st7);
                                     } else {
                                         callStateTextView.setText(st8);
                                     }
@@ -290,6 +292,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.btn_refuse_call: // 拒绝接听
+		    refuseBtn.setEnabled(false);
 			if (ringtone != null)
 				ringtone.stop();
 			try {
@@ -303,10 +306,12 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 			break;
 
 		case R.id.btn_answer_call: // 接听电话
+		    answerBtn.setEnabled(false);
 		    if (ringtone != null)
                 ringtone.stop();
 			if (isInComingCall) {
 				try {
+				    callStateTextView.setText("正在接听...");
 					EMChatManager.getInstance().answerCall();
 					isAnswered = true;
 				} catch (Exception e) {
@@ -324,11 +329,13 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 			break;
 
 		case R.id.btn_hangup_call: // 挂断电话
+		    hangupBtn.setEnabled(false);
 			if (soundPool != null)
 				soundPool.stop(streamID);
+			chronometer.stop();
 			endCallTriggerByMe = true;
+			callStateTextView.setText(getResources().getString(R.string.hanging_up));
 			try {
-			    callStateTextView.setText("正在挂断...");
 				EMChatManager.getInstance().endCall();
 			} catch (Exception e) {
 				e.printStackTrace();

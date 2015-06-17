@@ -35,6 +35,13 @@
             android:layout_height="wrap_content"
             android:textColor="#fff"
             android:text="Chronometer" />
+        
+        <TextView 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_is_p2p"
+            android:textColor="#fff"
+            />
 
         <TextView
             android:id="@+id/tv_calling_duration"
@@ -138,7 +145,7 @@
                 android:id="@+id/btn_hangup_call"
                 android:layout_width="fill_parent"
                 android:layout_height="60dp"
-                android:background="@drawable/voice_call_hangup_bg"
+                android:background="@drawable/call_hangup_bg"
                 android:gravity="center"
                 android:text="@string/hang_up"
                 android:textColor="@android:color/white"
@@ -155,7 +162,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="60dp"
                     android:layout_weight="1"
-                    android:background="@drawable/voice_call_hangup_bg"
+                    android:background="@drawable/call_hangup_bg"
                     android:gravity="center"
                     android:text="@string/hang_up"
                     android:textColor="@android:color/white"
@@ -167,7 +174,7 @@
                     android:layout_height="60dp"
                     android:layout_marginLeft="30dp"
                     android:layout_weight="1"
-                    android:background="@drawable/voice_call_hangup_bg"
+                    android:background="@drawable/call_answer_bg"
                     android:gravity="center"
                     android:text="@string/answer"
                     android:textColor="@android:color/white"

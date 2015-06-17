@@ -165,7 +165,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                             }
                         };
                         
-                      //注册通话广播接收者
+                      //注册广播接收者
                         appContext.registerReceiver(broadCastReceiver,cmdFilter);
                     }
 
@@ -198,7 +198,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             
             private void showToast(String value){
                 if(!registered){
-                  //注册通话广播接收者
+                  //注册广播接收者
                     appContext.registerReceiver(new BroadcastReceiver(){
 
                         @Override

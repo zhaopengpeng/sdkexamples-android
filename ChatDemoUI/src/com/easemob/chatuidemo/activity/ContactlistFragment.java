@@ -21,11 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import u.aly.ad;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -49,6 +49,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.controller.HXSDKHelper.HXSyncListener;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.DemoApplication;
@@ -59,12 +61,14 @@ import com.easemob.chatuidemo.db.UserDao;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.widget.Sidebar;
 import com.easemob.exceptions.EaseMobException;
+import com.easemob.util.EMLog;
 
 /**
  * 联系人列表页
  * 
  */
 public class ContactlistFragment extends Fragment {
+	public static final String TAG = "ContactlistFragment";
 	private ContactAdapter adapter;
 	private List<User> contactList;
 	private ListView listView;
@@ -74,9 +78,56 @@ public class ContactlistFragment extends Fragment {
 	private List<String> blackList;
 	ImageButton clearSearch;
 	EditText query;
+	HXContactSyncListener contactSyncListener;
+	HXBlackListSyncListener blackListSyncListener;
+	View progressBar;
+	Handler handler = new Handler();
     private User toBeProcessUser;
     private String toBeProcessUsername;
 
+	class HXContactSyncListener implements HXSDKHelper.HXSyncListener {
+		@Override
+		public void onSyncSucess(final boolean success) {
+			EMLog.d(TAG, "on contact list sync success:" + success);
+			ContactlistFragment.this.getActivity().runOnUiThread(new Runnable() {
+				public void run() {
+				    getActivity().runOnUiThread(new Runnable(){
+
+		                @Override
+		                public void run() {
+		                    if(success){
+		                        progressBar.setVisibility(View.GONE);
+                                refresh();
+		                    }else{
+		                        String s1 = getResources().getString(R.string.get_failed_please_check);
+		                        Toast.makeText(getActivity(), s1, 1).show();
+		                        progressBar.setVisibility(View.GONE);
+		                    }
+		                }
+		                
+		            });
+				}
+			});
+		}
+	}
+	
+	class HXBlackListSyncListener implements HXSyncListener{
+
+        @Override
+        public void onSyncSucess(boolean success) {
+            getActivity().runOnUiThread(new Runnable(){
+
+                @Override
+                public void run() {
+                    blackList = EMContactManager.getInstance().getBlackListUsernames();
+                    refresh();
+                }
+                
+            });
+        }
+	    
+	};
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.fragment_contact_list, container, false);
@@ -92,6 +143,7 @@ public class ContactlistFragment extends Fragment {
 		listView = (ListView) getView().findViewById(R.id.list);
 		sidebar = (Sidebar) getView().findViewById(R.id.sidebar);
 		sidebar.setListView(listView);
+        
 		//黑名单列表
 		blackList = EMContactManager.getInstance().getBlackListUsernames();
 		contactList = new ArrayList<User>();
@@ -176,7 +228,20 @@ public class ContactlistFragment extends Fragment {
 			}
 		});
 		registerForContextMenu(listView);
+		
+		progressBar = (View) getView().findViewById(R.id.progress_bar);
 
+		contactSyncListener = new HXContactSyncListener();
+		HXSDKHelper.getInstance().addSyncContactListener(contactSyncListener);
+		
+		blackListSyncListener = new HXBlackListSyncListener();
+		HXSDKHelper.getInstance().addSyncBlackListListener(blackListSyncListener);
+		
+		if (!HXSDKHelper.getInstance().isContactsSyncedWithServer()) {
+			progressBar.setVisibility(View.VISIBLE);
+		} else {
+			progressBar.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
@@ -314,11 +379,34 @@ public class ContactlistFragment extends Fragment {
 				public void run() {
 					getContactList();
 					adapter.notifyDataSetChanged();
-
 				}
 			});
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void onDestroy() {
+		if (contactSyncListener != null) {
+			HXSDKHelper.getInstance().removeSyncContactListener(contactSyncListener);
+			contactSyncListener = null;
+		}
+		
+		if(blackListSyncListener != null){
+		    HXSDKHelper.getInstance().removeSyncBlackListListener(blackListSyncListener);
+		}
+		
+		super.onDestroy();
+	}
+	
+	public void showProgressBar(boolean show) {
+		if (progressBar != null) {
+			if (show) {
+				progressBar.setVisibility(View.VISIBLE);
+			} else {
+				progressBar.setVisibility(View.GONE);
+			}
 		}
 	}
 

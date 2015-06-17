@@ -92,7 +92,18 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	    super.onCreate(savedInstanceState);
+	    
+	    // 获取传过来的groupid
+        groupId = getIntent().getStringExtra("groupId");
+        group = EMGroupManager.getInstance().getGroup(groupId);
+
+        // we are not supposed to show the group if we don't find the group
+        if(group == null){
+            finish();
+            return;
+        }
+        
 		setContentView(R.layout.activity_group_details);
 		instance = this;
 		st = getResources().getString(R.string.people);
@@ -118,9 +129,6 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		referenceWidth = referenceDrawable.getIntrinsicWidth();
 		referenceHeight = referenceDrawable.getIntrinsicHeight();
 
-		// 获取传过来的groupid
-		groupId = getIntent().getStringExtra("groupId");
-		group = EMGroupManager.getInstance().getGroup(groupId);
 
 		idText.setText(groupId);
 		if (group.getOwner() == null || "".equals(group.getOwner())
@@ -347,7 +355,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 					runOnUiThread(new Runnable() {
 						public void run() {
 							progressDialog.dismiss();
-							Toast.makeText(getApplicationContext(), "退出群聊失败: " + e.getMessage(), 1).show();
+							Toast.makeText(getApplicationContext(), getResources().getString(R.string.Exit_the_group_chat_failure) + " " + e.getMessage(), 1).show();
 						}
 					});
 				}
@@ -736,7 +744,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 					runOnUiThread(new Runnable() {
 						public void run() {
 							((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getAffiliationsCount()
-									+ "人)");
+									+ ")");
 							loadingPB.setVisibility(View.INVISIBLE);
 							refreshMembers();
 							if (EMChatManager.getInstance().getCurrentUser().equals(group.getOwner())) {

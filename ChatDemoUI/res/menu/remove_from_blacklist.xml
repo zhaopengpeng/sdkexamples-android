@@ -3,6 +3,6 @@
 
     <item
         android:id="@+id/remove"
-        android:title="移出黑名单"/>
+        android:title="@string/move_out_backlist"/>
 
 </menu>

@@ -266,6 +266,8 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                             } catch (Exception e) {
                             }
                             openSpeakerOn();
+                            ((TextView)findViewById(R.id.tv_is_p2p)).setText(EMChatManager.getInstance().isDirectCall()
+                                    ? R.string.direct_call : R.string.relay_call);
                             handsFreeImage.setImageResource(R.drawable.icon_speaker_on);
                             isHandsfreeState = true;
                             chronometer.setVisibility(View.VISIBLE);
@@ -330,7 +332,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                                 if (isAnswered) {
                                     callingState = CallingState.NORMAL;
                                     if (endCallTriggerByMe) {
-                                        callStateTextView.setText(s6);
+//                                        callStateTextView.setText(s6);
                                     } else {
                                         callStateTextView.setText(s7);
                                     }
@@ -368,6 +370,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
         case R.id.btn_refuse_call: // 拒绝接听
+            refuseBtn.setEnabled(false);
             if (ringtone != null)
                 ringtone.stop();
             try {
@@ -381,10 +384,12 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
             break;
 
         case R.id.btn_answer_call: // 接听电话
+            answerBtn.setEnabled(false);
             if (ringtone != null)
                 ringtone.stop();
             if (isInComingCall) {
                 try {
+                    callStateTextView.setText("正在接听...");
                     EMChatManager.getInstance().answerCall();
                     cameraHelper.setStartFlag(true);
 
@@ -407,9 +412,12 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
             break;
 
         case R.id.btn_hangup_call: // 挂断电话
+            hangupBtn.setEnabled(false);
             if (soundPool != null)
                 soundPool.stop(streamID);
+            chronometer.stop();
             endCallTriggerByMe = true;
+            callStateTextView.setText(getResources().getString(R.string.hanging_up));
             try {
                 EMChatManager.getInstance().endCall();
             } catch (Exception e) {

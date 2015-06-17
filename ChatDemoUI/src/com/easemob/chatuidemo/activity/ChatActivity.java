@@ -37,6 +37,8 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v4.widget.SwipeRefreshLayout.OnRefreshListener;
 import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -69,6 +71,7 @@ import com.easemob.EMGroupChangeListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.EMValueCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
+import com.easemob.applib.model.GroupRemoveListener;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
 import com.easemob.chat.EMContactManager;
@@ -186,6 +189,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	private Button btnMore;
 	public String playMsgId;
 
+	private SwipeRefreshLayout swipeRefreshLayout;
+
 	private Handler micImageHandler = new Handler() {
 		@Override
 		public void handleMessage(android.os.Message msg) {
@@ -195,7 +200,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	};
 	public EMGroup group;
 	public EMChatRoom room;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -231,6 +236,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		iv_emoticons_checked.setVisibility(View.INVISIBLE);
 		more = findViewById(R.id.more);
 		edittext_layout.setBackgroundResource(R.drawable.input_bar_bg_normal);
+		voiceCallBtn = (ImageView) findViewById(R.id.btn_voice_call);
+		videoCallBtn = (ImageView) findViewById(R.id.btn_video_call);
 
 		// 动画资源文件,用于录制语音时
 		micImages = new Drawable[] { getResources().getDrawable(R.drawable.record_animate_01),
@@ -308,6 +315,53 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			}
 		});
 
+		 swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.chat_swipe_layout);
+
+		 swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright, android.R.color.holo_green_light,
+		                 android.R.color.holo_orange_light, android.R.color.holo_red_light);
+
+		 swipeRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
+
+		         @Override
+		         public void onRefresh() {
+		                 new Handler().postDelayed(new Runnable() {
+
+		                         @Override
+		                         public void run() {
+		                                 if (listView.getFirstVisiblePosition() == 0 && !isloading && haveMoreData) {
+		                                         List<EMMessage> messages;
+		                                         try {
+	                                                 if (chatType == CHATTYPE_SINGLE){
+                                                         messages = conversation.loadMoreMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
+	                                                 }
+	                                                 else{
+                                                         messages = conversation.loadMoreGroupMsgFromDB(adapter.getItem(0).getMsgId(), pagesize);
+	                                                 }
+		                                         } catch (Exception e1) {
+	                                                 swipeRefreshLayout.setRefreshing(false);
+	                                                 return;
+		                                         }
+		                                         
+		                                         if (messages.size() > 0) {
+	                                                 adapter.notifyDataSetChanged();
+	                                                 adapter.refreshSeekTo(messages.size() - 1);
+	                                                 if (messages.size() != pagesize){
+	                                                     haveMoreData = false;
+	                                                 }
+		                                         } else {
+		                                             haveMoreData = false;
+		                                         }
+		                                         
+		                                         isloading = false;
+
+		                                 }else{
+		                                     Toast.makeText(ChatActivity.this, getResources().getString(R.string.no_more_messages), Toast.LENGTH_SHORT).show();
+		                                 }
+		                                 swipeRefreshLayout.setRefreshing(false);
+		                         }
+		                 }, 1000);
+		         }
+		 });
 	}
 
 	private void setUpView() {
@@ -600,7 +654,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				double longitude = data.getDoubleExtra("longitude", 0);
 				String locationAddress = data.getStringExtra("address");
 				if (locationAddress != null && !locationAddress.equals("")) {
-					more(more);
+				    toggleMore(more);
 					sendLocationMsg(latitude, longitude, "", locationAddress);
 				} else {
 					String st = getResources().getString(R.string.unable_to_get_loaction);
@@ -674,15 +728,21 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		} else if (id == R.id.btn_voice_call) { // 点击语音电话图标
 			if (!EMChatManager.getInstance().isConnected())
 				Toast.makeText(this, st1, 0).show();
-			else
+			else{
 				startActivity(new Intent(ChatActivity.this, VoiceCallActivity.class).putExtra("username",
 						toChatUsername).putExtra("isComingCall", false));
+				voiceCallBtn.setEnabled(false);
+				toggleMore(null);
+			}
 		} else if (id == R.id.btn_video_call) { // 视频通话
 			if (!EMChatManager.getInstance().isConnected())
 				Toast.makeText(this, st1, 0).show();
-			else
+			else{
 				startActivity(new Intent(this, VideoCallActivity.class).putExtra("username", toChatUsername).putExtra(
 						"isComingCall", false));
+				videoCallBtn.setEnabled(false);
+				toggleMore(null);
+			}
 		}
 	}
 
@@ -1169,7 +1229,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * 
 	 * @param view
 	 */
-	public void more(View view) {
+	public void toggleMore(View view) {
 		if (more.getVisibility() == View.GONE) {
 			EMLog.d(TAG, "more gone");
 			hideKeyboard();
@@ -1206,6 +1266,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	}
 
 	private PowerManager.WakeLock wakeLock;
+    private ImageView voiceCallBtn;
+    private ImageView videoCallBtn;
 
 	/**
 	 * 按住说话listener
@@ -1385,6 +1447,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		super.onResume();
 		if (group != null)
 			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
+		voiceCallBtn.setEnabled(true);
+		videoCallBtn.setEnabled(true);
 
 		 if(adapter != null){
 		     adapter.refresh();
@@ -1516,7 +1580,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		public void onScrollStateChanged(AbsListView view, int scrollState) {
 			switch (scrollState) {
 			case OnScrollListener.SCROLL_STATE_IDLE:
-				if (view.getFirstVisiblePosition() == 0 && !isloading && haveMoreData && conversation.getAllMessages().size() != 0) {
+				/*if (view.getFirstVisiblePosition() == 0 && !isloading && haveMoreData && conversation.getAllMessages().size() != 0) {
 					isloading = true;
 					loadmorePB.setVisibility(View.VISIBLE);
 					// sdk初始化加载的聊天记录为20条，到顶时去db里获取更多					
@@ -1551,7 +1615,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 					loadmorePB.setVisibility(View.GONE);
 					isloading = false;
 
-				}
+				}*/
 				break;
 			}
 		}
@@ -1615,7 +1679,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * 监测群组解散或者被T事件
 	 * 
 	 */
-	class GroupListener implements EMGroupChangeListener {
+	class GroupListener extends GroupRemoveListener{
 
 		@Override
 		public void onUserRemoved(final String groupId, String groupName) {
@@ -1649,37 +1713,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				}
 			});
 		}
-
-        @Override
-        public void onInvitationReceived(String groupId, String groupName,
-                String inviter, String reason) {            
-        }
-
-        @Override
-        public void onApplicationReceived(String groupId, String groupName,
-                String applyer, String reason) {            
-        }
-
-        @Override
-        public void onApplicationAccept(String groupId, String groupName,
-                String accepter) {
-            
-        }
-
-        @Override
-        public void onApplicationDeclined(String groupId, String groupName,
-                String decliner, String reason) {            
-        }
-
-        @Override
-        public void onInvitationAccpted(String groupId, String inviter,
-                String reason) {            
-        }
-
-        @Override
-        public void onInvitationDeclined(String groupId, String invitee,
-                String reason) {            
-        }
 
 	}
 
