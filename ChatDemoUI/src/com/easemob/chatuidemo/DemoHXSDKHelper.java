@@ -23,7 +23,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.easemob.EMCallBack;
@@ -37,11 +39,13 @@ import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
+import com.easemob.chat.EMContact;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
 import com.easemob.chatuidemo.activity.ChatActivity;
 import com.easemob.chatuidemo.activity.MainActivity;
+import com.easemob.chatuidemo.domain.RobotUser;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.receiver.CallReceiver;
 import com.easemob.chatuidemo.utils.CommonUtils;
@@ -66,6 +70,11 @@ public class DemoHXSDKHelper extends HXSDKHelper{
      * contact list in cache
      */
     private Map<String, User> contactList;
+    
+    /**
+     * robot list in cache
+     */
+    private Map<String, RobotUser> robotList;
     private CallReceiver callReceiver;
     
     /**
@@ -276,8 +285,17 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 if(message.getType() == Type.TXT){
                     ticker = ticker.replaceAll("\\[.{2,3}\\]", "[表情]");
                 }
-                
-                return message.getFrom() + ": " + ticker;
+                Map<String,RobotUser> robotMap=((DemoHXSDKHelper)HXSDKHelper.getInstance()).getRobotList();
+    			if(robotMap!=null&&robotMap.containsKey(message.getFrom())){
+    				String nick = robotMap.get(message.getFrom()).getNick();
+    				if(!TextUtils.isEmpty(nick)){
+    					return nick + ": " + ticker;
+    				}else{
+    					return message.getFrom() + ": " + ticker;
+    				}
+    			}else{
+    				return message.getFrom() + ": " + ticker;
+    			}
             }
             
             @Override
@@ -387,7 +405,18 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         
         return contactList;
     }
+    
+	public Map<String, RobotUser> getRobotList() {
+		if (getHXId() != null && robotList == null) {
+			robotList = ((DemoHXSDKModel) getModel()).getRobotList();
+		}
+		return robotList;
+	}
 
+    public void setRobotList(Map<String, RobotUser> robotList){
+    	this.robotList = robotList;
+    }
+    
     /**
      * 设置好友user list到内存中
      *
@@ -406,6 +435,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             public void onSuccess() {
                 // TODO Auto-generated method stub
                 setContactList(null);
+                setRobotList(null);
                 getModel().closeDB();
                 if(callback != null){
                     callback.onSuccess();

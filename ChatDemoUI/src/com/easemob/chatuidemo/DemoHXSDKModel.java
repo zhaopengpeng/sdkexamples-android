@@ -17,10 +17,11 @@ import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
+
 import com.easemob.applib.model.DefaultHXSDKModel;
-import com.easemob.chatuidemo.db.DbOpenHelper;
 import com.easemob.chatuidemo.db.DemoDBManager;
 import com.easemob.chatuidemo.db.UserDao;
+import com.easemob.chatuidemo.domain.RobotUser;
 import com.easemob.chatuidemo.domain.User;
 
 public class DemoHXSDKModel extends DefaultHXSDKModel{
@@ -49,7 +50,18 @@ public class DemoHXSDKModel extends DefaultHXSDKModel{
         UserDao dao = new UserDao(context);
         return dao.getContactList();
     }
+    
+    public Map<String, RobotUser> getRobotList(){
+    	UserDao dao = new UserDao(context);
+    	return dao.getRobotUser();
+    }
 
+    public boolean saveRobotList(List<RobotUser> robotList){
+    	UserDao dao = new UserDao(context);
+    	dao.saveRobotUser(robotList);
+    	return true;
+    }
+    
     public void closeDB() {
         DemoDBManager.getInstance().closeDB();
     }
