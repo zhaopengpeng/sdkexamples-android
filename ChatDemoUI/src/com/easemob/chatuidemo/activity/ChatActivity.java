@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -67,7 +68,6 @@ import android.widget.Toast;
 import com.easemob.EMChatRoomChangeListener;
 import com.easemob.EMError;
 import com.easemob.EMEventListener;
-import com.easemob.EMGroupChangeListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.EMValueCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
@@ -94,6 +94,7 @@ import com.easemob.chatuidemo.adapter.ExpressionAdapter;
 import com.easemob.chatuidemo.adapter.ExpressionPagerAdapter;
 import com.easemob.chatuidemo.adapter.MessageAdapter;
 import com.easemob.chatuidemo.adapter.VoicePlayClickListener;
+import com.easemob.chatuidemo.domain.RobotUser;
 import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.chatuidemo.utils.ImageUtils;
 import com.easemob.chatuidemo.utils.SmileUtils;
@@ -200,6 +201,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	};
 	public EMGroup group;
 	public EMChatRoom room;
+	public boolean isRobot;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -378,7 +380,18 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 		if (chatType == CHATTYPE_SINGLE) { // 单聊
 			toChatUsername = getIntent().getStringExtra("userId");
-			((TextView) findViewById(R.id.name)).setText(toChatUsername);
+			Map<String,RobotUser> robotMap=((DemoHXSDKHelper)HXSDKHelper.getInstance()).getRobotList();
+			if(robotMap!=null&&robotMap.containsKey(toChatUsername)){
+				isRobot = true;
+				String nick = robotMap.get(toChatUsername).getNick();
+				if(!TextUtils.isEmpty(nick)){
+					((TextView) findViewById(R.id.name)).setText(nick);
+				}else{
+					((TextView) findViewById(R.id.name)).setText(toChatUsername);
+				}
+			}else{
+				((TextView) findViewById(R.id.name)).setText(toChatUsername);
+			}
 		} else {
 			// 群聊
 			findViewById(R.id.container_to_group).setVisibility(View.VISIBLE);
@@ -890,7 +903,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * @param isResend
 	 *            boolean resend
 	 */
-	private void sendText(String content) {
+	public void sendText(String content) {
 
 		if (content.length() > 0) {
 			EMMessage message = EMMessage.createSendMessage(EMMessage.Type.TXT);
@@ -900,7 +913,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			}else if(chatType == CHATTYPE_CHATROOM){
 			    message.setChatType(ChatType.ChatRoom);
 			}
-			
+			if(isRobot){
+				message.setAttribute("em_robot_message", true);
+			}
 			TextMessageBody txtBody = new TextMessageBody(content);
 			// 设置消息body
 			message.addBody(txtBody);
@@ -941,7 +956,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			int len = Integer.parseInt(length);
 			VoiceMessageBody body = new VoiceMessageBody(new File(filePath), len);
 			message.addBody(body);
-
+			if(isRobot){
+				message.setAttribute("em_robot_message", true);
+			}
 			conversation.addMessage(message);
 			adapter.refreshSelectLast();
 			setResult(RESULT_OK);
@@ -973,6 +990,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		// 默认超过100k的图片会压缩后发给对方，可以设置成发送原图
 		// body.setSendOriginalImage(true);
 		message.addBody(body);
+		if(isRobot){
+			message.setAttribute("em_robot_message", true);
+		}
 		conversation.addMessage(message);
 
 		listView.setAdapter(adapter);
@@ -1001,6 +1021,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			message.setReceipt(to);
 			VideoMessageBody body = new VideoMessageBody(videoFile, thumbPath, length, videoFile.length());
 			message.addBody(body);
+			if(isRobot){
+				message.setAttribute("em_robot_message", true);
+			}
 			conversation.addMessage(message);
 			listView.setAdapter(adapter);
 			adapter.refreshSelectLast();
@@ -1067,6 +1090,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		LocationMessageBody locBody = new LocationMessageBody(locationAddress, latitude, longitude);
 		message.addBody(locBody);
 		message.setReceipt(toChatUsername);
+		if(isRobot){
+			message.setAttribute("em_robot_message", true);
+		}
 		conversation.addMessage(message);
 		listView.setAdapter(adapter);
 		adapter.refreshSelectLast();
@@ -1122,6 +1148,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		// add message body
 		NormalFileMessageBody body = new NormalFileMessageBody(new File(filePath));
 		message.addBody(body);
+		if(isRobot){
+			message.setAttribute("em_robot_message", true);
+		}
 		conversation.addMessage(message);
 		listView.setAdapter(adapter);
 		adapter.refreshSelectLast();

@@ -19,6 +19,7 @@ import java.util.Map;
 import android.content.Context;
 
 
+import com.easemob.chatuidemo.domain.RobotUser;
 import com.easemob.chatuidemo.domain.User;
 
 public class UserDao {
@@ -31,6 +32,12 @@ public class UserDao {
 	public static final String COLUMN_NAME_DISABLED_GROUPS = "disabled_groups";
 	public static final String COLUMN_NAME_DISABLED_IDS = "disabled_ids";
 
+	public static final String ROBOT_TABLE_NAME = "robots";
+	public static final String ROBOT_COLUMN_NAME_ID = "username";
+	public static final String ROBOT_COLUMN_NAME_NICK = "nick";
+	public static final String ROBOT_COLUMN_NAME_AVATAR = "avatar";
+	
+	
 	public UserDao(Context context) {
 	    DemoDBManager.getInstance().onInit(context);
 	}
@@ -84,5 +91,13 @@ public class UserDao {
     
     public List<String> getDisabledIds(){
         return DemoDBManager.getInstance().getDisabledIds();
+    }
+    
+    public Map<String, RobotUser> getRobotUser(){
+    	return DemoDBManager.getInstance().getRobotList();
+    }
+    
+    public void saveRobotUser(List<RobotUser> robotList){
+    	DemoDBManager.getInstance().saveRobotList(robotList);
     }
 }
