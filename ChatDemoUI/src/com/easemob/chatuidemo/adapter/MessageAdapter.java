@@ -53,6 +53,7 @@ import android.widget.Toast;
 
 import com.easemob.EMCallBack;
 import com.easemob.EMError;
+import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMMessage;
@@ -67,6 +68,7 @@ import com.easemob.chat.TextMessageBody;
 import com.easemob.chat.VideoMessageBody;
 import com.easemob.chat.VoiceMessageBody;
 import com.easemob.chatuidemo.Constant;
+import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 import com.easemob.chatuidemo.activity.AlertDialog;
 import com.easemob.chatuidemo.activity.BaiduMapActivity;
@@ -109,8 +111,8 @@ public class MessageAdapter extends BaseAdapter{
 	private static final int MESSAGE_TYPE_RECV_VOICE_CALL = 13;
 	private static final int MESSAGE_TYPE_SENT_VIDEO_CALL = 14;
 	private static final int MESSAGE_TYPE_RECV_VIDEO_CALL = 15;
-	private static final int MESSAGE_TYPE_SENT_MENU = 16;
-	private static final int MESSAGE_TYPE_RECV_MENU = 17;
+	private static final int MESSAGE_TYPE_SENT_ROBOT_MENU = 16;
+	private static final int MESSAGE_TYPE_RECV_ROBOT_MENU = 17;
 
 	public static final String IMAGE_DIR = "chat/image/";
 	public static final String VOICE_DIR = "chat/audio/";
@@ -247,8 +249,8 @@ public class MessageAdapter extends BaseAdapter{
 			    return message.direct == EMMessage.Direct.RECEIVE ? MESSAGE_TYPE_RECV_VOICE_CALL : MESSAGE_TYPE_SENT_VOICE_CALL;
 			else if (message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VIDEO_CALL, false))
 			    return message.direct == EMMessage.Direct.RECEIVE ? MESSAGE_TYPE_RECV_VIDEO_CALL : MESSAGE_TYPE_SENT_VIDEO_CALL;
-			else if(message.getStringAttribute(Constant.MESSAGE_ATTR_MSGTYPE, null)!=null)
-				return message.direct == EMMessage.Direct.RECEIVE ? MESSAGE_TYPE_RECV_MENU : MESSAGE_TYPE_SENT_MENU;
+			else if(((DemoHXSDKHelper)HXSDKHelper.getInstance()).isRobotMenuMessage(message))
+				return message.direct == EMMessage.Direct.RECEIVE ? MESSAGE_TYPE_RECV_ROBOT_MENU : MESSAGE_TYPE_SENT_ROBOT_MENU;
 			else
 				return message.direct == EMMessage.Direct.RECEIVE ? MESSAGE_TYPE_RECV_TXT : MESSAGE_TYPE_SENT_TXT;
 		}
@@ -301,7 +303,7 @@ public class MessageAdapter extends BaseAdapter{
 				return message.direct == EMMessage.Direct.RECEIVE ? inflater.inflate(R.layout.row_received_video_call,
 						null) : inflater.inflate(R.layout.row_sent_video_call, null);
 			// 含有菜单的消息	
-			else if (message.getStringAttribute(Constant.MESSAGE_ATTR_MSGTYPE, null) != null)
+			else if (((DemoHXSDKHelper)HXSDKHelper.getInstance()).isRobotMenuMessage(message))
 				return message.direct == EMMessage.Direct.RECEIVE ? inflater.inflate(R.layout.row_received_menu, null)
 						: inflater.inflate(R.layout.row_sent_message, null);
 			else
@@ -468,9 +470,9 @@ public class MessageAdapter extends BaseAdapter{
 			        || message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VIDEO_CALL, false))
 			    // 音视频通话
 			    handleCallMessage(message, holder, position);
-			else if(message.getStringAttribute(Constant.MESSAGE_ATTR_MSGTYPE, null)!=null)
+			else if(((DemoHXSDKHelper)HXSDKHelper.getInstance()).isRobotMenuMessage(message))
 				//含有列表的消息
-				handleMenuMessage(message, holder, position);
+				handleRobotMenuMessage(message, holder, position);
 			else
 			    handleTextMessage(message, holder, position);
 			break;
@@ -615,7 +617,7 @@ public class MessageAdapter extends BaseAdapter{
 		}
 	}
 	
-	private void setLayout(LinearLayout parentView,JSONArray jsonArr){
+	private void setRobotMenuMessageLayout(LinearLayout parentView,JSONArray jsonArr){
 		try {
 			parentView.removeAllViews();
 			for (int i = 0; i < jsonArr.length(); i++) {
@@ -647,14 +649,14 @@ public class MessageAdapter extends BaseAdapter{
 		
 		
 	}
-	private void handleMenuMessage(EMMessage message, ViewHolder holder, final int postion){
+	private void handleRobotMenuMessage(EMMessage message, ViewHolder holder, final int postion){
 		try {
-			JSONObject jsonObj = message.getJSONObjectAttribute(Constant.MESSAGE_ATTR_MSGTYPE);
+			JSONObject jsonObj = message.getJSONObjectAttribute(Constant.MESSAGE_ATTR_ROBOT_MSGTYPE);
 			if(jsonObj.has("choice")){
 				JSONObject jsonChoice = jsonObj.getJSONObject("choice");
 				String title = jsonChoice.getString("title");
 				holder.tvTitle.setText(title);
-				setLayout(holder.tvList, jsonChoice.getJSONArray("list"));
+				setRobotMenuMessageLayout(holder.tvList, jsonChoice.getJSONArray("list"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

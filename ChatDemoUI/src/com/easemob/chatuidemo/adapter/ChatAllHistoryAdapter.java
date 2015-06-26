@@ -189,17 +189,9 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 			digest = getStrng(context, R.string.video);
 			break;
 		case TXT: // 文本消息
-			if(message.getStringAttribute(Constant.MESSAGE_ATTR_MSGTYPE, null)!=null){
-				String title = "";
-				try {
-					JSONObject jsonObj = message.getJSONObjectAttribute(Constant.MESSAGE_ATTR_MSGTYPE);
-					if(jsonObj.has("choice")){
-						JSONObject jsonChoice = jsonObj.getJSONObject("choice");
-						title = jsonChoice.getString("title");
-					}
-				} catch (Exception e) {
-				}
-				digest = title;
+			
+			if(((DemoHXSDKHelper)HXSDKHelper.getInstance()).isRobotMenuMessage(message)){
+				digest = ((DemoHXSDKHelper)HXSDKHelper.getInstance()).getRobotMenuMessageDigest(message);
 			}else if(message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL,false)){
 				TextMessageBody txtBody = (TextMessageBody) message.getBody();
 				digest = getStrng(context, R.string.voice_call) + txtBody.getMessage();

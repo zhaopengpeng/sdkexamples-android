@@ -21,5 +21,5 @@ public class Constant {
 	public static final String MESSAGE_ATTR_IS_VIDEO_CALL = "is_video_call";
 	public static final String ACCOUNT_REMOVED = "account_removed";
 	public static final String CHAT_ROBOT = "item_robots";
-	public static final String MESSAGE_ATTR_MSGTYPE = "msgtype";
+	public static final String MESSAGE_ATTR_ROBOT_MSGTYPE = "msgtype";
 }

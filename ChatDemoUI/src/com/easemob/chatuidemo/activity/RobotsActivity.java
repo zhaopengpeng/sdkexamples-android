@@ -77,7 +77,7 @@ public class RobotsActivity extends BaseActivity {
 
 			@Override
 			public void onRefresh() {
-				getRobotListFromServer();
+				getRobotNamesFromServer();
 			}
 		});
 		Map<String, RobotUser> robotMap = ((DemoHXSDKHelper) HXSDKHelper.getInstance()).getRobotList();
@@ -85,7 +85,7 @@ public class RobotsActivity extends BaseActivity {
 			robotList.addAll(robotMap.values());
 		} else {
 			progressBar.setVisibility(View.VISIBLE);
-			getRobotListFromServer();
+			getRobotNamesFromServer();
 		}
 		adapter = new RobotAdapter(this, 1, robotList);
 		mListView.setAdapter(adapter);
@@ -115,8 +115,8 @@ public class RobotsActivity extends BaseActivity {
 		});
 	}
 
-	private void getRobotListFromServer() {
-		asyncGetRobotListFromServer(new EMValueCallBack<List<EMContact>>() {
+	private void getRobotNamesFromServer() {
+		asyncGetRobotNamesFromServer(new EMValueCallBack<List<EMContact>>() {
 
 			@Override
 			public void onSuccess(final List<EMContact> value) {
@@ -158,7 +158,7 @@ public class RobotsActivity extends BaseActivity {
 		});
 	}
 
-	private void asyncGetRobotListFromServer(final EMValueCallBack<List<EMContact>> callback) {
+	private void asyncGetRobotNamesFromServer(final EMValueCallBack<List<EMContact>> callback) {
 		new Thread(new Runnable() {
 
 			@Override
