@@ -147,7 +147,18 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getAffiliationsCount() + st);
 		
 		List<String> members = new ArrayList<String>();
-		members.addAll(group.getMembers());
+		List<String> groupList = group.getMembers();
+		for(int i = 0; i<groupList.size();i++){
+			if(groupList.get(i).equals(group.getOwner())){
+				members.add(group.getOwner());
+				for(int j= 0;j<groupList.size();j++){
+					if(!groupList.get(j).equals(group.getOwner())){
+						members.add(groupList.get(j));
+					}
+				}
+			}
+		}
+//		members.addAll(group.getMembers());
 		
 		adapter = new GridAdapter(this, R.layout.grid, members);
 		userGridview.setAdapter(adapter);
@@ -289,15 +300,37 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		}
 	}
 
+	
 	private void refreshMembers(){
 	    adapter.clear();
         
         List<String> members = new ArrayList<String>();
-        members.addAll(group.getMembers());
+//        members.addAll(group.getMembers());
+        List<String> groupList = group.getMembers();
+		for(int i = 0; i<groupList.size();i++){
+			if(groupList.get(i).equals(group.getOwner())){
+				members.add(group.getOwner());
+				for(int j= 0;j<groupList.size();j++){
+					if(!groupList.get(j).equals(group.getOwner())){
+						members.add(groupList.get(j));
+					}
+				}
+			}
+		}
         adapter.addAll(members);
         
         adapter.notifyDataSetChanged();
 	}
+	
+//	private void refreshMembers(){
+//	    adapter.clear();
+//        
+//        List<String> members = new ArrayList<String>();
+//        members.addAll(group.getMembers());
+//        adapter.addAll(members);
+//        
+//        adapter.notifyDataSetChanged();
+//	}
 	
 	/**
 	 * 点击退出群组按钮
@@ -629,6 +662,8 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 //				button.setCompoundDrawables(null, avatar, null, null);
 				holder.textView.setText(username);
 				UserUtils.setUserAvatar(getContext(), username, holder.imageView);
+				//群主头像
+				UserUtils.setownerAvatar(getContext(), username,group.getOwner(), holder.imageView);
 				// demo群组成员的头像都用默认头像，需由开发者自己去设置头像
 				if (isInDeleteMode) {
 					// 如果是删除模式下，显示减人图标

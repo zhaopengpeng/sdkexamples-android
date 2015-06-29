@@ -41,4 +41,14 @@ public class UserUtils {
         }
     }
     
+    /**
+     * 设置群主头像
+     * @param username
+     */
+    public static void setownerAvatar(Context context, String username,String ownername, ImageView imageView){
+        	if(username == ownername){
+        		Picasso.with(context).load(R.drawable.default_avatar_owner).into(imageView);
+        	}
+    }
+    
 }
