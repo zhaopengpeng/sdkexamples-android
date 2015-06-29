@@ -16,7 +16,6 @@ package com.easemob.chatuidemo.activity;
 
 import java.util.UUID;
 
-import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.media.SoundPool;
@@ -335,7 +334,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 				soundPool.stop(streamID);
 			chronometer.stop();
 			endCallTriggerByMe = true;
-			callStateTextView.setText("正在挂断...");
+			callStateTextView.setText(getResources().getString(R.string.hanging_up));
 			try {
 				EMChatManager.getInstance().endCall();
 			} catch (Exception e) {

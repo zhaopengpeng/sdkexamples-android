@@ -200,7 +200,7 @@
     <string name="User_name_cannot_be_empty">用户名不能为空！</string>
     <string name="Password_cannot_be_empty">密码不能为空！</string>
     <string name="please_set_the_current">设置当前用户的昵称\n用于ios离线推送时显示用户昵称</string>
-    <string name="Is_landing">正在登陆...</string>
+    <string name="Is_landing">正在登录...</string>
     <string name="list_is_for">将在后台获取好友和群聊列表...</string>
     <string name="login_failure_failed">登录失败: 获取好友或群聊失败</string>
     <string name="Login_failed">登录失败:</string>
@@ -284,4 +284,7 @@
     <string name="refreshing_group_list">正在刷新群列表</string>
     <string name="failed_to_load_data">加载数据失败，请检查网络或稍后重试</string>
     <string name="searching">正在搜索..</string>
+    <string name="hanging_up">正在挂断..</string>
+    <string name="illegal_user_name">用户名不合法</string>
+    <string name="robot_chat">环信小助手</string>
 </resources>

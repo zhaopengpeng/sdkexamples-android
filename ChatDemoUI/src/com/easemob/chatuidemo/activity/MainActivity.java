@@ -95,6 +95,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	private boolean isCurrentAccountRemoved = false;
 	
 	private MyConnectionListener connectionListener = null;
+	private MyGroupChangeListener groupChangeListener = null;
 
 	/**
 	 * 检查当前用户是否被删除
@@ -159,8 +160,9 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		connectionListener = new MyConnectionListener();
 		EMChatManager.getInstance().addConnectionListener(connectionListener);
 		
+		groupChangeListener = new MyGroupChangeListener();
 		// 注册群聊相关的listener
-        EMGroupManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
+        EMGroupManager.getInstance().addGroupChangeListener(groupChangeListener);
 		
 		
 		//内部测试方法，请忽略
@@ -177,7 +179,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
                 HXSDKHelper.getInstance().noitifyGroupSyncListeners(true);
                 
                 if(HXSDKHelper.getInstance().isContactsSyncedWithServer()){
-                    HXSDKHelper.getInstance().notifyHXSDKAppReadyForRecevingEvents();
+                    HXSDKHelper.getInstance().notifyForRecevingEvents();
                 }
             }
 
@@ -233,6 +235,14 @@ public class MainActivity extends BaseActivity implements EMEventListener {
                 chatRoomItem.setHeader("");
                 userlist.put(Constant.CHAT_ROOM, chatRoomItem);
                 
+                // 添加"Robot"
+        		User robotUser = new User();
+        		String strRobot = context.getString(R.string.robot_chat);
+        		robotUser.setUsername(Constant.CHAT_ROBOT);
+        		robotUser.setNick(strRobot);
+        		robotUser.setHeader("");
+        		userlist.put(Constant.CHAT_ROBOT, robotUser);
+        		
                  // 存入内存
                 DemoApplication.getInstance().setContactList(userlist);
                  // 存入db
@@ -243,7 +253,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
                 HXSDKHelper.getInstance().notifyContactsSyncListener(true);
                 
                 if(HXSDKHelper.getInstance().isGroupsSyncedWithServer()){
-                    HXSDKHelper.getInstance().notifyHXSDKAppReadyForRecevingEvents();
+                    HXSDKHelper.getInstance().notifyForRecevingEvents();
                 }
                 
             }
@@ -410,6 +420,10 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
 		if(connectionListener != null){
 		    EMChatManager.getInstance().removeConnectionListener(connectionListener);
+		}
+		
+		if(groupChangeListener != null){
+		    EMGroupManager.getInstance().removeGroupChangeListener(groupChangeListener);
 		}
 		
 		try {
@@ -593,23 +607,36 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
 		@Override
 		public void onConnected() {
+            boolean groupSynced = HXSDKHelper.getInstance().isGroupsSyncedWithServer();
+            boolean contactSynced = HXSDKHelper.getInstance().isContactsSyncedWithServer();
+            
+            // in case group and contact were already synced, we supposed to notify sdk we are ready to receive the events
+            if(groupSynced && contactSynced){
+                new Thread(){
+                    @Override
+                    public void run(){
+                        HXSDKHelper.getInstance().notifyForRecevingEvents();
+                    }
+                }.start();
+            }else{
+                if(!groupSynced){
+                    asyncFetchGroupsFromServer();
+                }
+                
+                if(!contactSynced){
+                    asyncFetchContactsFromServer();
+                }
+                
+                if(!HXSDKHelper.getInstance().isBlackListSyncedWithServer()){
+                    asyncFetchBlackListFromServer();
+                }
+            }
+            
 			runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
 					chatHistoryFragment.errorItem.setVisibility(View.GONE);
-					
-				    if(!HXSDKHelper.getInstance().isGroupsSyncedWithServer()){
-                        asyncFetchGroupsFromServer();
-                    }
-                    
-                    if(!HXSDKHelper.getInstance().isContactsSyncedWithServer()){
-                        asyncFetchContactsFromServer();
-                    }
-                    
-                    if(!HXSDKHelper.getInstance().isBlackListSyncedWithServer()){
-                        asyncFetchBlackListFromServer();
-                    }
 				}
 
 			});

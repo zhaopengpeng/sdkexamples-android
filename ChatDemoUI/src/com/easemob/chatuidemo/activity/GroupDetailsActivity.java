@@ -92,7 +92,18 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	    super.onCreate(savedInstanceState);
+	    
+	    // 获取传过来的groupid
+        groupId = getIntent().getStringExtra("groupId");
+        group = EMGroupManager.getInstance().getGroup(groupId);
+
+        // we are not supposed to show the group if we don't find the group
+        if(group == null){
+            finish();
+            return;
+        }
+        
 		setContentView(R.layout.activity_group_details);
 		instance = this;
 		st = getResources().getString(R.string.people);
@@ -118,9 +129,6 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		referenceWidth = referenceDrawable.getIntrinsicWidth();
 		referenceHeight = referenceDrawable.getIntrinsicHeight();
 
-		// 获取传过来的groupid
-		groupId = getIntent().getStringExtra("groupId");
-		group = EMGroupManager.getInstance().getGroup(groupId);
 
 		idText.setText(groupId);
 		if (group.getOwner() == null || "".equals(group.getOwner())
