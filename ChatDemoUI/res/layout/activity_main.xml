@@ -40,6 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="10dp"
+                android:layout_marginTop="1dp"
                 android:background="@drawable/unread_count_bg"
                 android:gravity="center"
                 android:text="7"
@@ -74,12 +75,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="10dp"
-                android:background="@drawable/unread_count_bg"
-                android:gravity="center"
-                android:text="7"
-                android:textColor="@android:color/white"
-                android:textSize="12sp"
-                android:visibility="invisible" />
+                android:background="@drawable/unread_dot"
+                android:visibility="visible" />
         </RelativeLayout>
 
         <RelativeLayout

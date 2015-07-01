@@ -106,7 +106,7 @@ public class ContactAdapter extends ArrayAdapter<User>  implements SectionIndexe
 		    holder.avatar.setImageResource(R.drawable.new_friends_icon);
 			if(user.getUnreadMsgCount() > 0){
 			    holder.unreadMsgView.setVisibility(View.VISIBLE);
-			    holder.unreadMsgView.setText(user.getUnreadMsgCount()+"");
+//			    holder.unreadMsgView.setText(user.getUnreadMsgCount()+"");
 			}else{
 			    holder.unreadMsgView.setVisibility(View.INVISIBLE);
 			}
