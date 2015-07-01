@@ -233,12 +233,14 @@ public class RecorderVideoActivity extends BaseActivity implements
 			Toast.makeText(this, R.string.The_video_to_start, Toast.LENGTH_SHORT).show();
 			btn_switch.setVisibility(View.INVISIBLE);
 			btnStart.setVisibility(View.INVISIBLE);
+			btnStart.setEnabled(false);
 			btnStop.setVisibility(View.VISIBLE);
 			// 重置其他
 			chronometer.setBase(SystemClock.elapsedRealtime());
 			chronometer.start();
 			break;
 		case R.id.recorder_stop:
+		    btnStop.setEnabled(false);
 			// 停止拍摄
 			stopRecording();
 			btn_switch.setVisibility(View.VISIBLE);
@@ -264,18 +266,13 @@ public class RecorderVideoActivity extends BaseActivity implements
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									dialog.dismiss();
-									if (mCamera == null) {
-										initCamera();
-									}
-									try {
-										mCamera.setPreviewDisplay(mSurfaceHolder);
-										mCamera.startPreview();
-										handleSurfaceChanged();
-									} catch (IOException e1) {
-										EMLog.e("video", "start preview fail "
-												+ e1.getMessage());
-									}
+								    if(localPath != null){
+								        File file = new File(localPath);
+								        if(file.exists())
+								            file.delete();
+								    }
+								    finish();
+									
 								}
 							}).setCancelable(false).show();
 			break;
