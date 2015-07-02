@@ -453,7 +453,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 			public void run() {
 				int count = getUnreadAddressCountTotal();
 				if (count > 0) {
-					unreadAddressLable.setText(String.valueOf(count));
+//					unreadAddressLable.setText(String.valueOf(count));
 					unreadAddressLable.setVisibility(View.VISIBLE);
 				} else {
 					unreadAddressLable.setVisibility(View.INVISIBLE);

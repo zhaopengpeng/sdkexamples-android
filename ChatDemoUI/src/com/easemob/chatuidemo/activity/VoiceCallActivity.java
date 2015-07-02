@@ -186,7 +186,8 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
                                     soundPool.stop(streamID);
                             } catch (Exception e) {
                             }
-                            closeSpeakerOn();
+                            if(!isHandsfreeState)
+                                closeSpeakerOn();
                             //显示是否为直连，方便测试
                             ((TextView)findViewById(R.id.tv_is_p2p)).setText(EMChatManager.getInstance().isDirectCall()
                                     ? R.string.direct_call : R.string.relay_call);
