@@ -48,6 +48,8 @@ import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
 import com.easemob.chatuidemo.activity.ChatActivity;
 import com.easemob.chatuidemo.activity.MainActivity;
+import com.easemob.chatuidemo.activity.VideoCallActivity;
+import com.easemob.chatuidemo.activity.VoiceCallActivity;
 import com.easemob.chatuidemo.domain.RobotUser;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.receiver.CallReceiver;
@@ -80,6 +82,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
      */
     private Map<String, RobotUser> robotList;
     private CallReceiver callReceiver;
+    
     
     /**
      * 用来记录foreground Activity
@@ -312,19 +315,26 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             public Intent getLaunchIntent(EMMessage message) {
                 //设置点击通知栏跳转事件
                 Intent intent = new Intent(appContext, ChatActivity.class);
-                ChatType chatType = message.getChatType();
-                if (chatType == ChatType.Chat) { // 单聊信息
-                    intent.putExtra("userId", message.getFrom());
-                    intent.putExtra("chatType", ChatActivity.CHATTYPE_SINGLE);
-                } else { // 群聊信息
-                    // message.getTo()为群聊id
-                    intent.putExtra("groupId", message.getTo());
-                    if(chatType == ChatType.GroupChat){
-                        intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
-                    }else{
-                        intent.putExtra("chatType", ChatActivity.CHATTYPE_CHATROOM);
+                //有电话时优先跳转到通话页面
+                if(isVideoCalling){
+                    intent = new Intent(appContext, VideoCallActivity.class);
+                }else if(isVoiceCalling){
+                    intent = new Intent(appContext, VoiceCallActivity.class);
+                }else{
+                    ChatType chatType = message.getChatType();
+                    if (chatType == ChatType.Chat) { // 单聊信息
+                        intent.putExtra("userId", message.getFrom());
+                        intent.putExtra("chatType", ChatActivity.CHATTYPE_SINGLE);
+                    } else { // 群聊信息
+                        // message.getTo()为群聊id
+                        intent.putExtra("groupId", message.getTo());
+                        if(chatType == ChatType.GroupChat){
+                            intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+                        }else{
+                            intent.putExtra("chatType", ChatActivity.CHATTYPE_CHATROOM);
+                        }
+                        
                     }
-                    
                 }
                 return intent;
             }

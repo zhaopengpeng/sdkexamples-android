@@ -130,6 +130,9 @@ public abstract class HXSDKHelper {
 	private boolean isBlackListSyncedWithServer = false;
 	
 	private boolean alreadyNotified = false;
+	
+	public boolean isVoiceCalling;
+    public boolean isVideoCalling;
 
     protected HXSDKHelper(){
         me = this;

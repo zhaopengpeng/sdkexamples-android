@@ -204,6 +204,7 @@
         <activity
             android:name=".activity.VoiceCallActivity"
             android:screenOrientation="portrait"
+            android:launchMode="singleTask"
             android:theme="@style/nornal_style" >
         </activity>
         <!-- 视频通话 -->
@@ -211,6 +212,7 @@
             android:name=".activity.VideoCallActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
+            android:launchMode="singleTask"
             android:theme="@style/horizontal_slide" >
         </activity>
         <!-- 群聊简单信息 -->
