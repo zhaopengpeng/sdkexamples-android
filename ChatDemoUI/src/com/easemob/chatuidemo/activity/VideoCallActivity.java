@@ -57,6 +57,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
     private boolean isAnswered;
     private int streamID;
     private boolean endCallTriggerByMe = false;
+    private boolean monitor = true;
 
     EMVideoCallHelper callHelper;
     private TextView callStateTextView;
@@ -76,6 +77,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
     private CameraHelper cameraHelper;
     private LinearLayout topContainer;
     private LinearLayout bottomContainer;
+    private TextView monitorTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +109,8 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
         btnsContainer = (RelativeLayout) findViewById(R.id.ll_btns);
         topContainer = (LinearLayout) findViewById(R.id.ll_top_container);
         bottomContainer = (LinearLayout) findViewById(R.id.ll_bottom_container);
+        monitorTextView = (TextView) findViewById(R.id.tv_call_monitor);
+        
 
         refuseBtn.setOnClickListener(this);
         answerBtn.setOnClickListener(this);
@@ -139,12 +143,11 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
         // 设置显示对方图像的surfaceview
         callHelper.setSurfaceView(oppositeSurface);
 
-        localSurfaceHolder.addCallback(new localCallback());
-        oppositeSurfaceHolder.addCallback(new oppositeCallback());
+        localSurfaceHolder.addCallback(new LocalCallback());
+        oppositeSurfaceHolder.addCallback(new OppositeCallback());
 
         // 设置通话监听
         addCallStateListener();
-
         if (!isInComingCall) {// 拨打电话
             soundPool = new SoundPool(1, AudioManager.STREAM_RING, 0);
             outgoing = soundPool.load(this, R.raw.outgoing, 1);
@@ -174,7 +177,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
      * 本地SurfaceHolder callback
      * 
      */
-    class localCallback implements SurfaceHolder.Callback {
+    class LocalCallback implements SurfaceHolder.Callback {
 
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
@@ -193,7 +196,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
     /**
      * 对方SurfaceHolder callback
      */
-    class oppositeCallback implements SurfaceHolder.Callback {
+    class OppositeCallback implements SurfaceHolder.Callback {
 
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
@@ -279,6 +282,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
                             nickTextView.setVisibility(View.INVISIBLE);
                             callStateTextView.setText(R.string.In_the_call);
                             callingState = CallingState.NORMAL;
+                            startMonitor();
                         }
 
                     });
@@ -478,6 +482,7 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
     protected void onDestroy() {
         super.onDestroy();
         HXSDKHelper.getInstance().isVideoCalling = false;
+        stopMonitor();
         try {
 			callHelper.setSurfaceView(null);
 			cameraHelper.stopCapture();
@@ -493,6 +498,37 @@ public class VideoCallActivity extends CallActivity implements OnClickListener {
         callDruationText = chronometer.getText().toString();
         saveCallRecord(1);
         finish();
+    }
+    
+    /**
+     * 方便开发测试，实际app中去掉显示即可
+     */
+    void startMonitor(){
+        new Thread(new Runnable() {
+            public void run() {
+                while(monitor){
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            monitorTextView.setText("宽x高："+callHelper.getVideoWidth()+"x"+callHelper.getVideoHeight()
+                                    + "\n延迟：" + callHelper.getVideoTimedelay()
+                                    + "\n帧率：" + callHelper.getVideoFramerate()
+                                    + "\n丢包数：" + callHelper.getVideoLostcnt()
+                                    + "\n本地比特率：" + callHelper.getLocalBitrate()
+                                    + "\n对方比特率：" + callHelper.getRemoteBitrate());
+                            
+                        }
+                    });
+                    try {
+                        Thread.sleep(1500);
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        }).start();
+    }
+    
+    void stopMonitor(){
+        monitor = false;
     }
 
 }
