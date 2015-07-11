@@ -16,6 +16,7 @@ package com.easemob.chat.demo;
 import java.util.Random;
 
 import com.easemob.EMCallBack;
+import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatManager;
 
 import android.app.Activity;
@@ -41,6 +42,12 @@ public class LoginActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		if(EMChat.getInstance().isLoggedIn()){
+		    startActivity(new Intent(this, MainActivity.class));
+		    finish();
+		}
+		
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_login);
 

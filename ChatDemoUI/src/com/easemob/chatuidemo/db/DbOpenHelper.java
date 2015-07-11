@@ -21,7 +21,7 @@ import com.easemob.applib.controller.HXSDKHelper;
 
 public class DbOpenHelper extends SQLiteOpenHelper{
 
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 	private static DbOpenHelper instance;
 
 	private static final String USERNAME_TABLE_CREATE = "CREATE TABLE "
@@ -41,6 +41,11 @@ public class DbOpenHelper extends SQLiteOpenHelper{
 			+ InviteMessgeDao.COLUMN_NAME_ISINVITEFROMME + " INTEGER, "
 			+ InviteMessgeDao.COLUMN_NAME_TIME + " TEXT); ";
 			
+	private static final String ROBOT_TABLE_CREATE = "CREATE TABLE "
+			+ UserDao.ROBOT_TABLE_NAME + " ("
+			+ UserDao.ROBOT_COLUMN_NAME_ID + " TEXT PRIMARY KEY, "
+			+ UserDao.ROBOT_COLUMN_NAME_NICK + " TEXT, "
+			+ UserDao.ROBOT_COLUMN_NAME_AVATAR + " TEXT);";
 			
 	private static final String CREATE_PREF_TABLE = "CREATE TABLE "
             + UserDao.PREF_TABLE_NAME + " ("
@@ -67,6 +72,7 @@ public class DbOpenHelper extends SQLiteOpenHelper{
 		db.execSQL(USERNAME_TABLE_CREATE);
 		db.execSQL(INIVTE_MESSAGE_TABLE_CREATE);
 		db.execSQL(CREATE_PREF_TABLE);
+		db.execSQL(ROBOT_TABLE_CREATE);
 		
 	}
 
@@ -80,6 +86,9 @@ public class DbOpenHelper extends SQLiteOpenHelper{
 		if(oldVersion < 3){
 		    db.execSQL(CREATE_PREF_TABLE);
         }
+		if(oldVersion < 4){
+			db.execSQL(ROBOT_TABLE_CREATE);
+		}
 	}
 	
 	public void closeDB() {

@@ -13,8 +13,9 @@ import android.text.TextUtils;
 
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.domain.InviteMessage;
-import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.domain.InviteMessage.InviteMesageStatus;
+import com.easemob.chatuidemo.domain.RobotUser;
+import com.easemob.chatuidemo.domain.User;
 import com.easemob.util.HanziToPinyin;
 
 public class DemoDBManager {
@@ -76,7 +77,7 @@ public class DemoDBManager {
                 }
                 
                 if (username.equals(Constant.NEW_FRIENDS_USERNAME) || username.equals(Constant.GROUP_USERNAME)
-                        || username.equals(Constant.CHAT_ROOM)) {
+                        || username.equals(Constant.CHAT_ROOM)|| username.equals(Constant.CHAT_ROBOT)) {
                     user.setHeader("");
                 } else if (Character.isDigit(headerName.charAt(0))) {
                     user.setHeader("#");
@@ -281,4 +282,70 @@ public class DemoDBManager {
             dbHelper.closeDB();
         }
     }
+    
+    
+    /**
+     * Save Robot list
+     */
+	synchronized public void saveRobotList(List<RobotUser> robotList) {
+		SQLiteDatabase db = dbHelper.getWritableDatabase();
+		if (db.isOpen()) {
+			db.delete(UserDao.ROBOT_TABLE_NAME, null, null);
+			for (RobotUser item : robotList) {
+				ContentValues values = new ContentValues();
+				values.put(UserDao.ROBOT_COLUMN_NAME_ID, item.getUsername());
+				if (item.getNick() != null)
+					values.put(UserDao.ROBOT_COLUMN_NAME_NICK, item.getNick());
+				if (item.getAvatar() != null)
+					values.put(UserDao.ROBOT_COLUMN_NAME_AVATAR, item.getAvatar());
+				db.replace(UserDao.ROBOT_TABLE_NAME, null, values);
+			}
+		}
+	}
+    
+    /**
+     * load robot list
+     */
+	synchronized public Map<String, RobotUser> getRobotList() {
+		SQLiteDatabase db = dbHelper.getReadableDatabase();
+		Map<String, RobotUser> users = null;
+		if (db.isOpen()) {
+			Cursor cursor = db.rawQuery("select * from " + UserDao.ROBOT_TABLE_NAME, null);
+			if(cursor.getCount()>0){
+				users = new HashMap<String, RobotUser>();
+			};
+			while (cursor.moveToNext()) {
+				String username = cursor.getString(cursor.getColumnIndex(UserDao.ROBOT_COLUMN_NAME_ID));
+				String nick = cursor.getString(cursor.getColumnIndex(UserDao.ROBOT_COLUMN_NAME_NICK));
+				String avatar = cursor.getString(cursor.getColumnIndex(UserDao.ROBOT_COLUMN_NAME_AVATAR));
+				RobotUser user = new RobotUser();
+				user.setUsername(username);
+				user.setNick(nick);
+				user.setAvatar(avatar);
+				String headerName = null;
+				if (!TextUtils.isEmpty(user.getNick())) {
+					headerName = user.getNick();
+				} else {
+					headerName = user.getUsername();
+				}
+				if(Character.isDigit(headerName.charAt(0))){
+					user.setHeader("#");
+				}else{
+					user.setHeader(HanziToPinyin.getInstance().get(headerName.substring(0, 1)).get(0).target
+							.substring(0, 1).toUpperCase());
+					char header = user.getHeader().toLowerCase().charAt(0);
+					if (header < 'a' || header > 'z') {
+						user.setHeader("#");
+					}
+				}
+				
+				users.put(username, user);
+			}
+			cursor.close();
+		}
+		return users;
+	}
+    
+    
+    
 }

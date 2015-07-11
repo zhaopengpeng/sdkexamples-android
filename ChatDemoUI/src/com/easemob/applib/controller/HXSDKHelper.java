@@ -130,6 +130,9 @@ public abstract class HXSDKHelper {
 	private boolean isBlackListSyncedWithServer = false;
 	
 	private boolean alreadyNotified = false;
+	
+	public boolean isVoiceCalling;
+    public boolean isVideoCalling;
 
     protected HXSDKHelper(){
         me = this;
@@ -187,7 +190,6 @@ public abstract class HXSDKHelper {
         EMChat.getInstance().init(context);
         
         // 设置sandbox测试环境
-        // 建议开发者开发时设置此模式
         if(hxModel.isSandboxMode()){
             EMChat.getInstance().setEnv(EMEnvMode.EMSandboxMode);
         }

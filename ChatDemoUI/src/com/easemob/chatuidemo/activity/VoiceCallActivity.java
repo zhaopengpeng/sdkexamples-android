@@ -35,6 +35,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMCallStateChangeListener;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chatuidemo.R;
@@ -73,6 +74,8 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
         	return;
         }
 		setContentView(R.layout.activity_voice_call);
+		
+		HXSDKHelper.getInstance().isVoiceCalling = true;
 
 		comingBtnContainer = (LinearLayout) findViewById(R.id.ll_coming_call);
 		refuseBtn = (Button) findViewById(R.id.btn_refuse_call);
@@ -186,7 +189,8 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
                                     soundPool.stop(streamID);
                             } catch (Exception e) {
                             }
-                            closeSpeakerOn();
+                            if(!isHandsfreeState)
+                                closeSpeakerOn();
                             //显示是否为直连，方便测试
                             ((TextView)findViewById(R.id.tv_is_p2p)).setText(EMChatManager.getInstance().isDirectCall()
                                     ? R.string.direct_call : R.string.relay_call);
@@ -379,6 +383,7 @@ public class VoiceCallActivity extends CallActivity implements OnClickListener {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		HXSDKHelper.getInstance().isVoiceCalling = false;
 	}
 
 	@Override
