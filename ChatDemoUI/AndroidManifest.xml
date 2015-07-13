@@ -34,9 +34,9 @@
 
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
-    <permission android:name="com.example.gcm.permission.C2D_MESSAGE"
+    <permission android:name="com.easemob.chatuidemo.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
-    <uses-permission android:name="com.example.gcm.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.easemob.chatuidemo.permission.C2D_MESSAGE" />
     
     
     <application
@@ -289,7 +289,8 @@
         </receiver>
         
         <receiver
-            android:name="com.easemob.chat.GcmBroadcastReceiver"
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
@@ -297,7 +298,12 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.easemob.chat.GcmMessageHandler" />
+        <service android:name="com.easemob.chat.EMGcmListenerService"
+            android:exported="false" >
+             <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
 
         <!-- 设置环信应用的appkey -->
         <meta-data
@@ -319,9 +325,10 @@
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="3ecea51f560650b1ed8a4b99808f52e8" />
+        
         <!--  GCM version declaration -->
         <meta-data android:name="com.google.android.gms.version"
-            android:value="7571000" />
+            android:value="@integer/google_play_services_version" />
     </application>
 
 </manifest>

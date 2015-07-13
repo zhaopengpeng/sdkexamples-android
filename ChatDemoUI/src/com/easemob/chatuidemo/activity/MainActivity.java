@@ -603,7 +603,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
 		@Override
 		public void onDisconnected(final int error) {
-			final String st1 = getResources().getString(R.string.Less_than_chat_server_connection);
+//			final String st1 = getResources().getString(R.string.Less_than_chat_server_connection);
 			final String st2 = getResources().getString(R.string.the_current_network);
 			runOnUiThread(new Runnable() {
 
@@ -618,8 +618,8 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 					} else {
 						chatHistoryFragment.errorItem.setVisibility(View.VISIBLE);
 						if (NetUtils.hasNetwork(MainActivity.this))
-							chatHistoryFragment.errorText.setText(st1);
-						else
+//							chatHistoryFragment.errorText.setText(st1);
+//						else
 							chatHistoryFragment.errorText.setText(st2);
 
 					}
