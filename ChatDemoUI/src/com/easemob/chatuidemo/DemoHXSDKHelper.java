@@ -17,13 +17,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.easemob.EMCallBack;
@@ -37,14 +42,19 @@ import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
+import com.easemob.chat.EMContact;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
 import com.easemob.chatuidemo.activity.ChatActivity;
 import com.easemob.chatuidemo.activity.MainActivity;
+import com.easemob.chatuidemo.activity.VideoCallActivity;
+import com.easemob.chatuidemo.activity.VoiceCallActivity;
+import com.easemob.chatuidemo.domain.RobotUser;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.receiver.CallReceiver;
 import com.easemob.chatuidemo.utils.CommonUtils;
+import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.EMLog;
 import com.easemob.util.EasyUtils;
 
@@ -66,7 +76,13 @@ public class DemoHXSDKHelper extends HXSDKHelper{
      * contact list in cache
      */
     private Map<String, User> contactList;
+    
+    /**
+     * robot list in cache
+     */
+    private Map<String, RobotUser> robotList;
     private CallReceiver callReceiver;
+    
     
     /**
      * 用来记录foreground Activity
@@ -165,7 +181,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                             }
                         };
                         
-                      //注册通话广播接收者
+                      //注册广播接收者
                         appContext.registerReceiver(broadCastReceiver,cmdFilter);
                     }
 
@@ -198,7 +214,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             
             private void showToast(String value){
                 if(!registered){
-                  //注册通话广播接收者
+                  //注册广播接收者
                     appContext.registerReceiver(new BroadcastReceiver(){
 
                         @Override
@@ -276,8 +292,17 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 if(message.getType() == Type.TXT){
                     ticker = ticker.replaceAll("\\[.{2,3}\\]", "[表情]");
                 }
-                
-                return message.getFrom() + ": " + ticker;
+                Map<String,RobotUser> robotMap=((DemoHXSDKHelper)HXSDKHelper.getInstance()).getRobotList();
+    			if(robotMap!=null&&robotMap.containsKey(message.getFrom())){
+    				String nick = robotMap.get(message.getFrom()).getNick();
+    				if(!TextUtils.isEmpty(nick)){
+    					return nick + ": " + ticker;
+    				}else{
+    					return message.getFrom() + ": " + ticker;
+    				}
+    			}else{
+    				return message.getFrom() + ": " + ticker;
+    			}
             }
             
             @Override
@@ -290,19 +315,26 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             public Intent getLaunchIntent(EMMessage message) {
                 //设置点击通知栏跳转事件
                 Intent intent = new Intent(appContext, ChatActivity.class);
-                ChatType chatType = message.getChatType();
-                if (chatType == ChatType.Chat) { // 单聊信息
-                    intent.putExtra("userId", message.getFrom());
-                    intent.putExtra("chatType", ChatActivity.CHATTYPE_SINGLE);
-                } else { // 群聊信息
-                    // message.getTo()为群聊id
-                    intent.putExtra("groupId", message.getTo());
-                    if(chatType == ChatType.GroupChat){
-                        intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
-                    }else{
-                        intent.putExtra("chatType", ChatActivity.CHATTYPE_CHATROOM);
+                //有电话时优先跳转到通话页面
+                if(isVideoCalling){
+                    intent = new Intent(appContext, VideoCallActivity.class);
+                }else if(isVoiceCalling){
+                    intent = new Intent(appContext, VoiceCallActivity.class);
+                }else{
+                    ChatType chatType = message.getChatType();
+                    if (chatType == ChatType.Chat) { // 单聊信息
+                        intent.putExtra("userId", message.getFrom());
+                        intent.putExtra("chatType", ChatActivity.CHATTYPE_SINGLE);
+                    } else { // 群聊信息
+                        // message.getTo()为群聊id
+                        intent.putExtra("groupId", message.getTo());
+                        if(chatType == ChatType.GroupChat){
+                            intent.putExtra("chatType", ChatActivity.CHATTYPE_GROUP);
+                        }else{
+                            intent.putExtra("chatType", ChatActivity.CHATTYPE_CHATROOM);
+                        }
+                        
                     }
-                    
                 }
                 return intent;
             }
@@ -387,7 +419,47 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         
         return contactList;
     }
+    
+	public Map<String, RobotUser> getRobotList() {
+		if (getHXId() != null && robotList == null) {
+			robotList = ((DemoHXSDKModel) getModel()).getRobotList();
+		}
+		return robotList;
+	}
+	
+	
+	public boolean isRobotMenuMessage(EMMessage message) {
 
+		try {
+			JSONObject jsonObj = message.getJSONObjectAttribute(Constant.MESSAGE_ATTR_ROBOT_MSGTYPE);
+			if (jsonObj.has("choice")) {
+				return true;
+			}
+		} catch (Exception e) {
+		}
+		return false;
+	}
+	
+	public String getRobotMenuMessageDigest(EMMessage message) {
+		String title = "";
+		try {
+			JSONObject jsonObj = message.getJSONObjectAttribute(Constant.MESSAGE_ATTR_ROBOT_MSGTYPE);
+			if (jsonObj.has("choice")) {
+				JSONObject jsonChoice = jsonObj.getJSONObject("choice");
+				title = jsonChoice.getString("title");
+			}
+		} catch (Exception e) {
+		}
+		return title;
+	}
+	
+	
+	
+
+    public void setRobotList(Map<String, RobotUser> robotList){
+    	this.robotList = robotList;
+    }
+    
     /**
      * 设置好友user list到内存中
      *
@@ -406,6 +478,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             public void onSuccess() {
                 // TODO Auto-generated method stub
                 setContactList(null);
+                setRobotList(null);
                 getModel().closeDB();
                 if(callback != null){
                     callback.onSuccess();

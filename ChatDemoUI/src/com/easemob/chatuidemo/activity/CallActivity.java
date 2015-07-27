@@ -1,17 +1,17 @@
 package com.easemob.chatuidemo.activity;
 
+import android.content.Context;
+import android.media.AudioManager;
+import android.media.Ringtone;
+import android.media.SoundPool;
+import android.os.Bundle;
+
 import com.easemob.chat.EMCallStateChangeListener;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.TextMessageBody;
 import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.R;
-
-import android.content.Context;
-import android.media.AudioManager;
-import android.media.Ringtone;
-import android.media.SoundPool;
-import android.os.Bundle;
 
 public class CallActivity extends BaseActivity {
 
@@ -25,6 +25,7 @@ public class CallActivity extends BaseActivity {
     protected Ringtone ringtone;
     protected int outgoing;
     protected EMCallStateChangeListener callStateListener;
+    
     
     @Override
     protected void onCreate(Bundle arg0) {

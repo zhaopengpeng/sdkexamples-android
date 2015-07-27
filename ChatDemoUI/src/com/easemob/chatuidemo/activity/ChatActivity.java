@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -67,7 +68,6 @@ import android.widget.Toast;
 import com.easemob.EMChatRoomChangeListener;
 import com.easemob.EMError;
 import com.easemob.EMEventListener;
-import com.easemob.EMGroupChangeListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.EMValueCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
@@ -94,6 +94,7 @@ import com.easemob.chatuidemo.adapter.ExpressionAdapter;
 import com.easemob.chatuidemo.adapter.ExpressionPagerAdapter;
 import com.easemob.chatuidemo.adapter.MessageAdapter;
 import com.easemob.chatuidemo.adapter.VoicePlayClickListener;
+import com.easemob.chatuidemo.domain.RobotUser;
 import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.chatuidemo.utils.ImageUtils;
 import com.easemob.chatuidemo.utils.SmileUtils;
@@ -200,6 +201,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	};
 	public EMGroup group;
 	public EMChatRoom room;
+	public boolean isRobot;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -236,6 +238,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		iv_emoticons_checked.setVisibility(View.INVISIBLE);
 		more = findViewById(R.id.more);
 		edittext_layout.setBackgroundResource(R.drawable.input_bar_bg_normal);
+		voiceCallBtn = (ImageView) findViewById(R.id.btn_voice_call);
+		videoCallBtn = (ImageView) findViewById(R.id.btn_video_call);
 
 		// 动画资源文件,用于录制语音时
 		micImages = new Drawable[] { getResources().getDrawable(R.drawable.record_animate_01),
@@ -326,7 +330,6 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 		                         @Override
 		                         public void run() {
-		                                 // TODO Auto-generated method stub
 		                                 if (listView.getFirstVisiblePosition() == 0 && !isloading && haveMoreData) {
 		                                         List<EMMessage> messages;
 		                                         try {
@@ -343,7 +346,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		                                         
 		                                         if (messages.size() > 0) {
 	                                                 adapter.notifyDataSetChanged();
-	                                                 listView.setSelection(messages.size() - 1);
+	                                                 adapter.refreshSeekTo(messages.size() - 1);
 	                                                 if (messages.size() != pagesize){
 	                                                     haveMoreData = false;
 	                                                 }
@@ -358,7 +361,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		                                 }
 		                                 swipeRefreshLayout.setRefreshing(false);
 		                         }
-		                 }, 2000);
+		                 }, 1000);
 		         }
 		 });
 	}
@@ -377,7 +380,18 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 
 		if (chatType == CHATTYPE_SINGLE) { // 单聊
 			toChatUsername = getIntent().getStringExtra("userId");
-			((TextView) findViewById(R.id.name)).setText(toChatUsername);
+			Map<String,RobotUser> robotMap=((DemoHXSDKHelper)HXSDKHelper.getInstance()).getRobotList();
+			if(robotMap!=null&&robotMap.containsKey(toChatUsername)){
+				isRobot = true;
+				String nick = robotMap.get(toChatUsername).getNick();
+				if(!TextUtils.isEmpty(nick)){
+					((TextView) findViewById(R.id.name)).setText(nick);
+				}else{
+					((TextView) findViewById(R.id.name)).setText(toChatUsername);
+				}
+			}else{
+				((TextView) findViewById(R.id.name)).setText(toChatUsername);
+			}
 		} else {
 			// 群聊
 			findViewById(R.id.container_to_group).setVisibility(View.VISIBLE);
@@ -653,7 +667,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				double longitude = data.getDoubleExtra("longitude", 0);
 				String locationAddress = data.getStringExtra("address");
 				if (locationAddress != null && !locationAddress.equals("")) {
-					more(more);
+				    toggleMore(more);
 					sendLocationMsg(latitude, longitude, "", locationAddress);
 				} else {
 					String st = getResources().getString(R.string.unable_to_get_loaction);
@@ -727,15 +741,21 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		} else if (id == R.id.btn_voice_call) { // 点击语音电话图标
 			if (!EMChatManager.getInstance().isConnected())
 				Toast.makeText(this, st1, 0).show();
-			else
+			else{
 				startActivity(new Intent(ChatActivity.this, VoiceCallActivity.class).putExtra("username",
 						toChatUsername).putExtra("isComingCall", false));
+				voiceCallBtn.setEnabled(false);
+				toggleMore(null);
+			}
 		} else if (id == R.id.btn_video_call) { // 视频通话
 			if (!EMChatManager.getInstance().isConnected())
 				Toast.makeText(this, st1, 0).show();
-			else
+			else{
 				startActivity(new Intent(this, VideoCallActivity.class).putExtra("username", toChatUsername).putExtra(
 						"isComingCall", false));
+				videoCallBtn.setEnabled(false);
+				toggleMore(null);
+			}
 		}
 	}
 
@@ -883,7 +903,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * @param isResend
 	 *            boolean resend
 	 */
-	private void sendText(String content) {
+	public void sendText(String content) {
 
 		if (content.length() > 0) {
 			EMMessage message = EMMessage.createSendMessage(EMMessage.Type.TXT);
@@ -893,7 +913,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			}else if(chatType == CHATTYPE_CHATROOM){
 			    message.setChatType(ChatType.ChatRoom);
 			}
-			
+			if(isRobot){
+				message.setAttribute("em_robot_message", true);
+			}
 			TextMessageBody txtBody = new TextMessageBody(content);
 			// 设置消息body
 			message.addBody(txtBody);
@@ -934,7 +956,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			int len = Integer.parseInt(length);
 			VoiceMessageBody body = new VoiceMessageBody(new File(filePath), len);
 			message.addBody(body);
-
+			if(isRobot){
+				message.setAttribute("em_robot_message", true);
+			}
 			conversation.addMessage(message);
 			adapter.refreshSelectLast();
 			setResult(RESULT_OK);
@@ -966,6 +990,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		// 默认超过100k的图片会压缩后发给对方，可以设置成发送原图
 		// body.setSendOriginalImage(true);
 		message.addBody(body);
+		if(isRobot){
+			message.setAttribute("em_robot_message", true);
+		}
 		conversation.addMessage(message);
 
 		listView.setAdapter(adapter);
@@ -994,6 +1021,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 			message.setReceipt(to);
 			VideoMessageBody body = new VideoMessageBody(videoFile, thumbPath, length, videoFile.length());
 			message.addBody(body);
+			if(isRobot){
+				message.setAttribute("em_robot_message", true);
+			}
 			conversation.addMessage(message);
 			listView.setAdapter(adapter);
 			adapter.refreshSelectLast();
@@ -1060,6 +1090,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		LocationMessageBody locBody = new LocationMessageBody(locationAddress, latitude, longitude);
 		message.addBody(locBody);
 		message.setReceipt(toChatUsername);
+		if(isRobot){
+			message.setAttribute("em_robot_message", true);
+		}
 		conversation.addMessage(message);
 		listView.setAdapter(adapter);
 		adapter.refreshSelectLast();
@@ -1115,6 +1148,9 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		// add message body
 		NormalFileMessageBody body = new NormalFileMessageBody(new File(filePath));
 		message.addBody(body);
+		if(isRobot){
+			message.setAttribute("em_robot_message", true);
+		}
 		conversation.addMessage(message);
 		listView.setAdapter(adapter);
 		adapter.refreshSelectLast();
@@ -1222,7 +1258,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * 
 	 * @param view
 	 */
-	public void more(View view) {
+	public void toggleMore(View view) {
 		if (more.getVisibility() == View.GONE) {
 			EMLog.d(TAG, "more gone");
 			hideKeyboard();
@@ -1259,6 +1295,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	}
 
 	private PowerManager.WakeLock wakeLock;
+    private ImageView voiceCallBtn;
+    private ImageView videoCallBtn;
 
 	/**
 	 * 按住说话listener
@@ -1438,6 +1476,8 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		super.onResume();
 		if (group != null)
 			((TextView) findViewById(R.id.name)).setText(group.getGroupName());
+		voiceCallBtn.setEnabled(true);
+		videoCallBtn.setEnabled(true);
 
 		 if(adapter != null){
 		     adapter.refresh();
@@ -1569,7 +1609,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 		public void onScrollStateChanged(AbsListView view, int scrollState) {
 			switch (scrollState) {
 			case OnScrollListener.SCROLL_STATE_IDLE:
-				if (view.getFirstVisiblePosition() == 0 && !isloading && haveMoreData && conversation.getAllMessages().size() != 0) {
+				/*if (view.getFirstVisiblePosition() == 0 && !isloading && haveMoreData && conversation.getAllMessages().size() != 0) {
 					isloading = true;
 					loadmorePB.setVisibility(View.VISIBLE);
 					// sdk初始化加载的聊天记录为20条，到顶时去db里获取更多					
@@ -1604,7 +1644,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 					loadmorePB.setVisibility(View.GONE);
 					isloading = false;
 
-				}
+				}*/
 				break;
 			}
 		}

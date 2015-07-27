@@ -189,7 +189,7 @@ public class PublicChatRoomsActivity extends BaseActivity {
                                     hasMoreData = false;
                                     footLoadingLayout.setVisibility(View.VISIBLE);
                                     footLoadingPB.setVisibility(View.GONE);
-                                    footLoadingText.setText("No more data");
+                                    footLoadingText.setText(getResources().getString(R.string.no_more_messages));
                                 }
                                 adapter.notifyDataSetChanged();
                             }
@@ -203,7 +203,7 @@ public class PublicChatRoomsActivity extends BaseActivity {
                             isLoading = false;
                             pb.setVisibility(View.INVISIBLE);
                             footLoadingLayout.setVisibility(View.GONE);
-                            Toast.makeText(PublicChatRoomsActivity.this, "加载数据失败，请检查网络或稍后重试", 0).show();
+                            Toast.makeText(PublicChatRoomsActivity.this, getResources().getString(R.string.failed_to_load_data), 0).show();
                         }
                     });
                 }

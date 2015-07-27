@@ -19,9 +19,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -93,6 +95,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	private boolean isCurrentAccountRemoved = false;
 	
 	private MyConnectionListener connectionListener = null;
+	private MyGroupChangeListener groupChangeListener = null;
 
 	/**
 	 * 检查当前用户是否被删除
@@ -157,9 +160,16 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		connectionListener = new MyConnectionListener();
 		EMChatManager.getInstance().addConnectionListener(connectionListener);
 		
+		groupChangeListener = new MyGroupChangeListener();
 		// 注册群聊相关的listener
-		EMGroupManager.getInstance().addGroupChangeListener(new MyGroupChangeListener());
+        EMGroupManager.getInstance().addGroupChangeListener(groupChangeListener);
+		
+		
+		//内部测试方法，请忽略
+		registerInternalDebugReceiver();
 	}
+
+
 	
 	static void asyncFetchGroupsFromServer(){
 	    HXSDKHelper.getInstance().asyncFetchGroupsFromServer(new EMCallBack(){
@@ -169,7 +179,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
                 HXSDKHelper.getInstance().noitifyGroupSyncListeners(true);
                 
                 if(HXSDKHelper.getInstance().isContactsSyncedWithServer()){
-                    HXSDKHelper.getInstance().notifyHXSDKAppReadyForRecevingEvents();
+                    HXSDKHelper.getInstance().notifyForRecevingEvents();
                 }
             }
 
@@ -225,6 +235,14 @@ public class MainActivity extends BaseActivity implements EMEventListener {
                 chatRoomItem.setHeader("");
                 userlist.put(Constant.CHAT_ROOM, chatRoomItem);
                 
+                // 添加"Robot"
+        		User robotUser = new User();
+        		String strRobot = context.getString(R.string.robot_chat);
+        		robotUser.setUsername(Constant.CHAT_ROBOT);
+        		robotUser.setNick(strRobot);
+        		robotUser.setHeader("");
+        		userlist.put(Constant.CHAT_ROBOT, robotUser);
+        		
                  // 存入内存
                 DemoApplication.getInstance().setContactList(userlist);
                  // 存入db
@@ -235,7 +253,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
                 HXSDKHelper.getInstance().notifyContactsSyncListener(true);
                 
                 if(HXSDKHelper.getInstance().isGroupsSyncedWithServer()){
-                    HXSDKHelper.getInstance().notifyHXSDKAppReadyForRecevingEvents();
+                    HXSDKHelper.getInstance().notifyForRecevingEvents();
                 }
                 
             }
@@ -393,15 +411,25 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
 	@Override
 	protected void onDestroy() {
+		super.onDestroy();		
+		
 		if (conflictBuilder != null) {
 			conflictBuilder.create().dismiss();
 			conflictBuilder = null;
 		}
-		
+
 		if(connectionListener != null){
 		    EMChatManager.getInstance().removeConnectionListener(connectionListener);
 		}
-		super.onDestroy();
+		
+		if(groupChangeListener != null){
+		    EMGroupManager.getInstance().removeGroupChangeListener(groupChangeListener);
+		}
+		
+		try {
+            unregisterReceiver(internalDebugReceiver);
+        } catch (Exception e) {
+        }
 	}
 
 	/**
@@ -425,7 +453,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 			public void run() {
 				int count = getUnreadAddressCountTotal();
 				if (count > 0) {
-					unreadAddressLable.setText(String.valueOf(count));
+//					unreadAddressLable.setText(String.valueOf(count));
 					unreadAddressLable.setVisibility(View.VISIBLE);
 				} else {
 					unreadAddressLable.setVisibility(View.INVISIBLE);
@@ -579,23 +607,36 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
 		@Override
 		public void onConnected() {
+            boolean groupSynced = HXSDKHelper.getInstance().isGroupsSyncedWithServer();
+            boolean contactSynced = HXSDKHelper.getInstance().isContactsSyncedWithServer();
+            
+            // in case group and contact were already synced, we supposed to notify sdk we are ready to receive the events
+            if(groupSynced && contactSynced){
+                new Thread(){
+                    @Override
+                    public void run(){
+                        HXSDKHelper.getInstance().notifyForRecevingEvents();
+                    }
+                }.start();
+            }else{
+                if(!groupSynced){
+                    asyncFetchGroupsFromServer();
+                }
+                
+                if(!contactSynced){
+                    asyncFetchContactsFromServer();
+                }
+                
+                if(!HXSDKHelper.getInstance().isBlackListSyncedWithServer()){
+                    asyncFetchBlackListFromServer();
+                }
+            }
+            
 			runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
 					chatHistoryFragment.errorItem.setVisibility(View.GONE);
-					
-				    if(!HXSDKHelper.getInstance().isGroupsSyncedWithServer()){
-                        asyncFetchGroupsFromServer();
-                    }
-                    
-                    if(!HXSDKHelper.getInstance().isContactsSyncedWithServer()){
-                        asyncFetchContactsFromServer();
-                    }
-                    
-                    if(!HXSDKHelper.getInstance().isBlackListSyncedWithServer()){
-                        asyncFetchBlackListFromServer();
-                    }
 				}
 
 			});
@@ -603,7 +644,11 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 
 		@Override
 		public void onDisconnected(final int error) {
+<<<<<<< HEAD
 //			final String st1 = getResources().getString(R.string.Less_than_chat_server_connection);
+=======
+			final String st1 = getResources().getString(R.string.can_not_connect_chat_server_connection);
+>>>>>>> origin
 			final String st2 = getResources().getString(R.string.the_current_network);
 			runOnUiThread(new Runnable() {
 
@@ -749,7 +794,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 			msg.setFrom(accepter);
 			msg.setTo(groupId);
 			msg.setMsgId(UUID.randomUUID().toString());
-			msg.addBody(new TextMessageBody(accepter + st4));
+			msg.addBody(new TextMessageBody(accepter + " " +st4));
 			// 保存同意消息
 			EMChatManager.getInstance().saveMessage(msg);
 			// 提醒新消息
@@ -883,6 +928,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	private android.app.AlertDialog.Builder accountRemovedBuilder;
 	private boolean isConflictDialogShow;
 	private boolean isAccountRemovedDialogShow;
+    private BroadcastReceiver internalDebugReceiver;
 
 	/**
 	 * 显示帐号在别处登录dialog
@@ -963,6 +1009,40 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 			showAccountRemovedDialog();
 		}
 	}
+	
+	/**
+	 * 内部测试代码，开发者请忽略
+	 */
+	private void registerInternalDebugReceiver() {
+	    internalDebugReceiver = new BroadcastReceiver() {
+            
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                DemoApplication.getInstance().logout(new EMCallBack() {
+                    
+                    @Override
+                    public void onSuccess() {
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                // 重新显示登陆页面
+                                finish();
+                                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                                
+                            }
+                        });
+                    }
+                    
+                    @Override
+                    public void onProgress(int progress, String status) {}
+                    
+                    @Override
+                    public void onError(int code, String message) {}
+                });
+            }
+        };
+        IntentFilter filter = new IntentFilter(getPackageName() + ".em_internal_debug");
+        registerReceiver(internalDebugReceiver, filter);
+    }
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {

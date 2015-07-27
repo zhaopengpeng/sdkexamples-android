@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.easemob.chatuidemo"
-    android:versionCode="19"
-    android:versionName="2.1.9" >
+    android:versionCode="20"
+    android:versionName="2.2.1" >
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -210,6 +210,7 @@
         <activity
             android:name=".activity.VoiceCallActivity"
             android:screenOrientation="portrait"
+            android:launchMode="singleTask"
             android:theme="@style/nornal_style" >
         </activity>
         <!-- 视频通话 -->
@@ -217,6 +218,7 @@
             android:name=".activity.VideoCallActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"
+            android:launchMode="singleTask"
             android:theme="@style/horizontal_slide" >
         </activity>
         <!-- 群聊简单信息 -->
@@ -276,6 +278,13 @@
             android:theme="@style/horizontal_slide"
             android:windowSoftInputMode="stateAlwaysHidden" >
         </activity>
+        <!-- robots list -->
+        <activity 
+            android:name=".activity.RobotsActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/horizontal_slide"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            ></activity>
 
         <!-- 开机自启动服务 -->
         <receiver android:name="com.easemob.chat.StartServiceReceiver" >
@@ -314,7 +323,20 @@
             android:name="EASEMOB_APPKEY"
             android:value="easemob-demo#chatdemoui" />
         <!-- 声明sdk所需的service -->
-        <service android:name="com.easemob.chat.EMChatService" />
+        <service android:name="com.easemob.chat.EMChatService" 
+            android:exported="true"
+            />
+        <!-- 声明sdk所需的receiver -->
+        <receiver android:name="com.easemob.chat.EMMonitorReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REMOVED"/>
+                <data android:scheme="package"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
 
         <!-- 百度地图所需的service -->
         <service

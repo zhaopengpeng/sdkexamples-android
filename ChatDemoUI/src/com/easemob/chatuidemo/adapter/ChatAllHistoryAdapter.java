@@ -16,6 +16,9 @@ package com.easemob.chatuidemo.adapter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -29,9 +32,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.BufferType;
 
+import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatRoom;
-import com.easemob.chat.EMContact;
 import com.easemob.chat.EMConversation;
 import com.easemob.chat.EMGroup;
 import com.easemob.chat.EMGroupManager;
@@ -40,10 +43,12 @@ import com.easemob.chat.ImageMessageBody;
 import com.easemob.chat.TextMessageBody;
 import com.easemob.chat.EMConversation.EMConversationType;
 import com.easemob.chatuidemo.Constant;
+import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
+import com.easemob.chatuidemo.domain.RobotUser;
+import com.easemob.chatuidemo.utils.DateUtils;
 import com.easemob.chatuidemo.utils.SmileUtils;
 import com.easemob.chatuidemo.utils.UserUtils;
-import com.easemob.util.DateUtils;
 import com.easemob.util.EMLog;
 
 /**
@@ -111,7 +116,17 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 			} else if (username.equals(Constant.NEW_FRIENDS_USERNAME)) {
 				holder.name.setText("申请与通知");
 			}
-			holder.name.setText(username);
+			Map<String,RobotUser> robotMap=((DemoHXSDKHelper)HXSDKHelper.getInstance()).getRobotList();
+			if(robotMap!=null&&robotMap.containsKey(username)){
+				String nick = robotMap.get(username).getNick();
+				if(!TextUtils.isEmpty(nick)){
+					holder.name.setText(nick);
+				}else{
+					holder.name.setText(username);
+				}
+			}else{
+				holder.name.setText(username);
+			}
 		}
 
 		if (conversation.getUnreadMsgCount() > 0) {
@@ -174,12 +189,15 @@ public class ChatAllHistoryAdapter extends ArrayAdapter<EMConversation> {
 			digest = getStrng(context, R.string.video);
 			break;
 		case TXT: // 文本消息
-			if(!message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL,false)){
-				TextMessageBody txtBody = (TextMessageBody) message.getBody();
-				digest = txtBody.getMessage();
-			}else{
+			
+			if(((DemoHXSDKHelper)HXSDKHelper.getInstance()).isRobotMenuMessage(message)){
+				digest = ((DemoHXSDKHelper)HXSDKHelper.getInstance()).getRobotMenuMessageDigest(message);
+			}else if(message.getBooleanAttribute(Constant.MESSAGE_ATTR_IS_VOICE_CALL,false)){
 				TextMessageBody txtBody = (TextMessageBody) message.getBody();
 				digest = getStrng(context, R.string.voice_call) + txtBody.getMessage();
+			}else{
+				TextMessageBody txtBody = (TextMessageBody) message.getBody();
+				digest = txtBody.getMessage();
 			}
 			break;
 		case FILE: // 普通文件消息
