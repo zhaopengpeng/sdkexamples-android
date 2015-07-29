@@ -61,6 +61,16 @@
                 android:textSize="20sp" />
         </LinearLayout>
 
+        <TextView 
+            android:id="@+id/tv_call_monitor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/local_surface"
+            android:layout_alignParentRight="true"
+            android:textColor="#afff"
+            android:textSize="12sp"
+            android:layout_marginBottom="6dp"
+            />
         <SurfaceView
             android:id="@+id/local_surface"
             android:layout_width="100dp"

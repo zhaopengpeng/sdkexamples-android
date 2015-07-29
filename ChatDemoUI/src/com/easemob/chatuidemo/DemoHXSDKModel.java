@@ -50,6 +50,11 @@ public class DemoHXSDKModel extends DefaultHXSDKModel{
         return dao.getContactList();
     }
     
+    public void saveContact(User user){
+    	UserDao dao = new UserDao(context);
+    	dao.saveContact(user);
+    }
+    
     public Map<String, RobotUser> getRobotList(){
     	UserDao dao = new UserDao(context);
     	return dao.getRobotUser();

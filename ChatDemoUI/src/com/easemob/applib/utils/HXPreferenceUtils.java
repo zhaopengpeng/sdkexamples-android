@@ -35,6 +35,9 @@ public class HXPreferenceUtils {
 	private static String SHARED_KEY_SETTING_CONTACT_SYNCED = "SHARED_KEY_SETTING_CONTACT_SYNCED";
 	private static String SHARED_KEY_SETTING_BALCKLIST_SYNCED = "SHARED_KEY_SETTING_BALCKLIST_SYNCED";
 	
+	private static String SHARED_KEY_CURRENTUSER_NICK = "SHARED_KEY_CURRENTUSER_NICK";
+	private static String SHARED_KEY_CURRENTUSER_AVATAR = "SHARED_KEY_CURRENTUSER_AVATAR";
+	
 	private HXPreferenceUtils(Context cxt) {
 		mSharedPreferences = cxt.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE);
 		editor = mSharedPreferences.edit();
@@ -132,4 +135,28 @@ public class HXPreferenceUtils {
     public boolean isBacklistSynced(){
         return mSharedPreferences.getBoolean(SHARED_KEY_SETTING_BALCKLIST_SYNCED, false);
     }
+    
+	public void setCurrentUserNick(String nick) {
+		editor.putString(SHARED_KEY_CURRENTUSER_NICK, nick);
+		editor.commit();
+	}
+
+	public void setCurrentUserAvatar(String avatar) {
+		editor.putString(SHARED_KEY_CURRENTUSER_AVATAR, avatar);
+		editor.commit();
+	}
+
+	public String getCurrentUserNick() {
+		return mSharedPreferences.getString(SHARED_KEY_CURRENTUSER_NICK, null);
+	}
+
+	public String getCurrentUserAvatar() {
+		return mSharedPreferences.getString(SHARED_KEY_CURRENTUSER_AVATAR, null);
+	}
+
+	public void removeCurrentUserInfo() {
+		editor.remove(SHARED_KEY_CURRENTUSER_NICK);
+		editor.remove(SHARED_KEY_CURRENTUSER_AVATAR);
+		editor.commit();
+	}
 }

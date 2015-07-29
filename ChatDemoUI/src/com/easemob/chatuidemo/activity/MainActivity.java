@@ -45,7 +45,6 @@ import com.easemob.EMGroupChangeListener;
 import com.easemob.EMNotifierEvent;
 import com.easemob.EMValueCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
-import com.easemob.chat.EMChat;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMContactListener;
 import com.easemob.chat.EMContactManager;
@@ -150,6 +149,8 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 				.commit();
 		
 		init();
+		//异步获取当前用户的昵称和头像
+		((DemoHXSDKHelper)HXSDKHelper.getInstance()).getUserProfileManager().asyncGetCurrentUserInfo();
 	}
 
 	private void init() {     
@@ -244,7 +245,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
         		userlist.put(Constant.CHAT_ROBOT, robotUser);
         		
                  // 存入内存
-                DemoApplication.getInstance().setContactList(userlist);
+                ((DemoHXSDKHelper)HXSDKHelper.getInstance()).setContactList(userlist);
                  // 存入db
                 UserDao dao = new UserDao(context);
                 List<User> users = new ArrayList<User>(userlist.values());
@@ -256,6 +257,18 @@ public class MainActivity extends BaseActivity implements EMEventListener {
                     HXSDKHelper.getInstance().notifyForRecevingEvents();
                 }
                 
+                ((DemoHXSDKHelper)HXSDKHelper.getInstance()).getUserProfileManager().asyncFetchContactInfosFromServer(usernames,new EMValueCallBack<List<User>>() {
+
+					@Override
+					public void onSuccess(List<User> uList) {
+						((DemoHXSDKHelper)HXSDKHelper.getInstance()).updateContactList(uList);
+						((DemoHXSDKHelper)HXSDKHelper.getInstance()).getUserProfileManager().notifyContactInfosSyncListener(true);
+					}
+
+					@Override
+					public void onError(int error, String errorMsg) {
+					}
+				});
             }
 
             @Override
@@ -470,8 +483,8 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	 */
 	public int getUnreadAddressCountTotal() {
 		int unreadAddressCountTotal = 0;
-		if (DemoApplication.getInstance().getContactList().get(Constant.NEW_FRIENDS_USERNAME) != null)
-			unreadAddressCountTotal = DemoApplication.getInstance().getContactList().get(Constant.NEW_FRIENDS_USERNAME)
+		if (((DemoHXSDKHelper)HXSDKHelper.getInstance()).getContactList().get(Constant.NEW_FRIENDS_USERNAME) != null)
+			unreadAddressCountTotal = ((DemoHXSDKHelper)HXSDKHelper.getInstance()).getContactList().get(Constant.NEW_FRIENDS_USERNAME)
 					.getUnreadMsgCount();
 		return unreadAddressCountTotal;
 	}
@@ -504,7 +517,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		@Override
 		public void onContactAdded(List<String> usernameList) {			
 			// 保存增加的联系人
-			Map<String, User> localUsers = DemoApplication.getInstance().getContactList();
+			Map<String, User> localUsers = ((DemoHXSDKHelper)HXSDKHelper.getInstance()).getContactList();
 			Map<String, User> toAddUsers = new HashMap<String, User>();
 			for (String username : usernameList) {
 				User user = setUserHead(username);
@@ -524,7 +537,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		@Override
 		public void onContactDeleted(final List<String> usernameList) {
 			// 被删除
-			Map<String, User> localUsers = DemoApplication.getInstance().getContactList();
+			Map<String, User> localUsers = ((DemoHXSDKHelper)HXSDKHelper.getInstance()).getContactList();
 			for (String username : usernameList) {
 				localUsers.remove(username);
 				userDao.deleteContact(username);
@@ -841,7 +854,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		// 保存msg
 		inviteMessgeDao.saveMessage(msg);
 		// 未读数加1
-		User user = DemoApplication.getInstance().getContactList().get(Constant.NEW_FRIENDS_USERNAME);
+		User user = ((DemoHXSDKHelper)HXSDKHelper.getInstance()).getContactList().get(Constant.NEW_FRIENDS_USERNAME);
 		if (user.getUnreadMsgCount() == 0)
 			user.setUnreadMsgCount(user.getUnreadMsgCount() + 1);
 	}
