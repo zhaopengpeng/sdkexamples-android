@@ -279,7 +279,12 @@
             android:theme="@style/horizontal_slide"
             android:windowSoftInputMode="stateAlwaysHidden"
             ></activity>
-
+        <!-- user profile -->
+		<activity 
+		    android:name=".activity.UserProfileActivity"
+		    android:screenOrientation="portrait"
+		    android:theme="@style/horizontal_slide"
+		    ></activity>
 
         <!-- 设置环信应用的appkey -->
         <meta-data

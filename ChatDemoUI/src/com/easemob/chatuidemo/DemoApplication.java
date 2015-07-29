@@ -13,13 +13,10 @@
  */
 package com.easemob.chatuidemo;
 
-import java.util.Map;
-
 import android.app.Application;
 import android.content.Context;
 
 import com.easemob.EMCallBack;
-import com.easemob.chatuidemo.domain.User;
 
 public class DemoApplication extends Application {
 
@@ -59,29 +56,14 @@ public class DemoApplication extends Application {
          * }
          */
         hxSDKHelper.onInit(applicationContext);
+        //user profile  initialize
+        hxSDKHelper.getUserProfileManager().onInit(applicationContext);
 	}
 
 	public static DemoApplication getInstance() {
 		return instance;
 	}
  
-	/**
-	 * 获取内存中好友user list
-	 *
-	 * @return
-	 */
-	public Map<String, User> getContactList() {
-	    return hxSDKHelper.getContactList();
-	}
-
-	/**
-	 * 设置好友user list到内存中
-	 *
-	 * @param contactList
-	 */
-	public void setContactList(Map<String, User> contactList) {
-	    hxSDKHelper.setContactList(contactList);
-	}
 
 	/**
 	 * 获取当前登陆用户名

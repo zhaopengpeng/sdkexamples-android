@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -25,10 +24,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.easemob.EMCallBack;
@@ -42,7 +39,6 @@ import com.easemob.applib.model.HXSDKModel;
 import com.easemob.chat.CmdMessageBody;
 import com.easemob.chat.EMChatManager;
 import com.easemob.chat.EMChatOptions;
-import com.easemob.chat.EMContact;
 import com.easemob.chat.EMMessage;
 import com.easemob.chat.EMMessage.ChatType;
 import com.easemob.chat.EMMessage.Type;
@@ -54,7 +50,6 @@ import com.easemob.chatuidemo.domain.RobotUser;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.receiver.CallReceiver;
 import com.easemob.chatuidemo.utils.CommonUtils;
-import com.easemob.exceptions.EaseMobException;
 import com.easemob.util.EMLog;
 import com.easemob.util.EasyUtils;
 
@@ -83,6 +78,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     private Map<String, RobotUser> robotList;
     private CallReceiver callReceiver;
     
+    private UserProfileManager  userProManager;
     
     /**
      * 用来记录foreground Activity
@@ -469,6 +465,14 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         this.contactList = contactList;
     }
     
+    /**
+     * 保存单个user 
+     */
+    public void saveContact(User user){
+    	contactList.put(user.getUsername(), user);
+    	((DemoHXSDKModel) getModel()).saveContact(user);
+    }
+    
     @Override
     public void logout(final EMCallBack callback){
         endCall();
@@ -479,6 +483,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
                 // TODO Auto-generated method stub
                 setContactList(null);
                 setRobotList(null);
+                getUserProfileManager().reset();
                 getModel().closeDB();
                 if(callback != null){
                     callback.onSuccess();
@@ -510,4 +515,25 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         }
     }
 
+    /**
+     * update User cach And db
+     *
+     * @param contactList
+     */
+    public void updateContactList(List<User> contactInfoList) {
+         for (User u : contactInfoList) {
+			contactList.put(u.getUsername(), u);
+         }
+         ArrayList<User> mList = new ArrayList<User>();
+         mList.addAll(contactList.values());
+        ((DemoHXSDKModel)getModel()).saveContactList(mList);
+    }
+    
+    public synchronized UserProfileManager getUserProfileManager(){
+    	if(userProManager == null){
+    		userProManager = new UserProfileManager();
+    	}
+    	return userProManager;
+    }
+    
 }
