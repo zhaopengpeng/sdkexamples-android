@@ -29,8 +29,8 @@ import com.easemob.chatuidemo.DemoApplication;
 public class CameraHelper implements PreviewCallback {
     private static final String TAG = "CameraHelper";
 
-    static final int mwidth = 640;
-    static final int mheight = 480;
+    static final int mwidth = 320;
+    static final int mheight = 240;
 
     private Camera mCamera;
     private int camera_count;
