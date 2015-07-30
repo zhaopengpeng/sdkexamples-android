@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.easemob.EMCallBack;
 import com.easemob.applib.controller.HXSDKHelper;
@@ -344,7 +345,7 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 		pd.setMessage(st);
 		pd.setCanceledOnTouchOutside(false);
 		pd.show();
-		DemoApplication.getInstance().logout(new EMCallBack() {
+		DemoApplication.getInstance().logout(true,new EMCallBack() {
 			
 			@Override
 			public void onSuccess() {
@@ -366,7 +367,17 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 			
 			@Override
 			public void onError(int code, String message) {
-				
+				getActivity().runOnUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						pd.dismiss();
+						Toast.makeText(getActivity(), "unbind devicetokens failed", Toast.LENGTH_SHORT).show();
+						
+						
+					}
+				});
 			}
 		});
 	}

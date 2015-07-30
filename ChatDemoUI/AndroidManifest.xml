@@ -298,24 +298,31 @@
         
         <!-- gcm start -->
         <receiver
-            android:name="com.easemob.chat.EMGcmBroadcastReceive"
+            android:name="com.easemob.chat.EMGCMBroadcastReceiver"
             android:exported="true"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
                 <category android:name="com.easemob.chatuidemo" />
             </intent-filter>
         </receiver>
 
-        <service android:name="com.easemob.chat.EMGcmListenerService"
+        <service android:name="com.easemob.chat.EMGCMListenerService"
             android:exported="false" >
         </service>
         
         <meta-data 
-            android:name="GCM_APPKEY"
-            android:value="testgcm#562451699741"/>
+            android:name="GCM_PROJECT_NUMBER"
+            android:value="\0562451699741"/>
         
+        <receiver 
+            android:name="com.easemob.chatuidemo.receiver.GCMPushBroadCast"
+            android:exported="false">
+            <intent-filter >
+                <action android:name="com.easemob.sdk.push"/>
+                <category android:name="com.easemob.chatuidemo"/>
+            </intent-filter>
+        </receiver>
         <!-- gcm end -->
 
         <!-- 设置环信应用的appkey -->
@@ -323,9 +330,7 @@
             android:name="EASEMOB_APPKEY"
             android:value="easemob-demo#chatdemoui" />
         <!-- 声明sdk所需的service -->
-        <service android:name="com.easemob.chat.EMChatService" 
-            android:exported="true"
-            />
+        <service android:name="com.easemob.chat.EMChatService"/>
         <!-- 声明sdk所需的receiver -->
         <receiver android:name="com.easemob.chat.EMMonitorReceiver">
             <intent-filter>

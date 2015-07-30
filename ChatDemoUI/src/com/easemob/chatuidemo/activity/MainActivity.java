@@ -111,7 +111,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 		if (savedInstanceState != null && savedInstanceState.getBoolean(Constant.ACCOUNT_REMOVED, false)) {
 			// 防止被移除后，没点确定按钮然后按了home键，长期在后台又进app导致的crash
 			// 三个fragment里加的判断同理
-			DemoApplication.getInstance().logout(null);
+			DemoApplication.getInstance().logout(true,null);
 			finish();
 			startActivity(new Intent(this, LoginActivity.class));
 			return;
@@ -931,7 +931,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	 */
 	private void showConflictDialog() {
 		isConflictDialogShow = true;
-		DemoApplication.getInstance().logout(null);
+		DemoApplication.getInstance().logout(false,null);
 		String st = getResources().getString(R.string.Logoff_notification);
 		if (!MainActivity.this.isFinishing()) {
 			// clear up global variables
@@ -966,7 +966,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
 	 */
 	private void showAccountRemovedDialog() {
 		isAccountRemovedDialogShow = true;
-		DemoApplication.getInstance().logout(null);
+		DemoApplication.getInstance().logout(true,null);
 		String st5 = getResources().getString(R.string.Remove_the_notification);
 		if (!MainActivity.this.isFinishing()) {
 			// clear up global variables
@@ -1014,7 +1014,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
             
             @Override
             public void onReceive(Context context, Intent intent) {
-                DemoApplication.getInstance().logout(new EMCallBack() {
+                DemoApplication.getInstance().logout(true,new EMCallBack() {
                     
                     @Override
                     public void onSuccess() {
