@@ -255,7 +255,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 				getResources().getDrawable(R.drawable.record_animate_11),
 				getResources().getDrawable(R.drawable.record_animate_12),
 				getResources().getDrawable(R.drawable.record_animate_13),
-				getResources().getDrawable(R.drawable.record_animate_14), };
+				getResources().getDrawable(R.drawable.record_animate_14) };
 
 		// 表情list
 		reslist = getExpressionRes(35);
