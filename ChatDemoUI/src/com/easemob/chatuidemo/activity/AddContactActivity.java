@@ -18,7 +18,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -28,9 +27,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.easemob.applib.utils.HXPreferenceUtils;
+import com.easemob.applib.controller.HXSDKHelper;
 import com.easemob.chat.EMContactManager;
 import com.easemob.chatuidemo.DemoApplication;
+import com.easemob.chatuidemo.DemoHXSDKHelper;
 import com.easemob.chatuidemo.R;
 
 public class AddContactActivity extends BaseActivity{
@@ -98,7 +98,7 @@ public class AddContactActivity extends BaseActivity{
 			return;
 		}
 		
-		if(DemoApplication.getInstance().getContactList().containsKey(nameText.getText().toString())){
+		if(((DemoHXSDKHelper)HXSDKHelper.getInstance()).getContactList().containsKey(nameText.getText().toString())){
 		    //提示已在好友列表中，无需添加
 		    if(EMContactManager.getInstance().getBlackListUsernames().contains(nameText.getText().toString())){
 		        startActivity(new Intent(this, AlertDialog.class).putExtra("msg", "此用户已是你好友(被拉黑状态)，从黑名单列表中移出即可"));

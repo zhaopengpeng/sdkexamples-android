@@ -105,6 +105,8 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 
 	private LinearLayout blacklistContainer;
 	
+	private LinearLayout userProfileContainer;
+	
 	/**
 	 * 退出按钮
 	 */
@@ -165,10 +167,12 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 		textview2 = (TextView) getView().findViewById(R.id.textview2);
 		
 		blacklistContainer = (LinearLayout) getView().findViewById(R.id.ll_black_list);
+		userProfileContainer = (LinearLayout) getView().findViewById(R.id.ll_user_profile);
 		llDiagnose=(LinearLayout) getView().findViewById(R.id.ll_diagnose);
 		pushNick=(LinearLayout) getView().findViewById(R.id.ll_set_push_nick);
 		
 		blacklistContainer.setOnClickListener(this);
+		userProfileContainer.setOnClickListener(this);
 		rl_switch_notification.setOnClickListener(this);
 		rl_switch_sound.setOnClickListener(this);
 		rl_switch_vibrate.setOnClickListener(this);
@@ -332,6 +336,9 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 			break;
 		case R.id.ll_set_push_nick:
 			startActivity(new Intent(getActivity(), OfflinePushNickActivity.class));
+			break;
+		case R.id.ll_user_profile:
+			startActivity(new Intent(getActivity(), UserProfileActivity.class).putExtra("setting", true));
 			break;
 		default:
 			break;

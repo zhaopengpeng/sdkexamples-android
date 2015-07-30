@@ -277,4 +277,21 @@
     <string name="hanging_up">Hanging up..</string>
     <string name="illegal_user_name">Illegal user name</string>
     <string name="robot_chat">Robot chat</string>
+    <string name="title_user_profile">User Profile</string>
+    <string name="nickname">NickName</string>
+    <string name="dl_title_upload_photo">Upload Photo</string>
+    <string name="dl_msg_local_upload">Local Upload</string>
+    <string name="dl_msg_take_photo">Task Photo</string>
+    <string name="toast_no_support">No Support!</string>
+    <string name="setting_nickname">Setting nickname</string>
+    <string name="dl_ok">OK</string>
+    <string name="dl_cancel">Cancel</string>
+    <string name="toast_nick_not_isnull">nick cannot be empty!</string>
+    <string name="dl_update_nick">update nickname</string>
+    <string name="dl_update_photo">update photo</string>
+    <string name="dl_waiting">waiting...</string>
+    <string name="toast_updatenick_success">update nickname success!</string>
+    <string name="toast_updatenick_fail">update nickname fail!</string>
+    <string name="toast_updatephoto_success">update photo success!</string>
+    <string name="toast_updatephoto_fail">update photo fail!</string>
 </resources>
