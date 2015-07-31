@@ -317,10 +317,6 @@
             android:exported="false" >
         </service>
         
-        <meta-data 
-            android:name="GCM_PROJECT_NUMBER"
-            android:value="\0562451699741"/>
-        
         <receiver 
             android:name="com.easemob.chatuidemo.receiver.GCMPushBroadCast"
             android:exported="false">
