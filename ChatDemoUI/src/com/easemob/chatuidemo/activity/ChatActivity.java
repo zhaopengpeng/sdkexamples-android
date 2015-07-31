@@ -98,6 +98,7 @@ import com.easemob.chatuidemo.domain.RobotUser;
 import com.easemob.chatuidemo.utils.CommonUtils;
 import com.easemob.chatuidemo.utils.ImageUtils;
 import com.easemob.chatuidemo.utils.SmileUtils;
+import com.easemob.chatuidemo.utils.UserUtils;
 import com.easemob.chatuidemo.widget.ExpandGridView;
 import com.easemob.chatuidemo.widget.PasteEditText;
 import com.easemob.exceptions.EaseMobException;
@@ -390,7 +391,7 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 					((TextView) findViewById(R.id.name)).setText(toChatUsername);
 				}
 			}else{
-				((TextView) findViewById(R.id.name)).setText(toChatUsername);
+				UserUtils.setUserNick(toChatUsername, (TextView) findViewById(R.id.name));
 			}
 		} else {
 			// 群聊
