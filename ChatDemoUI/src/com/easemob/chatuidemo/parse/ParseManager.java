@@ -9,9 +9,11 @@ import android.text.TextUtils;
 import com.easemob.EMValueCallBack;
 import com.easemob.applib.utils.HXPreferenceUtils;
 import com.easemob.chat.EMChatManager;
+import com.easemob.chatuidemo.Constant;
 import com.easemob.chatuidemo.domain.User;
 import com.easemob.chatuidemo.utils.UserUtils;
 import com.easemob.util.EMLog;
+import com.easemob.util.HanziToPinyin;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.Parse;
@@ -99,6 +101,7 @@ public class ParseManager {
 						}
 						user.setNick(pObject.getString(CONFIG_NICK));
 						user.setUsername(pObject.getString(CONFIG_USERNAME));
+						setUserHearder(user);
 						mList.add(user);
 					}
 					callback.onSuccess(mList);
@@ -109,6 +112,30 @@ public class ParseManager {
 		});
 	}
 
+	/**
+     * 设置hearder属性，方便通讯中对联系人按header分类显示，以及通过右侧ABCD...字母栏快速定位联系人
+     * 
+     * @param username
+     * @param user
+     */
+    private static void setUserHearder(User user) {
+        String headerName = null;
+        if (!TextUtils.isEmpty(user.getNick())) {
+            headerName = user.getNick();
+        } else {
+            headerName = user.getUsername();
+        }
+        if (Character.isDigit(headerName.charAt(0))) {
+            user.setHeader("#");
+        } else {
+            user.setHeader(HanziToPinyin.getInstance().get(headerName.substring(0, 1)).get(0).target.substring(0, 1)
+                    .toUpperCase());
+            char header = user.getHeader().toLowerCase().charAt(0);
+            if (header < 'a' || header > 'z') {
+                user.setHeader("#");
+            }
+        }
+    }
 	
 	public void asyncGetCurrentUserInfo(final EMValueCallBack<User> callback){
 		final String username = EMChatManager.getInstance().getCurrentUser();
