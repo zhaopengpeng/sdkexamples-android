@@ -31,7 +31,6 @@ public class DemoApplication extends Application {
 	 */
 	public static String currentUserNick = "";
 	public static DemoHXSDKHelper hxSDKHelper = new DemoHXSDKHelper();
-	private String projectNumber = "562451699741";
 
 	@Override
 	public void onCreate() {
@@ -58,10 +57,6 @@ public class DemoApplication extends Application {
          * }
          */
         hxSDKHelper.onInit(applicationContext);
-        //user profile  initialize
-        hxSDKHelper.getUserProfileManager().onInit(applicationContext);
-        //设置GCM推送（使用条件，要求国外用户）
-        EMChatManager.getInstance().setGCMProjectNumber(projectNumber);
 	}
 
 	public static DemoApplication getInstance() {
