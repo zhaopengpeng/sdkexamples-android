@@ -352,7 +352,7 @@ public class SettingsFragment extends Fragment implements OnClickListener {
 		pd.setMessage(st);
 		pd.setCanceledOnTouchOutside(false);
 		pd.show();
-		DemoApplication.getInstance().logout(true,new EMCallBack() {
+		DemoHXSDKHelper.getInstance().logout(true,new EMCallBack() {
 			
 			@Override
 			public void onSuccess() {

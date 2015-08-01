@@ -158,7 +158,7 @@ public class LoginActivity extends BaseActivity {
 					runOnUiThread(new Runnable() {
 						public void run() {
 							pd.dismiss();
-							DemoApplication.getInstance().logout(true,null);
+							DemoHXSDKHelper.getInstance().logout(true,null);
 							Toast.makeText(getApplicationContext(), R.string.login_failure_failed, 1).show();
 						}
 					});

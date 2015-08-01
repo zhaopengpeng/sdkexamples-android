@@ -310,10 +310,10 @@ public abstract class HXSDKHelper {
     /**
      * logout HuanXin SDK
      */
-    public void logout(final boolean isGCM,final EMCallBack callback){
+    public void logout(final boolean unbindDeviceToken,final EMCallBack callback){
         setPassword(null);
         reset();
-        EMChatManager.getInstance().logout(isGCM,new EMCallBack(){
+        EMChatManager.getInstance().logout(unbindDeviceToken,new EMCallBack(){
 
             @Override
             public void onSuccess() {

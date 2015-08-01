@@ -97,6 +97,20 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     }
     
     @Override
+    public synchronized boolean onInit(Context context){
+        if(super.onInit(context)){
+            getUserProfileManager().onInit(context);
+            
+            //if your app is supposed to user Google Push, please set project number
+            String projectNumber = "562451699741";
+            EMChatManager.getInstance().setGCMProjectNumber(projectNumber);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    @Override
     protected void initHXOptions(){
         super.initHXOptions();
 
@@ -475,9 +489,9 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     }
     
     @Override
-    public void logout(final boolean isGCM,final EMCallBack callback){
+    public void logout(final boolean unbindDeviceToken,final EMCallBack callback){
         endCall();
-        super.logout(isGCM,new EMCallBack(){
+        super.logout(unbindDeviceToken,new EMCallBack(){
 
             @Override
             public void onSuccess() {
@@ -532,7 +546,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         ((DemoHXSDKModel)getModel()).saveContactList(mList);
     }
     
-    public synchronized UserProfileManager getUserProfileManager(){
+    public UserProfileManager getUserProfileManager(){
     	if(userProManager == null){
     		userProManager = new UserProfileManager();
     	}
