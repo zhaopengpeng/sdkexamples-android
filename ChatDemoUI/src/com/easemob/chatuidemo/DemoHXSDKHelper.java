@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
+import android.R.bool;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -474,9 +475,9 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     }
     
     @Override
-    public void logout(final EMCallBack callback){
+    public void logout(final boolean isGCM,final EMCallBack callback){
         endCall();
-        super.logout(new EMCallBack(){
+        super.logout(isGCM,new EMCallBack(){
 
             @Override
             public void onSuccess() {
@@ -493,7 +494,9 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             @Override
             public void onError(int code, String message) {
                 // TODO Auto-generated method stub
-                
+            	if(callback != null){
+                    callback.onError(code, message);
+                }
             }
 
             @Override
