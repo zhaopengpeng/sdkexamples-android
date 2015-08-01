@@ -17,6 +17,7 @@ import android.app.Application;
 import android.content.Context;
 
 import com.easemob.EMCallBack;
+import com.easemob.chat.EMChatManager;
 
 public class DemoApplication extends Application {
 
@@ -30,6 +31,7 @@ public class DemoApplication extends Application {
 	 */
 	public static String currentUserNick = "";
 	public static DemoHXSDKHelper hxSDKHelper = new DemoHXSDKHelper();
+	private String projectNumber = "562451699741";
 
 	@Override
 	public void onCreate() {
@@ -58,6 +60,8 @@ public class DemoApplication extends Application {
         hxSDKHelper.onInit(applicationContext);
         //user profile  initialize
         hxSDKHelper.getUserProfileManager().onInit(applicationContext);
+        //设置GCM推送（使用条件，要求国外用户）
+        EMChatManager.getInstance().setGCMProjectNumber(projectNumber);
 	}
 
 	public static DemoApplication getInstance() {
@@ -105,8 +109,8 @@ public class DemoApplication extends Application {
 	/**
 	 * 退出登录,清空数据
 	 */
-	public void logout(final EMCallBack emCallBack) {
+	public void logout(final boolean isGCM,final EMCallBack emCallBack) {
 		// 先调用sdk logout，在清理app中自己的数据
-	    hxSDKHelper.logout(emCallBack);
+	    hxSDKHelper.logout(isGCM,emCallBack);
 	}
 }
