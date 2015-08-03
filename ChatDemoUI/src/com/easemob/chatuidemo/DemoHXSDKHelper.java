@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
+import android.R.bool;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -93,6 +94,20 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     
     public void popActivity(Activity activity){
         activityList.remove(activity);
+    }
+    
+    @Override
+    public synchronized boolean onInit(Context context){
+        if(super.onInit(context)){
+            getUserProfileManager().onInit(context);
+            
+            //if your app is supposed to user Google Push, please set project number
+            String projectNumber = "562451699741";
+            EMChatManager.getInstance().setGCMProjectNumber(projectNumber);
+            return true;
+        }
+        
+        return false;
     }
     
     @Override
@@ -474,9 +489,9 @@ public class DemoHXSDKHelper extends HXSDKHelper{
     }
     
     @Override
-    public void logout(final EMCallBack callback){
+    public void logout(final boolean unbindDeviceToken,final EMCallBack callback){
         endCall();
-        super.logout(new EMCallBack(){
+        super.logout(unbindDeviceToken,new EMCallBack(){
 
             @Override
             public void onSuccess() {
@@ -493,7 +508,9 @@ public class DemoHXSDKHelper extends HXSDKHelper{
             @Override
             public void onError(int code, String message) {
                 // TODO Auto-generated method stub
-                
+            	if(callback != null){
+                    callback.onError(code, message);
+                }
             }
 
             @Override
@@ -529,7 +546,7 @@ public class DemoHXSDKHelper extends HXSDKHelper{
         ((DemoHXSDKModel)getModel()).saveContactList(mList);
     }
     
-    public synchronized UserProfileManager getUserProfileManager(){
+    public UserProfileManager getUserProfileManager(){
     	if(userProManager == null){
     		userProManager = new UserProfileManager();
     	}

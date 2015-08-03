@@ -17,6 +17,7 @@ import android.app.Application;
 import android.content.Context;
 
 import com.easemob.EMCallBack;
+import com.easemob.chat.EMChatManager;
 
 public class DemoApplication extends Application {
 
@@ -56,8 +57,6 @@ public class DemoApplication extends Application {
          * }
          */
         hxSDKHelper.onInit(applicationContext);
-        //user profile  initialize
-        hxSDKHelper.getUserProfileManager().onInit(applicationContext);
 	}
 
 	public static DemoApplication getInstance() {
@@ -105,8 +104,8 @@ public class DemoApplication extends Application {
 	/**
 	 * 退出登录,清空数据
 	 */
-	public void logout(final EMCallBack emCallBack) {
+	public void logout(final boolean isGCM,final EMCallBack emCallBack) {
 		// 先调用sdk logout，在清理app中自己的数据
-	    hxSDKHelper.logout(emCallBack);
+	    hxSDKHelper.logout(isGCM,emCallBack);
 	}
 }
