@@ -89,7 +89,7 @@ public class CameraHelper implements PreviewCallback {
             mCamera.stopPreview();
             mParameters = mCamera.getParameters();
             if (isScreenOriatationPortrait()) {
-                if(cameraInfo.orientation == 270)
+                if(cameraInfo.orientation == 270 || cameraInfo.orientation == 0)
                     mCamera.setDisplayOrientation(90);
                 if(cameraInfo.orientation == 90)
                     mCamera.setDisplayOrientation(270);
@@ -128,13 +128,13 @@ public class CameraHelper implements PreviewCallback {
         if (start_flag == true) {
             // 根据屏幕方向写入及传输数据
             if (isScreenOriatationPortrait()) {
-                if(cameraInfo.orientation == 90)
+                if(cameraInfo.orientation == 90 || cameraInfo.orientation == 0)
                     YUV420spRotate90(yuv_Rotate90,yuv_frame,  mwidth,mheight);
                 else if(cameraInfo.orientation == 270)
                     YUV420spRotate270(yuv_Rotate90,yuv_frame,  mwidth,mheight);
                 callHelper.processPreviewData(mheight, mwidth, yuv_Rotate90);
             } else {
-                if(cameraInfo.orientation == 90)
+                if(cameraInfo.orientation == 90 || cameraInfo.orientation == 0)
                 {
                     YUV420spRotate180(yuv_Rotate90,yuv_frame,mwidth,mheight);
                     YUV42left2right(yuv_frame,yuv_Rotate90,mwidth,mheight);
