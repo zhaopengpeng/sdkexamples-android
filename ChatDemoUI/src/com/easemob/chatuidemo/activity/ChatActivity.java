@@ -1041,12 +1041,12 @@ public class ChatActivity extends BaseActivity implements OnClickListener, EMEve
 	 * @param selectedImage
 	 */
 	private void sendPicByUri(Uri selectedImage) {
-		// String[] filePathColumn = { MediaStore.Images.Media.DATA };
-		Cursor cursor = getContentResolver().query(selectedImage, null, null, null, null);
+		String[] filePathColumn = { MediaStore.Images.Media.DATA };
+		Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
 		String st8 = getResources().getString(R.string.cant_find_pictures);
 		if (cursor != null) {
 			cursor.moveToFirst();
-			int columnIndex = cursor.getColumnIndex("_data");
+			int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
 			String picturePath = cursor.getString(columnIndex);
 			cursor.close();
 			cursor = null;
