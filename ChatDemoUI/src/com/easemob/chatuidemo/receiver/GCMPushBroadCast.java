@@ -1,6 +1,6 @@
 package com.easemob.chatuidemo.receiver;
 
-import com.easemob.chat.EMChat;
+import com.easemob.applib.controller.HXSDKHelper;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -30,7 +30,7 @@ public class GCMPushBroadCast extends BroadcastReceiver {
 
 	public void sendNotification(String message, boolean isForeground) {
 
-		Context appContext = EMChat.getInstance().getAppContext();
+		Context appContext = HXSDKHelper.getInstance().getAppContext();
 
 		if (notificationManager == null) {
 			notificationManager = (NotificationManager) appContext
