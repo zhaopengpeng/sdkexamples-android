@@ -627,7 +627,7 @@ public class MainActivity extends BaseActivity implements EMEventListener {
             if(groupSynced && contactSynced){
                 new Thread(){
                     @Override
-                    public void run(){
+                    public void run(){ 
                         HXSDKHelper.getInstance().notifyForRecevingEvents();
                     }
                 }.start();

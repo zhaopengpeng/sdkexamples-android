@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -148,6 +149,8 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 		
 		List<String> members = new ArrayList<String>();
 		members.addAll(group.getMembers());
+		int t= group.getMembers().size();
+		System.out.println(group.getMembers().size());
 		
 		adapter = new GridAdapter(this, R.layout.grid, members);
 		userGridview.setAdapter(adapter);
